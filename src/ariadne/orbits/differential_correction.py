@@ -37,11 +37,14 @@ def _y_crossing_event():
 
 
 def correct_lyapunov(mu: float, guess, period_guess: float,
-                     tol: float = 1e-11, max_iter: int = 50) -> PeriodicOrbit:
+                     tol: float = 1e-11, max_iter: int = 100) -> PeriodicOrbit:
     """Correct a planar Lyapunov guess to a periodic orbit.
 
     Holds x0 fixed (sets amplitude); varies vy0 to null vx at the half-period
-    crossing. Returns a PeriodicOrbit. Raises RuntimeError on non-convergence.
+    crossing. Returns a PeriodicOrbit; raises RuntimeError on non-convergence.
+    For finite-amplitude orbits, provide a good guess via continuation
+    (lyapunov_family / lyapunov_orbit_at_jacobi) — a raw linear guess only sits
+    inside the corrector's basin near the libration point.
     """
     s = np.asarray(guess, dtype=float).copy()
     ev = _y_crossing_event()

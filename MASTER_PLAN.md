@@ -501,13 +501,12 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 2 — Orbits & families **COMPLETE** (gates G3, G4 pass). Next: Stage 3.
-**Next action:** Stage 3 — Manifolds & connections: `manifolds/manifold.py` (Floquet
-eigenvector seeding of the monodromy + forward/backward propagation of stable/unstable
-tubes), `connections/poincare.py` (surface-of-section crossings), `connections/heteroclinic.py`
-(tube-intersection matching at equal Jacobi). Targets **G5** (tube reaches the expected
-neck, energy preserved) and **G6** (recover a known L1<->L2 heteroclinic connection).
-These tubes ARE the "highways." `manifolds/monodromy.py` + `stability_indices` already exist.
+**Current stage:** Stage 3 — Manifolds & connections **COMPLETE** (gates G5, G6 pass). Next: Stage 4.
+**Next action:** Stage 4 — the headline reproduction. Add `dynamics/bcr4bp.py` (bicircular,
+add the Sun) to unlock low-energy lunar transfers, and `optimize/collocation.py`
+(Hermite–Simpson direct transcription) + `optimize/primer_vector.py`. Use the Stage 3
+heteroclinic/tube machinery to build an Earth–Moon L1→Lyapunov ballistic-approach transfer
+and reproduce the Coimbra result (~3,925 m/s, ~32 d). Target **G8**.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
@@ -517,8 +516,19 @@ STM vs finite-diff max err=3.7e-6; Lagrange points match published values to ~5e
 **Stage 2 results (Earth-Moon, L1):** tiny-amp Lyapunov period matches linear theory to
 7.7e-7; finite-amp orbit (Ax=0.02) periodic to 2.4e-11, C=3.1659; 40-member family,
 Jacobi monotonic 3.200->2.913, period 2.69->4.07; **halo bifurcation located at C=3.1864**
-(matches literature ~3.18-3.19 for EM-L1). Run: `python -m pytest` (11 pass) or
+(matches literature ~3.18-3.19 for EM-L1). Run: `python -m pytest` (18 pass) or
 `PYTHONPATH=src python -m ariadne.validate.stage2`.
+
+**Stage 3 results (Earth-Moon):** L1 Lyapunov unstable tube (lambda=2.0e3) conserves Jacobi
+to median 2.6e-12 along the tube (close approaches bounded < 1e-5), 40/40 trajectories reach
+the Moon neck. **L1<->L2 heteroclinic connection found at C=3.15** on section x=1-mu, crossing
+(y,vy)=(-0.0732, 0.0595). Figures in docs/figures/ (tubes + Poincaré section; L1 family +
+halo bifurcation). Run: `PYTHONPATH=src python -m ariadne.validate.stage3` and
+`PYTHONPATH=src python -m ariadne.viz.figures`.
+NOTE on robustness: finite-amplitude orbits must be reached by CONTINUATION
+(lyapunov_family / lyapunov_orbit_at_jacobi with the tangent predictor); a raw linear guess
+only converges near the libration point. Manifold branch (+/-1) that points Moon-ward varies
+per orbit — try both (find_heteroclinic does).
 
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
@@ -528,6 +538,13 @@ Jacobi monotonic 3.200->2.913, period 2.69->4.07; **halo bifurcation located at 
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.3` — Stage 3 (manifolds & connections) complete. Added manifolds/manifold.py
+  (Floquet eigenvector seeding + tube propagation), connections/poincare.py (sections +
+  tube cuts), connections/heteroclinic.py (loop-intersection connection finder),
+  orbits.lyapunov_orbit_at_jacobi (Jacobi targeter), viz/figures.py, validate/stage3.py,
+  test_manifolds.py + test_connections.py (18 tests pass). Gates G5, G6 pass; L1<->L2
+  heteroclinic at C=3.15. Robustness fix: tangent predictor in continuation (raw linear
+  guess + Newton step-clamp removed — the clamp caused crossing-regime oscillation).
 - 2026-05-28 `v0.2` — Stage 2 (orbits & families) complete. Added orbits/linear.py
   (collinear linear modes + Lyapunov guess), orbits/differential_correction.py
   (symmetric single-shooting corrector, monodromy, stability indices),

@@ -16,6 +16,25 @@ validation gates, and the staged roadmap. Read it before writing code.
 
 **Current status & next action:** see `MASTER_PLAN.md` §16 (Status & Changelog).
 
+## Where we are (Stages 1–3 complete, validated)
+
+The CR3BP core, libration-point orbit families, and invariant-manifold transport tubes are
+built and validated against published values (Lagrange points to ~1e-11, Jacobi conserved to
+~1e-12, halo bifurcation at C≈3.186 matching literature). We can find the natural low-energy
+"highways" — including a verified **L1↔L2 heteroclinic connection**.
+
+![L1↔L2 transport tubes and the heteroclinic connection](docs/figures/heteroclinic_L1_L2.png)
+
+The Earth–Moon L1 (green) and L2 (red) Lyapunov orbits and their invariant-manifold tubes;
+where the tube cuts cross on the Poincaré section (★) is a near-ballistic L1↔L2 connection.
+
+![L1 planar Lyapunov family](docs/figures/L1_lyapunov_family.png)
+
+The L1 planar Lyapunov family colored by Jacobi constant, with the halo bifurcation located.
+
+Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
+`PYTHONPATH=src python -m ariadne.validate.stage3` (and `stage1`, `stage2`).
+
 ## What this is (and is not)
 - It **is**: an open, high-fidelity, validated engine + atlas for low-energy spaceflight,
   built on standard gravity and real ephemerides, cross-validated against NASA GMAT.
