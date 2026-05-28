@@ -501,17 +501,24 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 1 — CR3BP core **COMPLETE** (gates G1, G2 pass). Next: Stage 2.
-**Next action:** Stage 2 — Orbits & families: `orbits/differential_correction.py`
-(symmetry single-shooting + STM Newton) to find L1/L2 **Lyapunov** orbits, then
-`orbits/continuation.py` (pseudo-arclength) for the family + halo bifurcation.
-Targets **G3** (reproduce a published Lyapunov/halo orbit) and **G4** (family curve).
+**Current stage:** Stage 2 — Orbits & families **COMPLETE** (gates G3, G4 pass). Next: Stage 3.
+**Next action:** Stage 3 — Manifolds & connections: `manifolds/manifold.py` (Floquet
+eigenvector seeding of the monodromy + forward/backward propagation of stable/unstable
+tubes), `connections/poincare.py` (surface-of-section crossings), `connections/heteroclinic.py`
+(tube-intersection matching at equal Jacobi). Targets **G5** (tube reaches the expected
+neck, energy preserved) and **G6** (recover a known L1<->L2 heteroclinic connection).
+These tubes ARE the "highways." `manifolds/monodromy.py` + `stability_indices` already exist.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
 STM vs finite-diff max err=3.7e-6; Lagrange points match published values to ~5e-11
-(L1=0.8369151324, L2=1.1556821603, L3=-1.0050626453). Run: `python -m pytest` (7 pass)
-or `PYTHONPATH=src python -m ariadne.validate.stage1`.
+(L1=0.8369151324, L2=1.1556821603, L3=-1.0050626453).
+
+**Stage 2 results (Earth-Moon, L1):** tiny-amp Lyapunov period matches linear theory to
+7.7e-7; finite-amp orbit (Ax=0.02) periodic to 2.4e-11, C=3.1659; 40-member family,
+Jacobi monotonic 3.200->2.913, period 2.69->4.07; **halo bifurcation located at C=3.1864**
+(matches literature ~3.18-3.19 for EM-L1). Run: `python -m pytest` (11 pass) or
+`PYTHONPATH=src python -m ariadne.validate.stage2`.
 
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
@@ -521,6 +528,11 @@ or `PYTHONPATH=src python -m ariadne.validate.stage1`.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.2` — Stage 2 (orbits & families) complete. Added orbits/linear.py
+  (collinear linear modes + Lyapunov guess), orbits/differential_correction.py
+  (symmetric single-shooting corrector, monodromy, stability indices),
+  orbits/families.py (natural-parameter continuation + halo-bifurcation finder),
+  validate/stage2.py, test_orbits.py. Gates G3, G4 pass; halo bifurcation C=3.1864.
 - 2026-05-28 `v0.1.1` — Stage 1 (CR3BP core) complete and pushed to GitHub. Added
   dynamics/cr3bp.py (EOM, Jacobi, variational STM), orbits/lagrange.py (L1-L5),
   data/constants.py + units.py, validate/stage1.py, pytest suite. Gates G1, G2 pass.
