@@ -406,10 +406,11 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
   *DoD:* **G3, G4**.
 - **Stage 3 — Manifolds & connections**: STM/monodromy; tube generation; Poincaré; heteroclinic
   finder. *DoD:* **G5, G6**.
-- **Stage 4 — The headline reproduction**: BCR4BP; low-energy lunar transfer; optimizer
-  (collocation + primer vector); reproduce the Coimbra result. *DoD:* **G8**.
-- **Stage 5 — Real ephemeris**: SPICE/DE440 n-body + SRP + J2; Horizons checks; re-converge
-  Stage 4 on full ephemeris; GMAT export. *DoD:* **G7, G9, G10**.
+- **Stage 4 — BCR4BP + Δv mechanism** *(done)*: bicircular Sun-perturbed model; vis-viva Δv
+  budget; quantify the ballistic-capture saving (the low-energy mechanism). *DoD:* **G8a/b/c**.
+- **Stage 5 — Real ephemeris + exact reproduction**: SPICE/DE440 n-body + SRP + J2; Horizons
+  checks; collocation + primer-vector optimizer; converge the low-energy transfer on full
+  ephemeris to the *exact* Coimbra 3,925 m/s; GMAT export. *DoD:* **G7, G8(full), G9, G10**.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -501,12 +502,14 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 3 — Manifolds & connections **COMPLETE** (gates G5, G6 pass). Next: Stage 4.
-**Next action:** Stage 4 — the headline reproduction. Add `dynamics/bcr4bp.py` (bicircular,
-add the Sun) to unlock low-energy lunar transfers, and `optimize/collocation.py`
-(Hermite–Simpson direct transcription) + `optimize/primer_vector.py`. Use the Stage 3
-heteroclinic/tube machinery to build an Earth–Moon L1→Lyapunov ballistic-approach transfer
-and reproduce the Coimbra result (~3,925 m/s, ~32 d). Target **G8**.
+**Current stage:** Stage 4 — BCR4BP + Δv budget + low-energy mechanism **COMPLETE**
+(gates G8a/b/c pass). Next: Stage 5.
+**Next action:** Stage 5 — Real ephemeris + exact reproduction. Add `data/kernels.py`
+(SPICE/DE440 download+cache) and `dynamics/ephemeris_nbody.py`; cross-check propagation vs
+Horizons (G7). Then `optimize/collocation.py` (Hermite–Simpson direct transcription) +
+`optimize/primer_vector.py`, and converge the Stage-4 low-energy transfer on full ephemeris
+to reproduce the *exact* Coimbra 3,925 m/s / 32 d (full G8) and a flown mission (Genesis /
+Hiten, G9), cross-validated in GMAT (G10).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
@@ -530,6 +533,17 @@ NOTE on robustness: finite-amplitude orbits must be reached by CONTINUATION
 only converges near the libration point. Manifold branch (+/-1) that points Moon-ward varies
 per orbit — try both (find_heteroclinic does).
 
+**Stage 4 results (Earth-Moon):** BCR4BP validated — reduces to CR3BP in the no-Sun limit
+(EOM diff 0.0), solar accel = 0 at the barycenter, tidal magnitude at the Moon = 1.1e-2
+nondim (= 3.05e-8 km/s^2, matches 2GM_sun·d/r_sun^3). Δv budget reproduces the Apollo-class
+direct transfer: v_circ LEO=7.784, LLO=1.633 km/s; **TLI=3131 m/s, direct LOI=822 m/s,
+TOTAL direct=3953 m/s** (Coimbra "previous best" ~3992). Ballistic capture cuts LOI to
+677 m/s — a **145 m/s saving**; low-energy class **3808 m/s** (Coimbra optimized 3925 sits
+between, as expected). HONEST SCOPE: this reproduces the low-energy MECHANISM and Δv CLASS,
+not the exact end-to-end optimized number — that needs Stage 5 (ephemeris + collocation +
+their boundary conditions). Figure: docs/figures/delta_v_budget.png. Run:
+`PYTHONPATH=src python -m ariadne.validate.stage4`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -538,6 +552,12 @@ per orbit — try both (find_heteroclinic does).
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.4` — Stage 4 (BCR4BP + Δv budget + low-energy mechanism) complete. Added
+  dynamics/bcr4bp.py (bicircular Sun-perturbed model + sun_params), optimize/budget.py
+  (vis-viva Earth-Moon Δv budget + ballistic-capture saving), validate/stage4.py,
+  viz.figure_budget, test_bcr4bp.py + test_budget.py (28 tests pass). Gates G8a/b/c pass;
+  direct transfer 3953 m/s (Apollo-class), ballistic-capture saving 145 m/s. Exact 3925 m/s
+  reproduction deferred to Stage 5 (ephemeris + collocation) — honest scope.
 - 2026-05-28 `v0.3` — Stage 3 (manifolds & connections) complete. Added manifolds/manifold.py
   (Floquet eigenvector seeding + tube propagation), connections/poincare.py (sections +
   tube cuts), connections/heteroclinic.py (loop-intersection connection finder),

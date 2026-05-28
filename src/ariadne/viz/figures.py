@@ -141,9 +141,36 @@ def figure_family(mu=EARTH_MOON.mu, n=40):
     return path
 
 
+def figure_budget():
+    from ..optimize.budget import earth_moon_budget
+    b = earth_moon_budget()
+    fig, ax = plt.subplots(figsize=(6.8, 6.0))
+    labels = ["Direct\n(Apollo-class)", "Low-energy\n(ballistic capture)"]
+    tli = [b["dv_tli"] * 1000, b["dv_tli"] * 1000]
+    loi = [b["dv_loi_direct"] * 1000, b["dv_loi_ballistic"] * 1000]
+    ax.bar(labels, tli, color="tab:blue", label="TLI (trans-lunar injection)")
+    ax.bar(labels, loi, bottom=tli, color="tab:orange", label="LOI (lunar capture)")
+    for i, tot in enumerate([b["total_direct"], b["total_low_energy"]]):
+        ax.text(i, tot * 1000 + 30, f"{tot*1000:.0f} m/s", ha="center", fontweight="bold")
+    ax.axhline(3925, color="k", ls="--", lw=1)
+    ax.text(1.4, 3925 + 30, "Coimbra 3925 m/s", ha="right", fontsize=9)
+    ax.set_ylabel("Δv  (m/s)")
+    ax.set_title("Earth→Moon Δv budget (LEO→LLO)\nballistic capture saves the LOI burn")
+    ax.legend(loc="lower center")
+    ax.set_ylim(0, 4400)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "delta_v_budget.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
+    print("Rendering Earth->Moon Delta-v budget ...")
+    print("  ->", figure_budget())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

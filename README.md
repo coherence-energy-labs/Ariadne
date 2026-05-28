@@ -32,8 +32,15 @@ where the tube cuts cross on the Poincaré section (★) is a near-ballistic L1�
 
 The L1 planar Lyapunov family colored by Jacobi constant, with the halo bifurcation located.
 
+We also model the Sun's perturbation (bicircular model) and the Δv economics of getting to
+the Moon. A direct Apollo-class transfer costs ~3953 m/s LEO→LLO; arriving via ballistic
+capture cuts the lunar-insertion burn, saving ~145 m/s — the mechanism the Coimbra
+3925 m/s result optimizes.
+
+![Earth–Moon Δv budget](docs/figures/delta_v_budget.png)
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage3` (and `stage1`, `stage2`).
+`PYTHONPATH=src python -m ariadne.validate.stage4` (and `stage1`–`stage3`).
 
 ## What this is (and is not)
 - It **is**: an open, high-fidelity, validated engine + atlas for low-energy spaceflight,
