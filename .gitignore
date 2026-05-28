@@ -1,0 +1,28 @@
+# Downloaded NASA SPICE kernels (large, fetched on demand; tracked via kernels.lock)
+data/kernels/
+*.bsp
+*.bpc
+*.tls
+*.tpc
+*.tf
+*.ti
+
+# Generated results / atlas
+results/
+*.h5
+*.hdf5
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

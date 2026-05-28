@@ -1,0 +1,22 @@
+# Ariadne dependencies
+# Core scientific stack (already present in the dev environment)
+numpy>=2.0
+scipy>=1.13
+matplotlib>=3.8
+numba>=0.60
+sympy>=1.13
+pandas>=2.2
+h5py>=3.10
+
+# Astrodynamics / ephemeris (real NASA data)
+spiceypy>=6.0        # NASA SPICE toolkit bindings (kernels, frames, time)
+jplephem>=2.21       # lightweight DE4xx ephemeris reader (fallback / cross-check)
+astropy>=6.0         # time scales, constants, frames, units
+astroquery>=0.4.7    # JPL Horizons + SBDB queries for validation
+
+# Optimization (trajectory NLP); IPOPT optional, SciPy used by default
+# cyipopt>=1.4       # uncomment if IPOPT is available for large collocation problems
+
+# Dev / test
+pytest>=8.0
+pyyaml>=6.0
