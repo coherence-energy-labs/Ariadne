@@ -1,5 +1,6 @@
 # Downloaded NASA SPICE kernels (large, fetched on demand; tracked via kernels.lock)
-data/kernels/
+data/kernels/*
+!data/kernels/kernels.lock.json
 *.bsp
 *.bpc
 *.tls

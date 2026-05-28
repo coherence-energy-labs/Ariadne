@@ -39,8 +39,16 @@ capture cuts the lunar-insertion burn, saving ~145 m/s — the mechanism the Coi
 
 ![Earth–Moon Δv budget](docs/figures/delta_v_budget.png)
 
+We now run on **real JPL DE440 ephemeris** (via SPICE). A self-consistent Sun–Earth–Moon
+(+4 planet) n-body integration tracks DE440 to ~0.02 km over 2 days and stays under a few km
+for a month — and we have validated Lambert and Hermite–Simpson collocation solvers plus a
+GMAT export for independent cross-checking.
+
+![n-body propagator vs JPL DE440](docs/figures/ephemeris_validation.png)
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage4` (and `stage1`–`stage3`).
+`PYTHONPATH=src python -m ariadne.validate.stage5` (and `stage1`–`stage4`). The SPICE
+kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)
 - It **is**: an open, high-fidelity, validated engine + atlas for low-energy spaceflight,

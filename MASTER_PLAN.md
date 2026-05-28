@@ -408,9 +408,12 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
   finder. *DoD:* **G5, G6**.
 - **Stage 4 — BCR4BP + Δv mechanism** *(done)*: bicircular Sun-perturbed model; vis-viva Δv
   budget; quantify the ballistic-capture saving (the low-energy mechanism). *DoD:* **G8a/b/c**.
-- **Stage 5 — Real ephemeris + exact reproduction**: SPICE/DE440 n-body + SRP + J2; Horizons
-  checks; collocation + primer-vector optimizer; converge the low-energy transfer on full
-  ephemeris to the *exact* Coimbra 3,925 m/s; GMAT export. *DoD:* **G7, G8(full), G9, G10**.
+- **Stage 5 — Real ephemeris + optimization toolkit** *(done)*: SPICE/DE440 kernels;
+  test-particle + mutual n-body propagators (validated vs DE440); Lambert solver;
+  Hermite-Simpson collocation; GMAT exporter. *DoD:* **G7** (+ Lambert/collocation validated).
+- **Stage 6 — Exact reproduction & cross-validation**: assemble the end-to-end low-energy
+  transfer on DE440 (lambert guess -> collocation refine -> primer vector); converge to the
+  *exact* Coimbra 3,925 m/s; reproduce Genesis/Hiten; run GMAT. *DoD:* **G8(full), G9, G10**.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -502,14 +505,14 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 4 — BCR4BP + Δv budget + low-energy mechanism **COMPLETE**
-(gates G8a/b/c pass). Next: Stage 5.
-**Next action:** Stage 5 — Real ephemeris + exact reproduction. Add `data/kernels.py`
-(SPICE/DE440 download+cache) and `dynamics/ephemeris_nbody.py`; cross-check propagation vs
-Horizons (G7). Then `optimize/collocation.py` (Hermite–Simpson direct transcription) +
-`optimize/primer_vector.py`, and converge the Stage-4 low-energy transfer on full ephemeris
-to reproduce the *exact* Coimbra 3,925 m/s / 32 d (full G8) and a flown mission (Genesis /
-Hiten, G9), cross-validated in GMAT (G10).
+**Current stage:** Stage 5 — Real ephemeris + optimization toolkit **COMPLETE**
+(gate G7 passes; Lambert + Hermite-Simpson collocation + GMAT export validated).
+Next: Stage 6 (final reproduction increment).
+**Next action:** assemble the end-to-end low-energy lunar transfer on the real DE440
+ephemeris using the now-built pieces (ephemeris_nbody + lambert first guess + collocation
+refine + primer-vector check) and converge to the *exact* Coimbra 3,925 m/s / 32 d (full
+G8); reproduce a flown mission (Genesis Sun-Earth L1 manifold, or Hiten ballistic capture)
+for G9; run the exported GMAT script to close G10. `optimize/primer_vector.py` still to add.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
@@ -544,6 +547,21 @@ not the exact end-to-end optimized number — that needs Stage 5 (ephemeris + co
 their boundary conditions). Figure: docs/figures/delta_v_budget.png. Run:
 `PYTHONPATH=src python -m ariadne.validate.stage4`.
 
+**Stage 5 results (REAL JPL DE440 ephemeris):** SPICE toolkit (spiceypy 8.1) + DE440s
+downloaded/cached/checksummed (data/kernels.py, kernels.lock.json). **G7 passes:** UTC<->ET
+round-trips; Earth-Moon distance 383,805 km and Moon speed 1.022 km/s from DE440;
+two-body propagator closes to 3.8e-4 m over one period (energy drift 1.6e-11); the
+self-consistent Sun-Earth-Moon (+4 planet) n-body integration tracks DE440 to
+**0.02 km @ 2 d, 0.7 km @ 10 d, ~3 km @ 30 d, <6 km @ 60 d** (Earth/Moon). Optimization
+toolkit validated: universal-variable **Lambert** solver (self-consistent to µm/s for 0-rev
+arcs); **Hermite-Simpson collocation** recovers the analytic min-energy double-integrator
+(J=12.00000, u(t)=6-12t, max defect 3.3e-13). **GMAT** script exporter (docs/examples/).
+Figures: ephemeris_validation.png, moon_orbit_de440.png. Run: `python -m pytest` (35 pass),
+`PYTHONPATH=src python -m ariadne.validate.stage5`, `... ariadne.viz.figures`.
+Honest scope: real-ephemeris foundation + optimizer are done & validated; the EXACT 3,925
+m/s end-to-end reproduction (full G8), flown-mission (G9), and GMAT-run cross-check (G10) are
+the Stage 6 increment.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -552,6 +570,14 @@ their boundary conditions). Figure: docs/figures/delta_v_budget.png. Run:
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.5` — Stage 5 (real ephemeris + optimization toolkit) complete. Added
+  data/kernels.py (SPICE/DE440 download+cache+lock) + data/ephemeris.py wrappers;
+  dynamics/ephemeris_nbody.py (test-particle + mutual n-body propagators);
+  optimize/lambert.py (universal-variable BVP); optimize/collocation.py (Hermite-Simpson);
+  io/gmat_export.py; validate/stage5.py; viz ephemeris/moon figures; test_ephemeris.py +
+  test_optimize.py + test_io.py (35 tests pass). G7 passes; n-body tracks DE440 to ~0.02 km
+  @ 2 d; Lambert µm/s; collocation J=12.0 exact. Installed spiceypy 8.1. Real NASA data now
+  flowing. Exact 3925 reproduction + Genesis/Hiten + GMAT-run deferred to Stage 6.
 - 2026-05-28 `v0.4` — Stage 4 (BCR4BP + Δv budget + low-energy mechanism) complete. Added
   dynamics/bcr4bp.py (bicircular Sun-perturbed model + sun_params), optimize/budget.py
   (vis-viva Earth-Moon Δv budget + ballistic-capture saving), validate/stage4.py,

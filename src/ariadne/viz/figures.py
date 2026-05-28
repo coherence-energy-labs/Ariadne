@@ -166,11 +166,70 @@ def figure_budget():
     return path
 
 
+def figure_ephemeris_validation(epoch="2025-06-01T00:00:00"):
+    """Real-data validation: n-body integration error vs JPL DE440 over time."""
+    from ..data.ephemeris import et, body_state
+    from ..dynamics.ephemeris_nbody import propagate_nbody
+    bodies = ["SUN", "EARTH", "MOON"]
+    ext = ["JUPITER BARYCENTER", "VENUS BARYCENTER", "MARS BARYCENTER", "SATURN BARYCENTER"]
+    e0 = et(epoch)
+    spans = [2, 5, 10, 20, 30, 45, 60]
+    errs = {b: [] for b in bodies}
+    for d in spans:
+        sol, _ = propagate_nbody(bodies, e0, (0.0, d * 86400.0), external=ext)
+        for i, b in enumerate(bodies):
+            integ = sol.y[3 * i:3 * i + 3, -1]
+            truth = body_state(b, e0 + d * 86400.0, "J2000", "SSB")[:3]
+            errs[b].append(np.linalg.norm(integ - truth))
+
+    fig, ax = plt.subplots(figsize=(7.5, 5.6))
+    for b, c in zip(bodies, ("tab:orange", "tab:blue", "0.4")):
+        ax.semilogy(spans, errs[b], "o-", color=c, label=b.title())
+    ax.set_xlabel("propagation time (days)")
+    ax.set_ylabel("position error vs DE440 (km)")
+    ax.set_title("Ariadne n-body propagator vs JPL DE440\n(Sun-Earth-Moon + 4 planet perturbers)")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "ephemeris_validation.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
+def figure_moon_orbit(epoch="2025-06-01T00:00:00", days=28.0, n=400):
+    """The real Moon orbit about Earth over ~one month, straight from DE440."""
+    from ..data.ephemeris import et, body_pos
+    e0 = et(epoch)
+    ts = np.linspace(0.0, days * 86400.0, n)
+    P = np.array([body_pos("MOON", e0 + t, "J2000", "EARTH") for t in ts])
+    fig, ax = plt.subplots(figsize=(6.6, 6.2))
+    ax.plot(P[:, 0], P[:, 1], color="0.4", lw=1.2)
+    ax.plot(0, 0, "o", color="tab:blue", ms=12, label="Earth")
+    ax.plot(P[0, 0], P[0, 1], "o", color="0.5", ms=6, label="Moon (start)")
+    ax.set_aspect("equal")
+    ax.set_xlabel("x (km, J2000)")
+    ax.set_ylabel("y (km, J2000)")
+    ax.set_title(f"Real Moon orbit from JPL DE440 ({days:.0f} days)")
+    ax.legend()
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "moon_orbit_de440.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
     print("Rendering Earth->Moon Delta-v budget ...")
     print("  ->", figure_budget())
+    print("Rendering real Moon orbit (DE440) ...")
+    print("  ->", figure_moon_orbit())
+    print("Rendering ephemeris validation (n-body vs DE440) ...")
+    print("  ->", figure_ephemeris_validation())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
