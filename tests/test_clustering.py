@@ -4,7 +4,8 @@ import math
 import numpy as np
 
 from ariadne.discovery.clustering import (load_distant_tnos, filter_population,
-                                          circular_stats, rayleigh_mc, clustering_report)
+                                          circular_stats, rayleigh_mc, clustering_report,
+                                          load_with_uncertainty, resampled_clustering_p)
 
 
 def test_circular_stats_perfectly_clustered():
@@ -44,3 +45,11 @@ def test_real_catalog_loads_and_filters():
     rep = clustering_report(extreme, n_mc=20000)
     assert set(rep) >= {"n", "varpi", "omega", "Omega"}
     assert 0.0 <= rep["varpi"]["p_mc"] <= 1.0
+
+
+def test_uncertainty_propagation_runs_and_is_bounded():
+    rows = load_with_uncertainty()
+    ext = filter_population(rows, a_min=250.0, q_min=42.0)
+    assert len(ext) >= 10 and all("sigma_varpi_deg" in r for r in ext)
+    ps = resampled_clustering_p(ext, n_real=500, seed=0)
+    assert len(ps) == 500 and ((ps >= 0) & (ps <= 1)).all()

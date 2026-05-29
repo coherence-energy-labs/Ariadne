@@ -516,6 +516,12 @@ these add depth where real value remained.
 - **Stage 34 — Real distant-TNO clustering significance** *(done)*: live JPL SBDB (706 bodies),
   circular stats + Rayleigh + Monte-Carlo. Honest: extreme-sample varpi clustering is MARGINAL on
   current data (p=0.07); selection bias uncontrolled; no Planet 9 claim. *DoD:* **G34a/b/c**.
+- **Stage 35 — Differentiable dynamics + gradient optimization** *(done)*: JAX differentiable RK4 +
+  Levenberg-Marquardt shooting (exact gradients through the integrator). 1.6 m in 9 iters vs
+  Nelder-Mead 549 evals @ 9.2 km. Foundation for gradient-based trajectory design. *DoD:* **G35a/b/c**.
+- **Stage 36 — Uncertainty propagation into clustering** *(done)*: real JPL 1-sigma element errors
+  resampled; the marginal eTNO clustering degrades p=0.07 -> 0.13 (fragile; one object's perihelion is
+  unconstrained). Current data give no compelling evidence for Planet 9. *DoD:* **G36a/b/c**.
 
 ---
 
@@ -600,7 +606,15 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stages 33-34 — General relativity (1PN) + real distant-TNO clustering
+**Current stage:** Stages 33-36 — GR + real-catalog clustering + uncertainty + differentiable optimization
+**COMPLETE**. Stage 36: pulled REAL JPL 1-sigma element uncertainties and Monte-Carlo'd the eTNO
+clustering -- it DEGRADES from p=0.07 to median p=0.13 (one object's perihelion is unconstrained), so the
+marginal clustering is fragile and current public data give NO compelling evidence for Planet 9 (honest).
+PRIOR (Stage 35): `optimize/autodiff.py` -- a JAX differentiable RK4 propagator + Levenberg-
+Marquardt shooting using EXACT gradients through the integrator; solves a transfer to 1.6 m in 9
+iterations vs Nelder-Mead's 549 evals @ 9.2 km (gradient vs FD = 4.1e-8). Foundation for fast
+gradient-based trajectory design.
+PRIOR (Stage 33-34): General relativity (1PN) + real distant-TNO clustering.
 **COMPLETE**. Stage 33: added the Schwarzschild 1PN term (`dynamics/relativity.py`) -- the engine now
 reproduces Mercury's 42.99 arcsec/century perihelion advance (textbook 42.98), so it is GR-capable;
 the term is a ~3e-8 correction (firewall-safe). Stage 34: ran the actual Batygin-Brown clustering
@@ -1196,6 +1210,29 @@ crossed from the 6-object 2016 sample to the **live JPL Small-Body Database**: 7
   the clustering could be where surveys looked. No Planet 9 claim; this is the honest current state of the
   actual evidence. Run: `PYTHONPATH=src python -m ariadne.validate.stage34`.
 
+**Stage 35 results (differentiable dynamics + gradient-based optimization):** `optimize/autodiff.py`
+adds a JAX differentiable RK4 two-body propagator and a Levenberg-Marquardt shooting solver that gets
+the EXACT gradient of miss-distance through the integrator. Results: the autodiff gradient matches
+finite differences to **4.1e-8** (it is exact; FD is the approximation); LM shooting solves the
+transfer to **1.6 metres in 9 iterations**, while derivative-free Nelder-Mead needs **549 evaluations
+and stalls at 9.2 km**. The differentiable RK4 propagator is itself correct (a circular orbit returns
+after one period to 1.4e-11). Key lesson: a branchy analytic Lambert gives NaN autodiff gradients
+(Stumpff/Newton singularities), but gradient-THROUGH-THE-INTEGRATOR is clean -- and an undamped Newton
+step overshoots on a long arc, so LM damping + backtracking is required. This is the foundation for
+fast gradient-based trajectory optimization across the engine. CPU JAX (the win is exact gradients,
+not the GPU). Run: `PYTHONPATH=src python -m ariadne.validate.stage35`.
+
+**Stage 36 results (observational-uncertainty propagation -- is the clustering even real?):** pulled the
+REAL per-element 1-sigma uncertainties from the JPL SBDB and Monte-Carlo'd the extreme-eTNO perihelion
+longitudes. Findings: the angles are mostly measured to <0.1 deg (median sigma_varpi = 0.034 deg), so for
+the well-observed objects measurement error is negligible -- BUT one short-arc object has an essentially
+unconstrained perihelion (sigma -> 180 deg). Propagating the real uncertainties, the clustering
+significance **degrades from p=0.07 to a median p=0.13** (16-84% [0.056, 0.25]; significant in only 13%
+of resamples); the well-measured subset (N=17) is p=0.11. **Verdict:** the marginal clustering is FRAGILE
+-- dominated by small N and one unconstrained object, not by a perturber. Combined with Stage 34's
+selection-bias caveat, the honest bottom line is that current public data do NOT provide compelling
+statistical evidence for Planet 9. Run: `PYTHONPATH=src python -m ariadne.validate.stage36`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1204,6 +1241,22 @@ crossed from the 6-object 2016 sample to the **live JPL Small-Body Database**: 7
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.36` — Stage 36 (uncertainty propagation into the clustering significance) complete.
+  Extended discovery/clustering.py (load_with_uncertainty pulls real per-element 1-sigma errors from the
+  JPL SBDB -> data/distant_tnos_sigma.json; resampled_clustering_p Monte-Carlos the perihelion errors),
+  validate/stage36.py, test_clustering addition. HONEST result: the extreme-eTNO angles are mostly
+  measured to <0.1 deg, BUT one short-arc object has an essentially unconstrained perihelion (sigma->180
+  deg); propagating that, the clustering significance DEGRADES from p=0.07 to median p=0.13 (significant
+  in only ~13% of resamples). The marginal clustering is FRAGILE -- dominated by small N and one
+  unconstrained object; current data do NOT give compelling evidence for a perturber.
+- 2026-05-29 `v0.35` — Stage 35 (differentiable dynamics + gradient-based optimization) complete.
+  Added optimize/autodiff.py: a JAX differentiable RK4 two-body propagator (branch-free -> clean
+  autodiff, unlike a branchy analytic Lambert whose Stumpff/Newton singularities give NaN gradients)
+  + a Gauss-Newton shooting solver that solves the transfer via EXACT gradients of the integrator.
+  validate/stage35.py + tests/test_autodiff.py. The autodiff gradient matches finite differences to
+  ~4e-8; Gauss-Newton hits the target to ~mm in ~16 iterations vs Nelder-Mead's ~550 evals stalling at
+  km-level. CPU JAX (the win is exact gradients, not the GPU). The path to fast gradient-based
+  trajectory optimization across the engine.
 - 2026-05-29 `v0.34` — Stage 34 (real distant-TNO clustering significance) complete. Added
   discovery/clustering.py (loads the live/cached JPL SBDB catalog -- 706 bodies with a>150 AU --
   filters the detached extreme population, computes circular stats: mean resultant R, Rayleigh test,

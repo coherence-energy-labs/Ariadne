@@ -51,6 +51,52 @@ def load_distant_tnos(path=_CACHE, refresh=False):
     return out
 
 
+_CACHE_SIGMA = os.path.join("data", "distant_tnos_sigma.json")
+
+
+def load_with_uncertainty(path=_CACHE_SIGMA):
+    """Load the catalog WITH per-element 1-sigma uncertainties (varpi sigma included).
+
+    sigma_varpi ~ sqrt(sigma_Omega^2 + sigma_omega^2) (ignoring element correlation -- a
+    conservative-ish combination). Objects missing angle sigmas get a large sigma (treated as
+    unconstrained). Used to propagate observational uncertainty into the clustering significance.
+    """
+    with open(path) as f:
+        doc = json.load(f)
+    out = []
+    for row in doc["data"]:
+        name, a, e, i, om, w, q, s_a, s_e, s_i, s_om, s_w = row
+        if a is None or om is None or w is None:
+            continue
+        a = float(a); e = float(e)
+        s_om = float(s_om) if s_om is not None else 180.0
+        s_w = float(s_w) if s_w is not None else 180.0
+        out.append({"name": name.strip(), "a_au": a, "e": e, "i_deg": float(i),
+                    "Omega_deg": float(om), "omega_deg": float(w),
+                    "q_au": float(q) if q is not None else a * (1 - e),
+                    "varpi_deg": (float(om) + float(w)) % 360.0,
+                    "sigma_varpi_deg": min(180.0, math.hypot(s_om, s_w))})
+    return out
+
+
+def resampled_clustering_p(rows, n_real=3000, seed=0):
+    """Distribution of the varpi-clustering Rayleigh p under observational uncertainty.
+
+    For each of n_real catalog realizations, resample each object's varpi from
+    N(varpi, sigma_varpi) (wrapped), recompute the analytic Rayleigh p. Returns the array of
+    p-values -- its median/spread shows whether the clustering significance is driven (or not)
+    by measurement error vs being intrinsic (small N + selection bias).
+    """
+    rng = np.random.default_rng(seed)
+    mu = np.array([r["varpi_deg"] for r in rows])
+    sig = np.array([r["sigma_varpi_deg"] for r in rows])
+    ps = np.empty(n_real)
+    for k in range(n_real):
+        vp = (mu + rng.normal(0, sig)) % 360.0
+        ps[k] = circular_stats(vp)["p_analytic"]
+    return ps
+
+
 def filter_population(rows, a_min=250.0, q_min=42.0):
     """The dynamically-detached extreme population: a >= a_min AND perihelion q >= q_min.
 
