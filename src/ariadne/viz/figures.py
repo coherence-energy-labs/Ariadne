@@ -541,6 +541,46 @@ def figure_transport_graph():
     return path
 
 
+def figure_nrho():
+    """The Gateway-class L2 NRHO (3D) with halo-family context (Stage 19)."""
+    from ..data.constants import EARTH_MOON, R_MOON
+    from ..dynamics.cr3bp import propagate
+    from ..orbits.nrho import nrho_family
+    mu = EARTH_MOON.mu
+    Ts = EARTH_MOON.T_star / 86400.0
+    nrho, fam = nrho_family(mu, "L2", t_star_days=Ts, l_star=EARTH_MOON.L_star,
+                            target_period_d=6.56, ds=4e-3)
+    L = EARTH_MOON.L_star
+
+    def xyz(orb, npts=600):
+        sol = propagate(orb.s0, (0.0, orb.period), mu, t_eval=np.linspace(0, orb.period, npts))
+        return ((sol.y[0] - (1 - mu)) * L, sol.y[1] * L, sol.y[2] * L)   # Moon-centered km
+
+    fig = plt.figure(figsize=(8.2, 7.2))
+    ax = fig.add_subplot(111, projection="3d")
+    # a few family members for context (every ~80th, the rounding family)
+    for orb in fam[::max(1, len(fam) // 6)]:
+        x, y, z = xyz(orb, 300)
+        ax.plot(x, y, z, color="0.8", lw=0.5)
+    if nrho is not None:
+        x, y, z = xyz(nrho)
+        ax.plot(x, y, z, color="tab:red", lw=2.0, label=f"NRHO  (period {nrho.period*Ts:.2f} d)")
+    # the Moon
+    u, v = np.mgrid[0:2*np.pi:24j, 0:np.pi:12j]
+    ax.plot_surface(R_MOON*np.cos(u)*np.sin(v), R_MOON*np.sin(u)*np.sin(v),
+                    R_MOON*np.cos(v), color="0.5", alpha=0.5, linewidth=0)
+    ax.set_xlabel("x (km, Moon-centered)"); ax.set_ylabel("y (km)"); ax.set_zlabel("z (km)")
+    ax.set_title("Earth-Moon L2 Near-Rectilinear Halo Orbit (Gateway class)\n"
+                 "built by pseudo-arclength continuation of the halo family")
+    ax.legend(fontsize=9)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "nrho.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_atlas_systems():
     """The engine across the mass-ratio spectrum: L1 distance vs mu, with Hill scaling (Stage 16)."""
     from ..data.constants import EARTH_MOON, ATLAS_SYSTEMS
@@ -603,6 +643,8 @@ def main():
     print("  ->", figure_transport_graph())
     print("Rendering atlas systems (mass-ratio spectrum) ...")
     print("  ->", figure_atlas_systems())
+    print("Rendering Gateway-class NRHO (3D) ...")
+    print("  ->", figure_nrho())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

@@ -464,8 +464,10 @@ these add depth where real value remained.
   (multiple-shooting in DE440). The L1 Lyapunov orbit AND the L1<->L2 heteroclinic connection
   re-converge in the true ephemeris to within meters -- the discovered structure is ephemeris-real.
   *DoD:* **G18a/b/c**.
-- **Stage 19 — 3D halos + NRHO** *(planned)*: build/validate the Gateway-class Near-Rectilinear
-  Halo Orbit; extend the transport network to halo orbits.
+- **Stage 19 — 3D halos + NRHO** *(done)*: `orbits/nrho.py` pseudo-arclength continuation reaches
+  the Gateway-class L2 NRHO (period 6.558 d, perilune alt 1,501 km, apolune 71,198 km, periodic to
+  2.4e-14; near-stable, Floquet 2.18 vs Lyapunov 1,841). 3D-halo transport-graph integration (needs
+  a 3D Poincare section) noted as the remaining extension. *DoD:* **G19a/b**.
 - **Stage 20 — Moon-tour mining** *(planned)*: point the discovery engine at the Galilean/Saturnian
   moon systems; mine multi-moon tour route structure.
 - **Stage 21 — Low-thrust optimization** *(planned)*: optimize a continuous-thrust transfer (the
@@ -555,13 +557,12 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 18 — Ephemeris re-targeter **COMPLETE** (gates G18a/b/c). The original
-roadmap (Stages 0-17) is closed; Stage 18 begins the user-requested post-roadmap enhancements. The
-synodic<->inertial transform is exact, and the discovered CR3BP libration structure (L1 Lyapunov
-orbit + L1<->L2 heteroclinic connection) RE-CONVERGES in the full DE440 ephemeris to within meters
--- closing the one fidelity rung Stage 15 left open. The discovered structure is ephemeris-real.
-**Next action:** Stage 19 — 3D halos + the Gateway-class NRHO + extend the transport network to halo
-orbits. Then Stage 20 (moon-tour mining), Stage 21 (low-thrust optimization), Stage 22 (packaging).
+**Current stage:** Stage 19 — 3D halos + Gateway-class NRHO **COMPLETE** (gates G19a/b). Pseudo-
+arclength continuation of the L2 halo family reaches the Gateway 9:2 NRHO (period 6.558 d, perilune
+alt 1,501 km, apolune 71,198 km, periodic to 2.4e-14), which is ~840x more stable than a deep
+libration orbit (Floquet 2.18 vs 1,841). 3D halos/NRHOs are now first-class.
+**Next action:** Stage 20 — point the discovery engine at the Galilean/Saturnian moon systems and
+mine multi-moon tour route structure. Then Stage 21 (low-thrust optimization), Stage 22 (packaging).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -860,6 +861,20 @@ ephemeris, Earth+Sun+Moon). Results at epoch 2025-06-01:
   *existence/convergence* claim is solid (residuals are meters); the minimal-Delta-v figure is not.
   Run: `PYTHONPATH=src python -m ariadne.validate.stage18`.
 
+**Stage 19 results (3D halos + the Gateway-class NRHO):** built `orbits/nrho.py` -- pseudo-arclength
+continuation of the L2 halo family (free vars [x0,z0,vy0]; family tangent = the cross product of the
+2x3 STM Jacobian rows; Newton-correct orthogonal to it). Naive z-continuation cannot reach NRHOs (the
+family turns); pseudo-arclength rounds the turning point. Result: a **382-member L2 family from 14.82 d
+down to 6.56 d**, terminating in a Near-Rectilinear Halo Orbit that matches NASA's **Gateway 9:2 NRHO**:
+- **period 6.558 d** (Gateway ~6.56 d), **perilune 3,238 km (alt 1,501 km over the lunar pole)**,
+  **apolune 71,198 km** (Gateway ~70,000 km), periodic to **2.4e-14**.
+- **Near-stability (G19b):** the NRHO's max Floquet multiplier is **2.18**, versus **1,841** for the
+  L1 Lyapunov orbit at C=3.16 -- ~840x more stable. That is exactly why Gateway flies an NRHO (cheap
+  stationkeeping). Figure: nrho.png. Run: `PYTHONPATH=src python -m ariadne.validate.stage19`.
+- **Honest scope:** 3D halos/NRHOs are now first-class (constructed + validated). Integrating them as
+  transport-graph NODES needs a 3D Poincare section (the planar (y,v_y) intersection does not capture
+  3D crossings) -- noted as the remaining extension; the planar transport graph (Stages 14-15) stands.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -868,6 +883,12 @@ ephemeris, Earth+Sun+Moon). Results at epoch 2025-06-01:
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.19` — Stage 19 (3D halos + Gateway-class NRHO) complete. Added orbits/nrho.py
+  (pseudo-arclength halo continuation), validate/stage19.py, test_nrho.py (2 tests), viz.figure_nrho.
+  G19 PASS: a 382-member L2 family continues from 14.82 d to a Near-Rectilinear Halo Orbit matching
+  the Gateway 9:2 NRHO -- period 6.558 d, perilune 3,238 km (alt 1,501 km), apolune 71,198 km,
+  periodic to 2.4e-14; near-stable (max Floquet 2.18 vs the L1 Lyapunov's 1,841). Honest: integrating
+  halos as transport-graph nodes needs a 3D Poincare section (noted); the planar graph stands.
 - 2026-05-29 `v0.18` — Stage 18 (ephemeris re-targeter) complete; closes the G12 fidelity gap.
   Added dynamics/frames.py (exact synodic<->inertial transform) + transfers/ephemeris_retarget.py
   (position-continuous multiple shooting in DE440), validate/stage18.py, test_retarget.py (4 tests).
