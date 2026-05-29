@@ -114,6 +114,12 @@ than a fast, pricier transfer; a stable orbit is ~23× more coherent than any lu
 > This is a real, *different* objective (robustness), not a way to beat the energy floor — physics
 > fixes the minimum Δv. The cheapest path is simply the least coherent.
 
+A **coherence-weighted optimizer** then chooses the route: minimizing `J = z(Δv) + w·z(sensitivity)`
+traces the Pareto front and finds its **knee** — the 4-day transfer, which is **3.6× more robust
+than the cheapest route for only +71 m/s**. Raising the robustness weight sweeps the choice from
+the cheap-but-fragile WSB route to the fast-but-robust one. That's a smoother, lower-correction
+route chooser on standard gravity.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
 `PYTHONPATH=src python -m ariadne.validate.stage11` (and `stage1`–`stage10`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).

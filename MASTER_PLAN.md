@@ -428,8 +428,10 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 - **Stage 11 — Coherence / robustness lens** *(done)*: analysis/coherence.py (endpoint sensitivity
   + FTLE); measured the Δv-vs-coherence frontier (robustness costs fuel; cheapest=least coherent).
   *DoD:* **G_coh**.
-- **Stage 12+ (optional)** — coherence-WEIGHTED optimizer (most-robust path per Δv premium);
-  discovery engine on an under-mapped system (novelty, long shot); or consolidation + white-paper.
+- **Stage 12 — Coherence-weighted optimizer** *(done)*: Δv-vs-robustness Pareto front + knee
+  (coherence-guided route chooser, standard gravity). *DoD:* **G_opt**.
+- **Stage 13+ (optional)** — discovery engine on an under-mapped system (novelty, long shot);
+  or consolidation into a polished open release + white-paper. Earth-Moon is now covered.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -521,15 +523,13 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 11 — Coherence / robustness lens **COMPLETE** (gate G_coh: the coherence
-metric ranks a stable orbit ~23x more coherent than a transfer and resolves the Δv-vs-coherence
-frontier — "robustness costs fuel"). This is the project's *own* coherence framework applied as a
-real objective. Next: the user's call — coherence-OPTIMIZED transfers, the discovery engine, or
-consolidation.
-**Next action:** decide the goal — (a) build a coherence-weighted optimizer (find the most robust
-path for a given Δv premium), (b) point the discovery engine at an under-mapped system
-(Jovian/Saturnian moons) [only real shot at uncatalogued routes; manage expectations], or
-(c) consolidate into a polished open release + white-paper.
+**Current stage:** Stage 12 — Coherence-WEIGHTED optimizer **COMPLETE** (gate G_opt: resolves the
+Δv-vs-robustness Pareto front and its knee — the 4-day transfer is 3.6x more robust than the
+cheapest WSB route for only +71 m/s). This realizes the "coherence-guided Earth-Moon optimizer."
+Next: the user's call — discovery engine (Jovian/Saturnian, long shot at novelty), or consolidate.
+**Next action:** (a) point the discovery engine at an under-mapped multi-body system, or
+(b) consolidate into a polished open release + white-paper. The Earth-Moon problem (incl. the
+coherence/robustness lens) is now thoroughly covered.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -672,6 +672,24 @@ finite-difference conflates polynomial along-track drift with exponential chaos;
 higher than a 49-day WSB) — kept only as a coarse signal; `endpoint_sensitivity` is the trustworthy
 one. KEY POINT: coherence == robustness is a real & DIFFERENT objective; it does NOT beat the energy
 floor (physics fixes that). Figure: coherence_frontier.png. Run: `... ariadne.validate.stage11`.
+
+**Stage 12 results (coherence-WEIGHTED optimizer — the coherence-guided route chooser):** built
+transfers/coherence_optimizer.py implementing `J = z(Δv) + w * z(endpoint_sensitivity)` over the
+transfer family (the |∇(1/τc)| term is dropped — at Earth-Moon scale τc collapses to the Newtonian
+potential, adding nothing; the robustness term IS the coherence contribution). Computed the
+Δv-vs-robustness **Pareto front** (WSB 3907/45877 → direct 5d → 4d → 3d 4090/5898; 6d dominated)
+and its **knee = direct 4-day transfer (3978 m/s)**, which is **3.6x more robust than the cheapest
+WSB route for only +71 m/s**. The robustness weight sweeps the choice WSB(w=0) → 4d(w=1) → 3d(w=5).
+This is the user's "coherence-guided Earth-Moon optimizer," on standard gravity (eta=1 firewall),
+finding smoother / lower-correction routes. Figure: coherence_frontier.png (knee marked). Run:
+`PYTHONPATH=src python -m ariadne.validate.stage12`.
+
+**Cosmology side-quest (separate project, not Ariadne):** independently tested the S_One coherence
+field's parameter-free Radial Acceleration Relation on the real 175-galaxy SPARC database
+(`Coherence_Energy_Labs_Website/.../independent_rar_test.py`): g*=cH0/(2π) fits at 0.105 dex
+(~MOND's 0.098). The discriminating test (a0 ∝ H(z), `coherence_rar_zevolution.py`) is frontier/
+data-limited. Honest: this is the user's separate cosmology theory; Ariadne's dynamics stay
+standard-gravity regardless.
 Run: `PYTHONPATH=src python -m ariadne.validate.stage10`.
 
 **Decisions on record:**
@@ -682,6 +700,13 @@ Run: `PYTHONPATH=src python -m ariadne.validate.stage10`.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.12` — Stage 12 (coherence-weighted optimizer) complete. Added
+  transfers/coherence_optimizer.py (Δv-vs-robustness Pareto front, knee, weighted optimum),
+  validate/stage12.py, test_coherence_optimizer.py, knee marked on coherence_frontier.png.
+  Knee = direct 4-day transfer: 3.6x more robust than the cheapest WSB route for +71 m/s.
+  Realizes the coherence-guided route chooser on standard gravity. (Separately: independently
+  tested the S_One parameter-free RAR on real SPARC -> 0.105 dex, ~MOND; the a0(z)~H(z)
+  discriminator is data-limited. Cosmology lives in the Coherence_Energy_Labs project, not here.)
 - 2026-05-28 `v0.11` — Stage 11 (coherence / robustness lens) complete. Added analysis/coherence.py
   (endpoint_sensitivity = km arrival-drift per m/s = robustness; decoherence_rate FTLE as a coarse,
   caveated signal), validate/stage11.py, viz.figure_coherence_frontier, test_coherence.py. Mapped

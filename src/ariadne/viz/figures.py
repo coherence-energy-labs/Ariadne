@@ -429,9 +429,18 @@ def figure_coherence_frontier():
     dv.append(bw["total_ms"]); sens.append(endpoint_sensitivity(propw, s0w))
     lab.append("WSB 49 d")
 
+    from ..transfers.coherence_optimizer import pareto_front, knee
+    pts = [{"label": t, "dv_ms": x, "sensitivity": y} for x, y, t in zip(dv, sens, lab)]
+    kp = knee(pareto_front(pts))
+
     fig, ax = plt.subplots(figsize=(8.4, 6.4))
     colors = ["tab:green"] * 4 + ["tab:purple"]
     ax.scatter(dv, sens, c=colors, s=90, zorder=3)
+    if kp is not None:
+        ax.scatter([kp["dv_ms"]], [kp["sensitivity"]], s=320, facecolors="none",
+                   edgecolors="k", linewidths=2, zorder=4)
+        ax.annotate("knee\n(best compromise)", (kp["dv_ms"], kp["sensitivity"]),
+                    textcoords="offset points", xytext=(10, -28), fontsize=9, fontweight="bold")
     for x, y, t in zip(dv, sens, lab):
         ax.annotate(t, (x, y), textcoords="offset points", xytext=(8, 4), fontsize=9)
     ax.set_yscale("log")
