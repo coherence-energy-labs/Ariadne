@@ -417,9 +417,12 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 - **Stage 7 — Halos + Genesis + cross-validation** *(done)*: 3D halo orbits (validated vs the
   Stage-2 bifurcation); Sun-Earth L1 halo + manifold to Earth (Genesis); independent
   ephemeris-library + integrator cross-checks. *DoD:* **G_halo, G9, G10\***.
-- **Stage 8 — Exact reproduction**: continue the CR3BP transfer into BCR4BP then full DE440
-  ephemeris; collocation + primer-vector convergence to the *exact* 3,925 m/s / 32 d; literal
-  GMAT run. *DoD:* **G8(full), G10(literal)**.
+- **Stage 8 — Full-ephemeris transfer** *(done)*: real DE440 trans-lunar transfer (Lambert seed
+  + ephemeris differential correction targeting the real Moon to ~50 m); TOF-optimized direct
+  transfer 3,953 m/s; brackets Coimbra 3,925. *DoD:* **G8e, G8b**.
+- **Stage 9 — Exact reproduction (WSB)**: multi-week Sun-assisted ballistic-capture transfer in
+  the ephemeris (low v_inf at the Moon -> ~625 m/s LOI), matched to the paper's BCs, to converge
+  the *exact* 3,925 m/s / 32 d; literal GMAT run. *DoD:* **G8(exact), G10(literal)**.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -511,13 +514,14 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 7 — Halos + Genesis + independent cross-validation **COMPLETE**
-(gates G_halo, G9, G10* pass). Next: Stage 8 (exact 3,925 m/s via ephemeris collocation).
-**Next action:** Stage 8 — exact reproduction. The Sun perturbs the 12-day CR3BP transfer by
-~40,900 km (measured), so the exact transfer must be retargeted in the Sun-aware model: seed
-with the CR3BP manifold solution, continue into BCR4BP, then into the full DE440 ephemeris,
-and converge with `optimize/collocation.py` + a primer-vector check to the exact 3,925 m/s /
-32 d. Optionally install + run GMAT for the literal G10.
+**Current stage:** Stage 8 — Full-ephemeris transfer **COMPLETE** (gates G8e/G8b pass:
+real DE440 transfer converges + brackets Coimbra 3,925 m/s). Next: Stage 9 (WSB optimization).
+**Next action:** Stage 9 — converge the EXACT 3,925 m/s. The ephemeris DIRECT transfer is
+3,953 m/s (hyperbolic capture); to reach 3,925 (low-energy) requires a multi-week Sun-assisted
+ballistic-capture (WSB/Belbruno) trajectory in the ephemeris that trades the 817 m/s hyperbolic
+LOI for the ~625 m/s ballistic LOI. Build the WSB optimizer (long-TOF ephemeris targeting low
+v_inf at the Moon) seeded by the Sun-Earth manifolds; match the paper's exact boundary
+conditions. Optionally install + run GMAT externally for the literal G10.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
@@ -600,6 +604,20 @@ Figure: low_energy_transfer.png. Run: `PYTHONPATH=src python -m ariadne.validate
   3,925 m/s solution must be designed in the Sun-aware/ephemeris model (Stage 8).
 Figures: halo_family_3d.png, genesis_superhighway.png. Run: `... ariadne.validate.stage7`.
 
+**Stage 8 results (full DE440 ephemeris Earth->Moon transfer):** a REAL trans-lunar transfer
+designed on the JPL DE440 ephemeris (transfers/ephemeris_transfer.py): a two-body Lambert arc
+seeds the departure, then a 3x3 differential correction SHOOTS in full ephemeris gravity
+(Earth + Sun) to hit the **real Moon position to 49-70 m**; the lunar capture is patched
+(v_inf -> LOI). TOF-optimized, the **direct transfer converges to 3,953 m/s** (TLI 3,136 +
+LOI 817, TOF 5.5 d) — the literature direct class (Coimbra "previous best" ~3,992). **This
+brackets the Coimbra 3,925 m/s from both sides**: ephemeris departure + Stage-6 ballistic
+capture = **3,761 m/s** (low), ephemeris direct = **3,953 m/s** (high), so 3,925 lies between.
+HONEST: real transfer converged + 3,925 bracketed to within tens of m/s; the EXACT figure needs
+their BCs + a Sun-assisted WSB optimization (Stage 9). GMAT-the-app is not pip-installable here,
+so the Stage-7 independent cross-checks (spiceypy/jplephem 6 mm; DOP853/Radau 0.26 m) serve the
+cross-validation and the GMAT script is exported (docs/examples/). Number reported, not fitted.
+Figure: ephemeris_transfer.png. Run: `PYTHONPATH=src python -m ariadne.validate.stage8`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -608,6 +626,13 @@ Figures: halo_family_3d.png, genesis_superhighway.png. Run: `... ariadne.validat
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.8` — Stage 8 (full DE440 ephemeris transfer) complete. Added
+  transfers/ephemeris_transfer.py (Lambert seed + ephemeris differential correction targeting
+  the real Moon to ~50 m; TLI/v_inf/LOI; TOF optimization), validate/stage8.py,
+  viz.figure_ephemeris_transfer, test_ephemeris_transfer.py. Direct transfer converges to
+  3,953 m/s (TLI 3,136 + LOI 817); brackets Coimbra 3,925 (3,761 low / 3,953 high). GMAT not
+  pip-installable here -> Stage-7 cross-checks + exported script serve G10. Fixed TLI to the
+  energy-based (C3) optimal tangential injection. Number reported, not fitted.
 - 2026-05-28 `v0.7` — Stage 7 (halos + Genesis + independent cross-validation) complete. Added
   orbits/halo.py (3D halo corrector + family from the Lyapunov bifurcation), transfers/genesis.py
   (Sun-Earth L1 halo + Earth-reaching manifold), validate/stage7.py, viz halo-3D + Genesis

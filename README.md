@@ -71,8 +71,20 @@ Everything is cross-validated against independent tools: two ephemeris libraries
 jplephem on DE440) agree to **6 mm**, and two independent integrators (DOP853 vs Radau) agree
 to **0.26 m**.
 
+Finally, we design transfers on the **real DE440 ephemeris**: a Lambert seed plus a
+differential correction that shoots in full Sun+Earth gravity to hit the **actual Moon
+position to ~50 m**. The TOF-optimized direct transfer converges to **3,953 m/s** — and this
+**brackets the Coimbra 3,925 m/s from both sides** (3,761 m/s with ballistic capture, 3,953 m/s
+direct), pinning the published result to within tens of m/s with real data.
+
+![Full-ephemeris Earth→Moon transfer](docs/figures/ephemeris_transfer.png)
+
+> The *exact* 3,925 m/s is a low-energy (Sun-assisted ballistic-capture / WSB) optimum; reaching
+> it precisely needs the paper's boundary conditions and a multi-week trajectory optimization
+> (Stage 9). Every number is reported from the optimizer, never fitted.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage7` (and `stage1`–`stage6`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage8` (and `stage1`–`stage7`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

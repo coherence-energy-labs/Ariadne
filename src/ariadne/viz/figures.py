@@ -337,6 +337,39 @@ def figure_genesis():
     return path
 
 
+def figure_ephemeris_transfer(epoch="2025-06-01T00:00:00", tof_days=5.5):
+    from ..data.ephemeris import et, body_pos
+    from ..dynamics.ephemeris_nbody import propagate_test_particle
+    from ..transfers.ephemeris_transfer import design_transfer
+    e0 = et(epoch)
+    d = design_transfer(e0, tof_days)
+    tof = tof_days * 86400.0
+    ts = np.linspace(0.0, tof, 400)
+    sc = propagate_test_particle(d["r1"], d["v1"], e0, (0.0, tof),
+                                 perturbers=("SUN",), t_eval=ts).y
+    moon = np.array([body_pos("MOON", e0 + t, "J2000", "EARTH") for t in ts])
+
+    fig, ax = plt.subplots(figsize=(8.0, 7.2))
+    ax.plot(moon[:, 0], moon[:, 1], color="0.6", lw=1.0, ls="--", label="Moon orbit (DE440)")
+    ax.plot(sc[0], sc[1], color="tab:red", lw=1.6, label="spacecraft (DE440 propagation)")
+    ax.plot(0, 0, "o", color="tab:blue", ms=12, label="Earth")
+    ax.plot(sc[0, 0], sc[1, 0], "g^", ms=9, label="TLI (LEO departure)")
+    ax.plot(moon[-1, 0], moon[-1, 1], "o", color="0.4", ms=9, label="Moon at arrival")
+    ax.set_aspect("equal")
+    ax.set_xlabel("x (km, J2000)")
+    ax.set_ylabel("y (km, J2000)")
+    ax.set_title(f"Full-ephemeris Earth→Moon transfer (DE440)\n"
+                 f"TOF {tof_days:.1f} d, TLI {d['dv_tli_ms']:.0f} + LOI "
+                 f"{d['dv_loi_ms']:.0f} = {d['total_ms']:.0f} m/s, Moon miss {d['miss_km']*1000:.0f} m")
+    ax.legend(fontsize=8, loc="upper right")
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "ephemeris_transfer.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
@@ -352,6 +385,8 @@ def main():
     print("  ->", figure_halo_3d())
     print("Rendering Genesis Sun-Earth superhighway ...")
     print("  ->", figure_genesis())
+    print("Rendering full-ephemeris Earth-Moon transfer (DE440) ...")
+    print("  ->", figure_ephemeris_transfer())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
