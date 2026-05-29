@@ -541,6 +541,63 @@ def figure_transport_graph():
     return path
 
 
+def figure_localization_honing():
+    """Two-tier honing: the hidden-body localization region shrinks as tracked bodies are added (Stage 28)."""
+    import numpy as np
+    from ..fields.hidden_mass import CLUSTERED_ETNOS, PLANET9, elements_to_position, GM_EARTH
+    from ..discovery.inverse_mass import localization_vs_n
+    tracked = [elements_to_position(o["a_au"], o["e"], o["i"], o["Omega"], o["omega"], 180.0)
+               for o in CLUSTERED_ETNOS]
+    pos_true = elements_to_position(PLANET9["a_au"], PLANET9["e"], PLANET9["i"],
+                                    PLANET9["Omega"], PLANET9["omega"], 180.0)
+    hone = localization_vs_n(tracked, PLANET9["m_earth"] * GM_EARTH, pos_true, 1e-14, seed=1)
+    ns = [h["n"] for h in hone]
+    fig, ax = plt.subplots(figsize=(8.6, 5.6))
+    ax.plot(ns, [h["pos_sigma_au"] for h in hone], "o-", color="tab:blue", label="1$\\sigma$ uncertainty")
+    ax.plot(ns, [h["pos_error_au"] for h in hone], "s--", color="tab:red", label="actual position error")
+    ax.set_xlabel("number of tracked bodies used (Tier-2 refinement)")
+    ax.set_ylabel("localization (AU)")
+    ax.set_title("Honing in: the hidden-body confidence region tightens as data are added\n"
+                 "(broad sensitive overview -> point the model -> region shrinks; Le Verrier-style)")
+    ax.legend(fontsize=9); ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "localization_honing.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
+def figure_sensitivity_skymap():
+    """All-sky sensitivity: minimum detectable hidden-body mass vs sky direction at 500 AU (Stage 28)."""
+    import numpy as np
+    from ..fields.hidden_mass import CLUSTERED_ETNOS, elements_to_position
+    from ..discovery.inverse_mass import sensitivity_skymap
+    tracked = [elements_to_position(o["a_au"], o["e"], o["i"], o["Omega"], o["omega"], 180.0)
+               for o in CLUSTERED_ETNOS]
+    sm = sensitivity_skymap(tracked, distance_au=500.0, noise_ms2=1e-14, n_lon=48, n_lat=24)
+    fig, ax = plt.subplots(figsize=(10.2, 5.4))
+    im = ax.pcolormesh(sm["lons"], sm["lats"], np.log10(sm["min_mass_earth"]),
+                       shading="auto", cmap="cividis")
+    fig.colorbar(im, label=r"log$_{10}$ minimum detectable mass (Earth masses)")
+    for o, x in zip(CLUSTERED_ETNOS, tracked):
+        r = np.linalg.norm(x)
+        lon = np.degrees(np.arctan2(x[1], x[0])) % 360.0
+        lat = np.degrees(np.arcsin(x[2] / r))
+        ax.plot(lon, lat, "o", color="white", ms=6, mec="k")
+        ax.annotate(o["name"], (lon, lat), textcoords="offset points", xytext=(5, 3),
+                    fontsize=7, color="white")
+    ax.set_xlabel("ecliptic longitude (deg)"); ax.set_ylabel("ecliptic latitude (deg)")
+    ax.set_title("All-sky sensitivity at 500 AU -- minimum detectable hidden-body mass\n"
+                 "(bright = blind spots; the tracked eTNOs constrain best near their own directions)")
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "sensitivity_skymap.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_detectability():
     """The hidden-mass detector generalizes: detectable (mass, distance) plane for ANY body (Stage 27)."""
     import numpy as np
@@ -1006,6 +1063,10 @@ def main():
     print("  ->", figure_planet9())
     print("Rendering hidden-mass detectability map (any body) ...")
     print("  ->", figure_detectability())
+    print("Rendering inverse-localizer honing ...")
+    print("  ->", figure_localization_honing())
+    print("Rendering all-sky hidden-body sensitivity map ...")
+    print("  ->", figure_sensitivity_skymap())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

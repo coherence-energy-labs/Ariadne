@@ -570,18 +570,18 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 27 — Principled coherence field + trajectory-residual hidden-mass detector
-**COMPLETE**. Made the user's S_One coherence field rigorous (tau_c = 1 + Phi/c^2 from all masses;
-Newton recovery to 1.004e-8 at Earth, reproducing the framework's own result), then built it into a
-GENERAL gravitational-anomaly detector: a path pulled by an unmodeled mass leaves a residual that
-points to the body (Neptune/Cassini method). A hypothesized Planet 9 stands 57-118x above the
-Kuiper noise floor at the 6 real clustered eTNOs but is ~1e-5 of the solar pull; the detector
-generalizes to comets/asteroids/dwarf planets via a (mass,distance) detectability map.
-**Next action:** none required. HONEST bottom line unchanged: a complete, validated, open engine
-spanning CR3BP -> ephemeris -> GMAT -> search/discovery -> interplanetary -> a principled coherence
-field + hidden-mass detector, all on real data with the firewall intact. No new physics, no body
-actually detected. The one genuine next tool for an actual hidden-body search is a long-term
-(secular, Myr) symplectic integrator + the live eTNO catalog + statistical inference -- a serious
+**Current stage:** Stage 28 — Inverse hidden-mass localizer + two-tier discovery pipeline
+**COMPLETE**. The full flag-then-localize vision: a weighted least-squares inverse solver recovers
+an injected body's (mass, position) from noisy residuals at the 6 real clustered eTNOs (6 M_E @ 625
+AU -> 7.3 M_E @ 745 AU, within 1-sigma), the confidence region HONES from 504 AU (N=2) to 209 AU
+(N=6), a single body is correctly degenerate, and the localization emits a telescope sky search-box
+(the IR/optical fusion handoff). All-sky sensitivity map shows where a body could hide.
+**Next action:** none required. HONEST bottom line: a complete, validated, open engine spanning
+CR3BP -> ephemeris -> GMAT -> search/discovery -> interplanetary -> a principled coherence field ->
+a forward+inverse hidden-mass localizer, all on real data, firewall intact. No new physics, no body
+actually detected -- the outputs are confidence regions, floor/degeneracy-limited, GM-only. The one
+genuine path to a real hidden-body find is a long-term (secular, Myr) symplectic integrator + the
+live eTNO/tracking catalog + statistical inference + the IR/optical confirmation -- a serious
 specialist effort, noted not overclaimed.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
@@ -1025,6 +1025,28 @@ constants, the published clustered-eTNO elements, the published Planet 9 hypothe
   range tracking already constrains Planet 9 by this exact method. Figures: planet9_residual.png,
   detectability_map.png. Run: `PYTHONPATH=src python -m ariadne.validate.stage27`.
 
+**Stage 28 results (inverse hidden-mass localizer + two-tier discovery pipeline):** the user's full
+vision -- a broad sensitive overview flags an anomaly, then we hone in to a location (the Neptune/Le
+Verrier method) -- made rigorous. `discovery/inverse_mass.py`.
+- **Inverse recovery (G28a):** inject a known body, generate noisy residual observations at the SIX
+  real clustered eTNOs, and a weighted nonlinear least-squares localizer recovers it: truth 6 M_earth
+  @ 625 AU -> recovered **7.3 M_earth @ 745 AU** (position error 136 AU, within the 1-sigma region).
+  Output is a confidence REGION + a sky search-box (ecl lon 67 / lat -9 deg, 745 AU, 16 deg) -- "point
+  the IR/optical surveys here" (the multi-band fusion handoff).
+- **Honing (G28b):** the 1-sigma region tightens monotonically as tracked bodies are added: **504 AU
+  (N=2) -> 209 AU (N=6)**; position error 512 -> 136 AU. The Tier-2 refinement (region shrinking with
+  data) is exactly the "hone in more and more" the user described. Figure: localization_honing.png.
+- **Degeneracy + all-sky sensitivity (G28c):** a SINGLE tracked body is degenerate (1-sigma = inf:
+  only a direction + a mass/distance product, no unique body) -- >= 2 geometrically-diverse bodies are
+  required to triangulate. An all-sky map gives the minimum detectable mass vs sky direction at 500 AU
+  (blind spots up to ~0.5 M_earth). Figure: sensitivity_skymap.png.
+- **HONEST:** simulation recovery inverts the forward model under measurement noise -- it proves the
+  machinery and quantifies uncertainty, but a real detection additionally needs SECULAR (Myr)
+  accumulation, non-gravitational force modelling, and real data; the output is a confidence region,
+  never an exact point; gravity yields GM only (composition needs the size handoff). The right next
+  bands are gravity + thermal-IR + optical (NOT X-ray/gamma -- cold bodies don't emit there).
+  Run: `PYTHONPATH=src python -m ariadne.validate.stage28`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1033,6 +1055,16 @@ constants, the published clustered-eTNO elements, the published Planet 9 hypothe
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.28` — Stage 28 (inverse hidden-mass localizer + two-tier discovery pipeline)
+  complete. Added discovery/inverse_mass.py (weighted nonlinear least-squares localizer with
+  covariance/confidence region; simulate_observations; localization_vs_n honing; sky_box telescope
+  handoff; sensitivity_skymap; single-body degeneracy guard), validate/stage28.py,
+  test_inverse_mass.py (4 tests), viz.figure_localization_honing + figure_sensitivity_skymap.
+  G28 PASS: recovers an injected body (6 M_E @ 625 AU -> 7.3 M_E @ 745 AU, within 1-sigma) from
+  noisy residuals at the 6 real eTNOs; the 1-sigma region honing 504 AU (N=2) -> 209 AU (N=6); a
+  single body is degenerate (need >=2 diverse); all-sky sensitivity map produced. Honest: a
+  confidence region (Le-Verrier-style), floor/degeneracy-limited, GM-only; real detection needs
+  secular accumulation + real data + IR/optical confirmation.
 - 2026-05-29 `v0.27` — Stage 27 (principled coherence field + trajectory-residual hidden-mass
   detector) complete. Added fields/tau_c.py (tau_c = 1 + Phi/c^2 from the total potential of all
   masses; g_coh = -c^2 grad ln(tau_c)) and fields/hidden_mass.py (residual detector + real clustered
