@@ -67,6 +67,8 @@ SUN_EMB = make_system("Sun-EMB", GM_SUN, GM_EARTH + GM_MOON, AU_KM, "Sun", "EMB"
 
 # Jovian (Galilean) moon systems: GM (km^3/s^2) and mean orbital radius (km).
 GM_IO, GM_EUROPA, GM_GANYMEDE, GM_CALLISTO = 5959.916, 3202.739, 9887.834, 7179.289
+# Galilean moon mean radii (km), for flyby-altitude geometry.
+R_IO, R_EUROPA, R_GANYMEDE, R_CALLISTO = 1821.6, 1560.8, 2631.2, 2410.3
 JUPITER_IO = make_system("Jupiter-Io", GM_JUPITER, GM_IO, 421800.0, "Jupiter", "Io")
 JUPITER_EUROPA = make_system("Jupiter-Europa", GM_JUPITER, GM_EUROPA, 671100.0, "Jupiter", "Europa")
 JUPITER_GANYMEDE = make_system("Jupiter-Ganymede", GM_JUPITER, GM_GANYMEDE, 1070400.0, "Jupiter", "Ganymede")

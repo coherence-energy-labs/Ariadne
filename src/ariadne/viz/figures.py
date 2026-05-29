@@ -541,6 +541,43 @@ def figure_transport_graph():
     return path
 
 
+def figure_moon_tour():
+    """Galilean gravity-assist tour: v_inf profile + the assist saving vs Hohmann (Stage 20)."""
+    from ..transfers.tisserand import moon_tour
+    t = moon_tour(flyby_alt_km=200.0)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.2))
+    # left: v_inf at each moon along the tour
+    labels, vis, vos = [], [], []
+    for leg in t["legs"]:
+        labels.append(f"{leg['from'][:3]}->{leg['to'][:3]}")
+        vis.append(leg["vinf_inner_kms"]); vos.append(leg["vinf_outer_kms"])
+    x = np.arange(len(labels))
+    ax1.bar(x - 0.2, vis, 0.4, label="v$_\\infty$ at inner moon", color="tab:blue")
+    ax1.bar(x + 0.2, vos, 0.4, label="v$_\\infty$ at outer moon", color="tab:orange")
+    ax1.set_xticks(x); ax1.set_xticklabels(labels)
+    ax1.set_ylabel("v$_\\infty$ (km/s)")
+    ax1.set_title("Galilean tour: flyby v$_\\infty$ per leg")
+    ax1.legend(fontsize=8)
+
+    # right: gravity-assist deterministic Delta-v vs Hohmann baseline
+    ga, hoh = t["ga_deterministic_dv_ms"], t["hohmann_dv_ms"]
+    ax2.bar(["gravity-assist\n(deterministic)", "Hohmann\nbaseline"], [ga, hoh],
+            color=["tab:green", "0.6"])
+    ax2.set_ylabel("Io -> Callisto tour Delta-v (m/s)")
+    ax2.set_title(f"Gravity assists save {t['saving_ms']:.0f} m/s "
+                  f"({hoh / max(ga, 1e-9):.0f}x)")
+    for i, val in enumerate([ga, hoh]):
+        ax2.annotate(f"{val:.0f}", (i, val), ha="center", va="bottom", fontsize=9)
+    fig.suptitle("Ariadne multi-moon tour mining (Tisserand graph)", fontsize=12)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "moon_tour.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_nrho():
     """The Gateway-class L2 NRHO (3D) with halo-family context (Stage 19)."""
     from ..data.constants import EARTH_MOON, R_MOON
@@ -645,6 +682,8 @@ def main():
     print("  ->", figure_atlas_systems())
     print("Rendering Gateway-class NRHO (3D) ...")
     print("  ->", figure_nrho())
+    print("Rendering Galilean gravity-assist moon tour ...")
+    print("  ->", figure_moon_tour())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

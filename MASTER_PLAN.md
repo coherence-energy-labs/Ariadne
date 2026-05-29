@@ -468,8 +468,9 @@ these add depth where real value remained.
   the Gateway-class L2 NRHO (period 6.558 d, perilune alt 1,501 km, apolune 71,198 km, periodic to
   2.4e-14; near-stable, Floquet 2.18 vs Lyapunov 1,841). 3D-halo transport-graph integration (needs
   a 3D Poincare section) noted as the remaining extension. *DoD:* **G19a/b**.
-- **Stage 20 — Moon-tour mining** *(planned)*: point the discovery engine at the Galilean/Saturnian
-  moon systems; mine multi-moon tour route structure.
+- **Stage 20 — Moon-tour mining** *(done)*: `transfers/tisserand.py` -- Tisserand-graph gravity-assist
+  tour of the Galilean moons (Io->Callisto): 252 m/s deterministic Delta-v vs 8,990 m/s Hohmann
+  (35.7x saving), v_inf 1.2-1.9 km/s with feasible flyby turn authority. *DoD:* **G20a/b**.
 - **Stage 21 — Low-thrust optimization** *(planned)*: optimize a continuous-thrust transfer (the
   regime built in Stage 13) -- where "ride the gradients" finally has teeth.
 - **Stage 22 — Packaging + open-source** *(planned)*: pyproject, CI, pip-installable, docs.
@@ -557,12 +558,12 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 19 — 3D halos + Gateway-class NRHO **COMPLETE** (gates G19a/b). Pseudo-
-arclength continuation of the L2 halo family reaches the Gateway 9:2 NRHO (period 6.558 d, perilune
-alt 1,501 km, apolune 71,198 km, periodic to 2.4e-14), which is ~840x more stable than a deep
-libration orbit (Floquet 2.18 vs 1,841). 3D halos/NRHOs are now first-class.
-**Next action:** Stage 20 — point the discovery engine at the Galilean/Saturnian moon systems and
-mine multi-moon tour route structure. Then Stage 21 (low-thrust optimization), Stage 22 (packaging).
+**Current stage:** Stage 20 — Multi-moon tour mining **COMPLETE** (gates G20a/b). A Tisserand-graph
+gravity-assist tour of the Galilean moons (Io->Callisto) needs only 252 m/s deterministic Delta-v vs
+8,990 m/s Hohmann (35.7x saving), with v_inf 1.2-1.9 km/s and feasible flyby turn authority -- the
+gravity-assist payoff behind the Petit Grand Tour.
+**Next action:** Stage 21 — optimize a continuous-thrust (low-thrust) transfer, the regime built in
+Stage 13, where "ride the gradients" finally has teeth. Then Stage 22 (packaging + open-source).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -875,6 +876,21 @@ down to 6.56 d**, terminating in a Near-Rectilinear Halo Orbit that matches NASA
   transport-graph NODES needs a 3D Poincare section (the planar (y,v_y) intersection does not capture
   3D crossings) -- noted as the remaining extension; the planar transport graph (Stages 14-15) stands.
 
+**Stage 20 results (multi-moon tour mining — Tisserand graph):** built `transfers/tisserand.py`.
+A single-system L1<->L2 transport graph is the wrong tool for INTER-moon tours; the right one is the
+Tisserand graph, since a flyby conserves the Tisserand parameter w.r.t. that moon (it only ROTATES
+v_inf, never changes |v_inf|). For the Galilean gravity-assist tour **Io -> Europa -> Ganymede ->
+Callisto**:
+- flyby **v_inf = 1.2-1.9 km/s** per leg (the real Galilean tour regime), with **ample turn
+  authority** (max single-flyby turn 47-83 deg at 200 km altitude).
+- the **deterministic Delta-v = 252 m/s** (the v_inf magnitude mismatches at Europa and Ganymede that
+  a flyby cannot fix), versus the **8,990 m/s** propulsive Hohmann baseline -- a **35.7x saving**, the
+  gravity-assist payoff that makes the Petit Grand Tour possible. Figure: moon_tour.png.
+- **Honest:** energy/Tisserand structure only (flyby phasing, resonance timing, plane changes not
+  modeled). Separately, the planar L1<->L2 transport graph DOES build for a Jovian system (Ganymede,
+  6 nodes) but is sparse in the narrow small-mu libration band -- Tisserand for inter-moon, transport
+  graph for intra-system. Run: `PYTHONPATH=src python -m ariadne.validate.stage20`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -883,6 +899,12 @@ down to 6.56 d**, terminating in a Near-Rectilinear Halo Orbit that matches NASA
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.20` — Stage 20 (multi-moon tour mining) complete. Added transfers/tisserand.py
+  (Tisserand parameter + v_inf relation + connecting transfers + flyby turn authority + the
+  gravity-assist vs Hohmann comparison), Galilean moon radii in constants.py, validate/stage20.py,
+  test_tisserand.py (4 tests), viz.figure_moon_tour. G20 PASS: the Galilean tour Io->Callisto needs
+  252 m/s deterministic Delta-v (gravity assists supply the rest) vs 8,990 m/s Hohmann -- a 35.7x
+  saving; v_inf 1.2-1.9 km/s with 47-83 deg turn authority. Honest: energy/Tisserand structure only.
 - 2026-05-29 `v0.19` — Stage 19 (3D halos + Gateway-class NRHO) complete. Added orbits/nrho.py
   (pseudo-arclength halo continuation), validate/stage19.py, test_nrho.py (2 tests), viz.figure_nrho.
   G19 PASS: a 382-member L2 family continues from 14.82 d to a Near-Rectilinear Halo Orbit matching
