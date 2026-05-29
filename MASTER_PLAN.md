@@ -457,6 +457,21 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
   reference route table (the direct trans-lunar transfer is the GMAT-validated one). *DoD:*
   **G_deliver**. **Roadmap closed end-to-end (Stages 0-17).**
 
+**Post-roadmap enhancements (user-requested, Stages 18-22):** the original roadmap is complete;
+these add depth where real value remained.
+- **Stage 18 — Ephemeris re-targeter** *(done)*: closes the one fidelity rung Stage 15 left open.
+  `dynamics/frames.py` (exact synodic<->inertial transform) + `transfers/ephemeris_retarget.py`
+  (multiple-shooting in DE440). The L1 Lyapunov orbit AND the L1<->L2 heteroclinic connection
+  re-converge in the true ephemeris to within meters -- the discovered structure is ephemeris-real.
+  *DoD:* **G18a/b/c**.
+- **Stage 19 — 3D halos + NRHO** *(planned)*: build/validate the Gateway-class Near-Rectilinear
+  Halo Orbit; extend the transport network to halo orbits.
+- **Stage 20 — Moon-tour mining** *(planned)*: point the discovery engine at the Galilean/Saturnian
+  moon systems; mine multi-moon tour route structure.
+- **Stage 21 — Low-thrust optimization** *(planned)*: optimize a continuous-thrust transfer (the
+  regime built in Stage 13) -- where "ride the gradients" finally has teeth.
+- **Stage 22 — Packaging + open-source** *(planned)*: pyproject, CI, pip-installable, docs.
+
 ---
 
 ## 11. Compute & performance plan
@@ -540,14 +555,13 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 17 — Deliverables **COMPLETE** (gate G_deliver). The white paper
-(docs/WHITE_PAPER.md), the open release bundle (atlas/release.py -> HDF5 + INDEX.md + reference
-routes CSV), and the honestly-tagged GMAT-validated reference route table all exist and validate.
-**The original roadmap is now closed end-to-end (Stages 0-17).** Every capability is gated, every
-result reproduced by a validate script + tests, every caveat stated.
-**Next action:** none required — the roadmap is complete. Optional future work: build the
-libration-to-libration full-ephemeris re-targeter (the one remaining fidelity rung), mine routes on
-the non-Earth-Moon systems, or wire FMM/HJB continuous-field reachability for the low-thrust regime.
+**Current stage:** Stage 18 — Ephemeris re-targeter **COMPLETE** (gates G18a/b/c). The original
+roadmap (Stages 0-17) is closed; Stage 18 begins the user-requested post-roadmap enhancements. The
+synodic<->inertial transform is exact, and the discovered CR3BP libration structure (L1 Lyapunov
+orbit + L1<->L2 heteroclinic connection) RE-CONVERGES in the full DE440 ephemeris to within meters
+-- closing the one fidelity rung Stage 15 left open. The discovered structure is ephemeris-real.
+**Next action:** Stage 19 — 3D halos + the Gateway-class NRHO + extend the transport network to halo
+orbits. Then Stage 20 (moon-tour mining), Stage 21 (low-thrust optimization), Stage 22 (packaging).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -829,6 +843,23 @@ on top of the transport graph.
 - **G_deliver PASS.** This CLOSES the original roadmap end-to-end (Stages 0-17). Run:
   `PYTHONPATH=src python -m ariadne.validate.stage17`.
 
+**Stage 18 results (ephemeris re-targeter — closes the G12 fidelity gap):** built
+`dynamics/frames.py` (an EXACTLY invertible synodic<->inertial transform: round-trip 3.3e-16, the
+Moon's nondim point embeds onto the real DE440 Moon position to 0 km) and
+`transfers/ephemeris_retarget.py` (position-continuous multiple shooting in the full DE440
+ephemeris, Earth+Sun+Moon). Results at epoch 2025-06-01:
+- **L1 Lyapunov orbit re-converges** (C=3.16, period 12.4 d): position continuity to **2.6 m**,
+  stationkeeping **86 m/s** over one revolution.
+- **L1<->L2 heteroclinic connection re-converges**: position continuity to **5.3 m** over 13
+  segments. The discovered CR3BP libration structure is therefore **ephemeris-real** -- it exists
+  as a real trajectory in DE440, not just a CR3BP idealization. This closes the one fidelity rung
+  Stage 15 left open (G12's "survives full-ephemeris re-convergence").
+- **HONEST:** the position-continuous correction Delta-v (orbit 86 m/s; heteroclinic 2,371 m/s) is
+  an UPPER BOUND, inflated by forcing exact CR3BP positions through the sensitive lunar passage; a
+  maneuver-free natural (velocity-continuity) re-convergence is the cheaper refinement. The
+  *existence/convergence* claim is solid (residuals are meters); the minimal-Delta-v figure is not.
+  Run: `PYTHONPATH=src python -m ariadne.validate.stage18`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -837,6 +868,13 @@ on top of the transport graph.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.18` — Stage 18 (ephemeris re-targeter) complete; closes the G12 fidelity gap.
+  Added dynamics/frames.py (exact synodic<->inertial transform) + transfers/ephemeris_retarget.py
+  (position-continuous multiple shooting in DE440), validate/stage18.py, test_retarget.py (4 tests).
+  G18 PASS: frame round-trips to 3.3e-16 and embeds the Moon exactly; the L1 Lyapunov orbit
+  re-converges in DE440 to 2.6 m (86 m/s/rev stationkeeping); the L1<->L2 heteroclinic connection
+  re-converges to 5.3 m -- the discovered structure is ephemeris-real. Honest: the Delta-v figures
+  are position-forced upper bounds; the minimal natural re-convergence is the noted refinement.
 - 2026-05-29 `v0.17` — Stage 17 (deliverables) complete; the original roadmap is now closed
   end-to-end (Stages 0-17). Added docs/WHITE_PAPER.md (capstone paper), atlas/release.py (open
   release bundle: HDF5 atlas + INDEX.md + reference_routes.csv, with an honestly-tagged reference
