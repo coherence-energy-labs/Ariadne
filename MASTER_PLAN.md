@@ -570,15 +570,15 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 25 — Falsifiable coherence-field test **COMPLETE**. The genuinely
-project-original experiment: made "coherence" a concrete local field (-FLI) and tested it against
-the global transport structure. Statistically-significant result (p=0.009): the invariant-manifold
-tubes are MORE coherent than the chaotic background -- the transport network is the coherence
-SKELETON of phase space. HONEST: significant + elegant, not a breakthrough (consistent with known
-dynamics). On top of the original roadmap (0-17) + the enhancement arc (18-24), now all closed.
-**Next action:** none required. The honest bottom line stands: a complete, validated, open engine;
-no new physics and no route unknown to science were found. Optional deepenings remain (a real
-low-thrust optimal-control solver, a 3D-Poincare halo graph, a large-scale discovery run, PyPI).
+**Current stage:** Stage 26 — Solar-system coherence atlas + self-correction **COMPLETE**. The
+engine generalizes to ALL 23 major solar-system systems (7 orders of magnitude in mass ratio). The
+FAIR region-matched test OVERTURNED the Stage-25 "coherence skeleton" claim (it was a region-sampling
+artifact; manifolds are ordinary separatrices) -- reported loudly as a self-correction. Original
+roadmap (0-17), enhancement arc (18-24), interplanetary + coherence experiments (21-26) all done.
+**Next action:** Stage 27 (proposed, pending user go) -- a complete-known-mass hidden-body (Planet X)
+forward-model + residual/coherence-anomaly detector, with the unmodeled-small-body NOISE FLOOR front
+and centre (the honest limit). Plus a standing review of whether the user's tau/coherence-field
+theory docs offer a more principled, computable coherence definition usable as a scoring layer.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -964,22 +964,36 @@ builds (`ariadne_astro-0.24.0-py3-none-any.whl`). G_pkg PASS: pyproject version 
 `ariadne.__version__` (0.24.0), license + CI present, all 8 key subsystems import.
 Run: `PYTHONPATH=src python -m ariadne.validate.stage24`.
 
-**Stage 25 results (falsifiable test: coherence field vs the transport network):** the one
-genuinely project-original investigation -- does the "coherence" idea, made concrete as a local
-field, have predictive value for the global transport structure? Built `fields/coherence_field.py`
-(coherence operationalized as -FLI, the Fast Lyapunov Indicator from the STM) and ran a falsifiable
-test at C=3.15: the FLI of states ON the L1 unstable-manifold tube vs matched random accessible states.
-- **Result (statistically significant, n=60):** manifold-tube FLI mean **2.38** vs random **2.82**;
-  Mann-Whitney **p = 0.009** that tube states are LOWER-FLI. The naive "tubes are chaos ridges"
-  hypothesis is **REFUTED**; the data support the opposite, more elegant claim: **the invariant-
-  manifold transport network is the COHERENCE SKELETON of phase space** -- the natural low-energy
-  highways are significantly MORE coherent (more regular) than the surrounding chaos.
-- **HONEST verdict:** a clean, falsifiable, original-to-this-project result with a nice framing, BUT
-  **not a breakthrough and not unknown to specialists** -- it is consistent with the textbook fact
-  that manifolds are asymptotic, organized trajectories. No new physics, no route unknown to science.
-  The honest answer to "find something amazing": a rigorous, significant, somewhat-elegant structural
-  finding -- not a scientist-stopping discovery. Figure: coherence_field.png.
-  Run: `PYTHONPATH=src python -m ariadne.validate.stage25`.
+**Stage 25 results (falsifiable test: coherence field vs the transport network) -- ⚠ OVERTURNED
+BY STAGE 26, see below:** the one genuinely project-original investigation -- does the "coherence"
+idea, made concrete as a local field (-FLI), predict the global transport structure? Built
+`fields/coherence_field.py` and ran a test at C=3.15: FLI of states ON the L1 unstable-manifold
+tube vs random accessible states drawn from a WIDE fixed region.
+- **Stage-25 result (n=60):** manifold-tube FLI 2.38 vs random 2.82, Mann-Whitney p=0.009 that
+  tubes are LOWER-FLI -- claimed as "the manifold network is the COHERENCE SKELETON of phase space."
+- **⚠ CORRECTION (Stage 26):** this was a **region-sampling ARTIFACT.** The wide fixed comparison
+  region included more near-Moon chaos, biasing the tube to look coherent. Stage 26's FAIR test --
+  random states drawn from the manifold tube's OWN bounding box (location controlled) -- REVERSES
+  it across all 6 tested systems: tubes are slightly LESS coherent (HIGHER FLI) than the local
+  background (p ~ 0.99-1.0 against the skeleton; separatrix holds 6/6). The honest truth is the
+  mundane textbook one: **manifolds are the ordinary separatrices** (locally most-stretching), not
+  a coherence skeleton. The exciting Stage-25 framing does NOT survive a fair test. Lesson logged
+  in [[feedback_verify_bug_currency_first]] spirit: control your comparison set. Run: `... stage26`.
+
+**Stage 26 results (solar-system-wide coherence atlas + a self-correction):** scaled the analysis
+to the WHOLE solar system and, in doing so, overturned Stage 25.
+- **Whole-system generalization (G26a):** the engine produces a periodic L1 Lyapunov orbit for ALL
+  **23 major systems** -- Sun-planet for all 8 planets, the giant planets' major moons (Galilean,
+  Titan/Rhea/Enceladus/Iapetus, Titania/Oberon, Triton), Earth-Moon, the DART binary, and the
+  Pluto-Charon binary -- spanning **~7 orders of magnitude in mass ratio (1.65e-8 .. 0.108)**, zero
+  failures (residuals < 1e-12). The comprehensive catalog the scale-up promised.
+- **Self-correction (G26b):** the FAIR region-matched coherence test (random comparison states from
+  the manifold tube's OWN bounding box) **REFUTES the Stage-25 "coherence skeleton" result on all 6
+  tested systems** (skeleton 0/6, separatrix 6/6, p ~ 0.99-1.0). The Stage-25 finding was a
+  region-sampling artifact; the truth is the textbook one (manifolds are ordinary separatrices,
+  locally slightly higher FLI). Reported loudly because integrity > an exciting-but-wrong claim.
+- **Built:** `fields/solar_atlas.py` (whole-system catalog + the fair, region-matched skeleton test
+  with both one-sided p-values), validate/stage26.py, viz.figure_solar_atlas. Run: `... stage26`.
 
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
@@ -989,6 +1003,13 @@ test at C=3.15: the FLI of states ON the L1 unstable-manifold tube vs matched ra
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.26` — Stage 26 (solar-system coherence atlas + self-correction) complete. Added the
+  whole-solar-system registry (23 systems: Sun-planet x8, giant-planet major moons, Pluto-Charon
+  binary) to constants.py, fields/solar_atlas.py (catalog + a FAIR region-matched coherence test),
+  validate/stage26.py, test_solar_atlas.py, viz.figure_solar_atlas. G26a PASS: periodic libration
+  for all 23 systems (mu 1.65e-8 .. 0.108). G26b PASS as a SELF-CORRECTION: the fair region-matched
+  test refutes the Stage-25 "coherence skeleton" (skeleton 0/6, separatrix 6/6) -- it was a
+  region-sampling artifact; manifolds are ordinary separatrices. Stage-25 entry annotated OVERTURNED.
 - 2026-05-29 `v0.25` — Stage 25 (falsifiable coherence-field test) complete. Added
   fields/coherence_field.py (FLI-based coherence field over CR3BP phase space), validate/stage25.py,
   test_coherence_field.py (3 tests), viz.figure_coherence_field. Falsifiable result (C=3.15, n=60,

@@ -813,6 +813,44 @@ def figure_nrho():
     return path
 
 
+def figure_solar_atlas():
+    """The whole solar system on one plot: L1 distance vs mass ratio for all 23 systems (Stage 26)."""
+    from ..data.constants import SOLAR_SYSTEM
+    from ..transfers.jovian import moon_libration
+    mus, ratios, names = [], [], []
+    for S in SOLAR_SYSTEM:
+        m = moon_libration(S)
+        mus.append(S.mu)
+        ratios.append(m["L1_km"] / S.L_star)
+        names.append(S.name)
+    mus = np.array(mus); ratios = np.array(ratios)
+
+    fig, ax = plt.subplots(figsize=(10.5, 6.8))
+    mm = np.logspace(np.log10(mus.min()) - 0.3, np.log10(mus.max()) + 0.3, 200)
+    ax.loglog(mm, (mm / 3.0) ** (1.0 / 3.0), "--", color="0.5", label=r"Hill radius $(\mu/3)^{1/3}$")
+    # color Sun-planet vs moon vs binary
+    for x, y, n in zip(mus, ratios, names):
+        col = ("tab:orange" if n.startswith("Sun-") else
+               "tab:purple" if n in ("Pluto-Charon", "Didymos-Dimorphos") else "tab:blue")
+        ax.loglog(x, y, "o", color=col, ms=8, zorder=3)
+        ax.annotate(n, (x, y), textcoords="offset points", xytext=(6, 3), fontsize=6.5)
+    ax.loglog([], [], "o", color="tab:orange", label="Sun-planet")
+    ax.loglog([], [], "o", color="tab:blue", label="planet-moon")
+    ax.loglog([], [], "o", color="tab:purple", label="binary")
+    ax.set_xlabel(r"mass ratio $\mu = m_2/(m_1+m_2)$")
+    ax.set_ylabel("L1 distance from secondary / separation")
+    ax.set_title("Ariadne across the entire solar system -- 23 CR3BP systems, 7 orders of magnitude\n"
+                 "(periodic L1 Lyapunov orbits everywhere; all track the Hill-radius scaling)")
+    ax.legend(fontsize=9)
+    ax.grid(True, which="both", alpha=0.2)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "solar_atlas.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_atlas_systems():
     """The engine across the mass-ratio spectrum: L1 distance vs mu, with Hill scaling (Stage 16)."""
     from ..data.constants import EARTH_MOON, ATLAS_SYSTEMS
@@ -875,6 +913,8 @@ def main():
     print("  ->", figure_transport_graph())
     print("Rendering atlas systems (mass-ratio spectrum) ...")
     print("  ->", figure_atlas_systems())
+    print("Rendering solar-system atlas (23 systems) ...")
+    print("  ->", figure_solar_atlas())
     print("Rendering Gateway-class NRHO (3D) ...")
     print("  ->", figure_nrho())
     print("Rendering Galilean gravity-assist moon tour ...")

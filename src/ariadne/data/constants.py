@@ -96,3 +96,48 @@ DIDYMOS_DIMORPHOS = make_system("Didymos-Dimorphos", GM_DIDYMOS, GM_DIMORPHOS, 1
 # Ordered low-mu -> high-mu for the atlas (spans ~1.6e-8 to ~7e-3).
 ATLAS_SYSTEMS = [MARS_PHOBOS, SATURN_ENCELADUS, SUN_MARS, SATURN_RHEA,
                  SATURN_TITAN, DIDYMOS_DIMORPHOS]
+
+# ---------------------------------------------------------------------------
+# Stage 26: a solar-system-wide registry of CR3BP systems (the whole-system scale-up).
+# GM (km^3/s^2) and mean separation / semi-major axis (km), all DE440-class values.
+# ---------------------------------------------------------------------------
+GM_MERCURY = 22031.868
+GM_URANUS = 5793939.0
+GM_NEPTUNE = 6836529.0
+GM_PLUTO = 869.6
+GM_CHARON = 105.88
+GM_TRITON = 1427.6
+GM_IAPETUS = 120.50
+GM_DEIMOS = 9.615e-5
+GM_TITANIA = 235.4
+GM_OBERON = 201.1
+
+# Sun-planet systems (planet as secondary about the Sun).
+SUN_MERCURY = make_system("Sun-Mercury", GM_SUN, GM_MERCURY, 57909050.0, "Sun", "Mercury")
+SUN_VENUS = make_system("Sun-Venus", GM_SUN, GM_VENUS, 108209500.0, "Sun", "Venus")
+SUN_JUPITER = make_system("Sun-Jupiter", GM_SUN, GM_JUPITER, 778570000.0, "Sun", "Jupiter")
+SUN_SATURN = make_system("Sun-Saturn", GM_SUN, GM_SATURN, 1433530000.0, "Sun", "Saturn")
+SUN_URANUS = make_system("Sun-Uranus", GM_SUN, GM_URANUS, 2872460000.0, "Sun", "Uranus")
+SUN_NEPTUNE = make_system("Sun-Neptune", GM_SUN, GM_NEPTUNE, 4495060000.0, "Sun", "Neptune")
+
+# Additional moon systems.
+MARS_DEIMOS = make_system("Mars-Deimos", GM_MARS, GM_DEIMOS, 23463.2, "Mars", "Deimos")
+SATURN_IAPETUS = make_system("Saturn-Iapetus", GM_SATURN, GM_IAPETUS, 3560820.0, "Saturn", "Iapetus")
+URANUS_TITANIA = make_system("Uranus-Titania", GM_URANUS, GM_TITANIA, 435910.0, "Uranus", "Titania")
+URANUS_OBERON = make_system("Uranus-Oberon", GM_URANUS, GM_OBERON, 583520.0, "Uranus", "Oberon")
+NEPTUNE_TRITON = make_system("Neptune-Triton", GM_NEPTUNE, GM_TRITON, 354759.0, "Neptune", "Triton")
+# Pluto-Charon: the most extreme mass ratio in the solar system (mu ~ 0.11, a true binary).
+PLUTO_CHARON = make_system("Pluto-Charon", GM_PLUTO, GM_CHARON, 19595.8, "Pluto", "Charon")
+
+#: The whole-solar-system registry: Sun-planet + major moon systems + binaries, ordered
+#: low-mu -> high-mu. Spans ~1.6e-8 (Mars-Phobos) to ~0.108 (Pluto-Charon) -- 7 orders of magnitude.
+SOLAR_SYSTEM = [
+    MARS_PHOBOS, SATURN_ENCELADUS, SUN_MERCURY, SUN_VENUS, SUN_EARTH, SUN_MARS,
+    JUPITER_EUROPA, JUPITER_IO, SUN_JUPITER, SATURN_RHEA, JUPITER_GANYMEDE,
+    JUPITER_CALLISTO, SUN_SATURN, SUN_URANUS, SUN_NEPTUNE, URANUS_TITANIA, URANUS_OBERON,
+    SATURN_IAPETUS, SATURN_TITAN, NEPTUNE_TRITON, EARTH_MOON, DIDYMOS_DIMORPHOS, PLUTO_CHARON,
+]
+
+#: A spanning subset for the (expensive) coherence-skeleton generalization test.
+COHERENCE_TEST_SYSTEMS = [MARS_PHOBOS, SUN_EARTH, JUPITER_EUROPA, SATURN_TITAN,
+                          NEPTUNE_TRITON, PLUTO_CHARON]
