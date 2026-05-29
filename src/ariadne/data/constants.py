@@ -23,6 +23,9 @@ AU_KM = 149597870.7  # astronomical unit (km)
 R_EARTH = 6378.137
 R_MOON = 1737.4
 R_SUN = 695700.0
+R_MARS = 3389.5
+R_VENUS = 6051.8
+GM_VENUS = 324858.592
 
 
 @dataclass(frozen=True)

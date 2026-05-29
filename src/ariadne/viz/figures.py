@@ -541,6 +541,81 @@ def figure_transport_graph():
     return path
 
 
+def figure_porkchop():
+    """Earth->Mars porkchop (total Delta-v over launch date x TOF) with the global optimum (Stage 21)."""
+    from ..data.ephemeris import et, utc
+    from ..interplanetary.porkchop import porkchop, optimize_window
+    e0 = et("2026-01-01T00:00:00")
+    pk = porkchop("EARTH", "MARS BARYCENTER", e0, dep_days=540, tof_range=(120, 400),
+                  n_dep=70, n_tof=55)
+    opt = optimize_window("EARTH", "MARS BARYCENTER", e0, dep_days=540,
+                          tof_range=(120, 400), maxiter=50)
+    dep_days = (pk["dep_grid"] - e0) / 86400.0
+    Z = pk["total_ms"] / 1000.0       # km/s
+    fig, ax = plt.subplots(figsize=(9.0, 6.4))
+    levels = np.linspace(np.nanmin(Z), np.nanpercentile(Z, 85), 25)
+    cs = ax.contourf(dep_days, pk["tof_grid"], Z, levels=levels, cmap="viridis_r", extend="max")
+    fig.colorbar(cs, label="total Delta-v  (km/s, LEO injection + Mars capture)")
+    ax.contour(dep_days, pk["tof_grid"], Z, levels=levels[::4], colors="k", linewidths=0.3, alpha=0.4)
+    od = (opt["et_dep"] - e0) / 86400.0
+    ax.plot(od, opt["tof_days"], "r*", ms=18,
+            label=f"optimum {opt['utc_dep'][:10]}  {opt['total_ms']/1000:.2f} km/s")
+    ax.set_xlabel("departure (days after 2026-01-01)")
+    ax.set_ylabel("time of flight (days)")
+    ax.set_title("Ariadne Earth->Mars porkchop (DE440) -- launch epoch is a free variable")
+    ax.legend(loc="upper right", fontsize=9)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "porkchop_earth_mars.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
+def figure_mars_transfer():
+    """Top-down heliocentric flight path of the optimal Earth->Mars transfer (Stage 21)."""
+    from scipy.integrate import solve_ivp
+    from ..data.constants import GM_SUN, AU_KM
+    from ..data.ephemeris import et, body_pos
+    from ..interplanetary.porkchop import optimize_window
+    e0 = et("2026-01-01T00:00:00")
+    opt = optimize_window("EARTH", "MARS BARYCENTER", e0, dep_days=540,
+                          tof_range=(120, 400), maxiter=50)
+    tof = opt["tof_days"] * 86400.0
+
+    def helio(t, s):
+        r = s[:3]; rn = np.linalg.norm(r)
+        return np.concatenate([s[3:], -GM_SUN * r / rn ** 3])
+    s0 = np.concatenate([opt["r1"], opt["v1"]])
+    sol = solve_ivp(helio, (0, tof), s0, t_eval=np.linspace(0, tof, 400),
+                    method="DOP853", rtol=1e-10, atol=1e-10)
+
+    def orbit(body):
+        ts = opt["et_dep"] + np.linspace(0, 687 * 86400.0, 400)   # ~Mars year
+        P = np.array([body_pos(body, t, "J2000", "SUN") for t in ts])
+        return P[:, 0] / AU_KM, P[:, 1] / AU_KM
+
+    fig, ax = plt.subplots(figsize=(7.6, 7.2))
+    ax.plot(0, 0, "o", color="gold", ms=15, label="Sun")
+    ex, ey = orbit("EARTH"); ax.plot(ex, ey, color="tab:blue", lw=0.7, label="Earth orbit")
+    mx, my = orbit("MARS BARYCENTER"); ax.plot(mx, my, color="tab:red", lw=0.7, label="Mars orbit")
+    ax.plot(sol.y[0] / AU_KM, sol.y[1] / AU_KM, color="k", lw=1.8, label="transfer")
+    ax.plot(opt["r1"][0] / AU_KM, opt["r1"][1] / AU_KM, "o", color="tab:blue", ms=9)
+    rf = body_pos("MARS BARYCENTER", opt["et_arr"], "J2000", "SUN")
+    ax.plot(rf[0] / AU_KM, rf[1] / AU_KM, "o", color="tab:red", ms=9)
+    ax.set_aspect("equal")
+    ax.set_xlabel("x (AU)"); ax.set_ylabel("y (AU)")
+    ax.set_title(f"Optimal Earth->Mars transfer  ({opt['utc_dep'][:10]} -> {opt['utc_arr'][:10]},"
+                 f" {opt['tof_days']:.0f} d)\nC3 {opt['c3']:.1f} km$^2$/s$^2$, total {opt['total_ms']/1000:.2f} km/s")
+    ax.legend(fontsize=8, loc="upper left")
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "mars_transfer.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_moon_tour():
     """Galilean gravity-assist tour: v_inf profile + the assist saving vs Hohmann (Stage 20)."""
     from ..transfers.tisserand import moon_tour
@@ -684,6 +759,10 @@ def main():
     print("  ->", figure_nrho())
     print("Rendering Galilean gravity-assist moon tour ...")
     print("  ->", figure_moon_tour())
+    print("Rendering Earth->Mars porkchop ...")
+    print("  ->", figure_porkchop())
+    print("Rendering Earth->Mars optimal transfer (heliocentric) ...")
+    print("  ->", figure_mars_transfer())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

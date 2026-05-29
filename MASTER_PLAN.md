@@ -471,9 +471,15 @@ these add depth where real value remained.
 - **Stage 20 — Moon-tour mining** *(done)*: `transfers/tisserand.py` -- Tisserand-graph gravity-assist
   tour of the Galilean moons (Io->Callisto): 252 m/s deterministic Delta-v vs 8,990 m/s Hohmann
   (35.7x saving), v_inf 1.2-1.9 km/s with feasible flyby turn authority. *DoD:* **G20a/b**.
-- **Stage 21 — Low-thrust optimization** *(planned)*: optimize a continuous-thrust transfer (the
-  regime built in Stage 13) -- where "ride the gradients" finally has teeth.
-- **Stage 22 — Packaging + open-source** *(planned)*: pyproject, CI, pip-installable, docs.
+- **Stage 21 — Interplanetary porkchop + epoch-swept global optimizer** *(done)*: `interplanetary/`
+  -- launch epoch is now a free variable; recovers the real Earth->Mars windows (~26-mo cadence),
+  global optimum 2026-11 / 5,679 m/s, time/energy Pareto + coherence knee; PNG + GMAT flight-path
+  export. *DoD:* **G21a/b/c**.
+- **Stage 22 — Gravity-assist multi-flyby global optimizer** *(planned)*: differential evolution over
+  flyby sequence + epochs (e.g. Earth-Venus-Earth-Mars, Earth->Jupiter); grand-tour routing.
+- **Stage 23 — Low-thrust + unified multi-objective grand optimizer** *(planned)*: continuous-thrust
+  interplanetary leg + one optimizer over time/energy/robustness composing all tools (coherence-balanced).
+- **Stage 24 — Packaging + open-source** *(planned)*: pyproject, CI, pip-installable, docs.
 
 ---
 
@@ -558,12 +564,14 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 20 — Multi-moon tour mining **COMPLETE** (gates G20a/b). A Tisserand-graph
-gravity-assist tour of the Galilean moons (Io->Callisto) needs only 252 m/s deterministic Delta-v vs
-8,990 m/s Hohmann (35.7x saving), with v_inf 1.2-1.9 km/s and feasible flyby turn authority -- the
-gravity-assist payoff behind the Petit Grand Tour.
-**Next action:** Stage 21 — optimize a continuous-thrust (low-thrust) transfer, the regime built in
-Stage 13, where "ride the gradients" finally has teeth. Then Stage 22 (packaging + open-source).
+**Current stage:** Stage 21 — Interplanetary porkchop + epoch-swept global optimizer **COMPLETE**
+(gates G21a/b/c). The launch epoch is now a FREE variable: the optimizer recovers the real
+Earth->Mars windows (~26-mo cadence), finds the 2026 global optimum (TOF 310 d, 5,679 m/s), and maps
+the time-vs-energy Pareto with a coherence-balanced knee -- with PNG porkchop/flight-path figures and
+a Sun-centered GMAT export. This begins the grand multi-objective optimizer the user asked for.
+**Next action:** Stage 22 — gravity-assist multi-flyby global optimizer (differential evolution over
+flyby sequence + epochs). Then Stage 23 (low-thrust + unified multi-objective grand optimizer),
+Stage 24 (packaging).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -891,6 +899,24 @@ Callisto**:
   6 nodes) but is sparse in the narrow small-mu libration band -- Tisserand for inter-moon, transport
   graph for intra-system. Run: `PYTHONPATH=src python -m ariadne.validate.stage20`.
 
+**Stage 21 results (interplanetary porkchop + epoch-swept GLOBAL optimizer):** built the
+`interplanetary` package -- the launch EPOCH (time of year / planet geometry), the variable we had
+been holding fixed, is now a free optimization variable on the real DE440 ephemeris.
+- **Launch windows (G21a):** sweeping departure over 6 years recovers the real Earth->Mars window
+  cadence -- **2026-11, 2028-11, 2030-12 (~26 months apart, the Mars synodic period)** at realistic
+  cost (total Delta-v ~5.7-6.2 km/s with a propulsive Mars capture).
+- **Global optimum (G21b):** differential evolution over (epoch, TOF) finds **depart 2026-11-01,
+  arrive 2027-09-07, TOF 310 d, C3 9.27 km^2/s^2, total 5,679 m/s** -- matching the known 2026 Mars
+  opportunity. (Mars orbit insertion is the dominant ~2 km/s; aerocapture would cut it.)
+- **Time-vs-energy Pareto (G21c):** the front is monotonic -- a 120-day sprint costs 13.3 km/s, a
+  300-day transfer 5.7 km/s -- with a **balanced "coherence knee" at ~185 d / 8.15 km/s**. This is
+  the coherence principle applied to route choice: not the cheapest (slowest) nor the fastest
+  (priciest), but the most balanced. "Faster to Mars" is available -- the Pareto says exactly what it costs.
+- **Visualization (PNG + GMAT):** `viz.figure_porkchop` (the contour map) and `viz.figure_mars_transfer`
+  (the top-down heliocentric flight path) render PNGs; `interplanetary/gmat_helio.export_transfer_gmat`
+  writes a Sun-centered GMAT script of the optimized transfer (drop into GMAT to fly it).
+  Run: `PYTHONPATH=src python -m ariadne.validate.stage21`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -899,6 +925,14 @@ Callisto**:
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.21` — Stage 21 (interplanetary porkchop + epoch-swept global optimizer) complete.
+  Added the `interplanetary` package: porkchop.py (heliocentric Lambert over launch-date x TOF,
+  global differential-evolution optimum, launch-window finder, time/energy Pareto + coherence knee)
+  and gmat_helio.py (Sun-centered GMAT export); R_MARS/R_VENUS/GM_VENUS in constants.py;
+  validate/stage21.py, test_interplanetary.py (6 tests), viz.figure_porkchop + figure_mars_transfer.
+  G21 PASS: recovers the real Earth->Mars windows (2026-11/2028-11/2030-12, ~26-mo cadence); global
+  optimum depart 2026-11-01 TOF 310 d C3 9.27, total 5,679 m/s; monotonic time/energy Pareto with a
+  185-d balance knee. The launch epoch is now a free variable; PNG + GMAT flight-path visuals added.
 - 2026-05-29 `v0.20` — Stage 20 (multi-moon tour mining) complete. Added transfers/tisserand.py
   (Tisserand parameter + v_inf relation + connecting transfers + flyby turn authority + the
   gravity-assist vs Hohmann comparison), Galilean moon radii in constants.py, validate/stage20.py,
