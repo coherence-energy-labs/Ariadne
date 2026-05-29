@@ -541,6 +541,41 @@ def figure_transport_graph():
     return path
 
 
+def figure_grand_tradeoff():
+    """The unified time/energy/robustness trade space with coherence-balanced picks (Stage 23)."""
+    from ..data.ephemeris import et
+    from ..interplanetary.grand import build_tradeoff, most_coherent_route
+    e0 = et("2026-01-01T00:00:00")
+    tr = build_tradeoff("EARTH", "MARS BARYCENTER", e0, dep_days=540, tof_range=(120, 400),
+                        n_dep=45, n_tof=35)
+    tof = np.array([p["tof_days"] for p in tr])
+    dv = np.array([p["total_ms"] for p in tr]) / 1000.0
+    sens = np.array([p["sensitivity_ms_per_day"] for p in tr])
+
+    fig, ax = plt.subplots(figsize=(9.2, 6.4))
+    sc = ax.scatter(tof, dv, c=sens, cmap="plasma", s=60, zorder=3)
+    fig.colorbar(sc, label="launch-window sensitivity (m/s per day)  -- lower = more robust")
+    ax.plot(tof, dv, "k-", lw=0.5, alpha=0.4, zorder=1)
+    picks = [((1, 1, 1), "balanced", "tab:green", "*"),
+             ((3, 1, 0.5), "energy-first", "tab:blue", "P"),
+             ((0.5, 3, 0.5), "time-first", "tab:red", "D")]
+    for w, name, col, mk in picks:
+        c = most_coherent_route(tr, w)
+        ax.scatter([c["tof_days"]], [c["total_ms"] / 1000.0], marker=mk, s=230,
+                   edgecolor="k", facecolor=col, zorder=5, label=f"{name} pick")
+    ax.set_xlabel("time of flight (days)")
+    ax.set_ylabel("total Delta-v (km/s)")
+    ax.set_title("Ariadne grand optimizer -- Earth->Mars time x energy x robustness\n"
+                 "coherence balances all three; the weights are the dial")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "grand_tradeoff.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_veega():
     """Heliocentric flight path of the Galileo-class VEEGA to Jupiter (Stage 22)."""
     from scipy.integrate import solve_ivp
@@ -814,6 +849,8 @@ def main():
     print("  ->", figure_mars_transfer())
     print("Rendering Galileo-class VEEGA to Jupiter ...")
     print("  ->", figure_veega())
+    print("Rendering grand multi-objective trade space ...")
+    print("  ->", figure_grand_tradeoff())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

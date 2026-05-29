@@ -479,8 +479,10 @@ these add depth where real value remained.
   patched-conic flyby chain + turn authority + differential-evolution global search; a Venus-Earth-
   Earth VEEGA cuts launch C3 to Jupiter 76.9 -> 16.8 km^2/s^2 (4.6x, Galileo-class), all flybys
   feasible (feasible but not fully ballistic; minimal-DSM refinement noted). *DoD:* **G22a/b**.
-- **Stage 23 — Low-thrust + unified multi-objective grand optimizer** *(planned)*: continuous-thrust
-  interplanetary leg + one optimizer over time/energy/robustness composing all tools (coherence-balanced).
+- **Stage 23 — Unified multi-objective grand optimizer** *(done)*: `interplanetary/grand.py` -- one
+  optimizer balancing energy/time/robustness with coherence as the dial; picks a middle-ground
+  Earth->Mars route (186 d/8,085 m/s), weights steer it; Edelbaum low-thrust estimate included.
+  *DoD:* **G23a/b/c**.
 - **Stage 24 — Packaging + open-source** *(planned)*: pyproject, CI, pip-installable, docs.
 
 ---
@@ -566,13 +568,13 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 22 — Gravity-assist multi-flyby global optimizer **COMPLETE** (gates
-G22a/b). A Venus-Earth-Earth VEEGA cuts the launch C3 to Jupiter from the direct 76.9 to 16.8
-km^2/s^2 (4.6x, Galileo-class, ~6.4-yr flight) with all flybys turn-feasible; honest that it is
-feasible-but-not-fully-ballistic (~2.5 km/s powered-flyby Delta-v). PNG flight-path figure added.
-**Next action:** Stage 23 — the UNIFIED multi-objective grand optimizer: a low-thrust interplanetary
-leg + one optimizer over time/energy/robustness composing all the tools (coherence-balanced). Then
-Stage 24 (packaging + open-source).
+**Current stage:** Stage 23 — Unified multi-objective grand optimizer **COMPLETE** (gates G23a/b/c).
+One optimizer now balances energy, time, and robustness for Earth->Mars with coherence as the dial:
+the cheapest route is also the most robust, the fastest is priciest + fragile, and the coherence
+balancer picks a genuine middle ground (186 d / 8,085 m/s) that the weights steer. This is the
+synthesis the user asked for -- "the most optimal route in time and energy, or anything else."
+**Next action:** Stage 24 — package + open-source (pyproject, CI, pip-installable, docs). That is
+the final planned stage.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -933,6 +935,22 @@ turn authority) with a differential-evolution global search over launch epoch + 
   flew closer to ballistic. The launch-energy cut and flyby feasibility are validated; the
   minimal-DSM refinement is noted. Figure: veega_jupiter.png. Run: `... -m ariadne.validate.stage22`.
 
+**Stage 23 results (unified multi-objective grand optimizer — the synthesis):** built
+`interplanetary/grand.py` -- one optimizer that chooses a route by BALANCING three objectives
+(energy = Delta-v, time = TOF, robustness = launch-window sensitivity), with the coherence
+principle as the dial. For Earth->Mars (2026):
+- **No-free-lunch trade (G23a):** the cheapest transfer (309 d, 5,683 m/s) is also the most
+  launch-ROBUST (3 m/s/day); the fastest (120 d, 13,314 m/s) is both pricier AND most fragile
+  (13 m/s/day). The three objectives genuinely conflict.
+- **Coherence balancing (G23b):** equal weights pick a true MIDDLE-GROUND route (186 d, 8,085 m/s)
+  -- not the cheapest, not the fastest. The weights steer it: energy-first -> 219 d / 6,894 m/s,
+  time-first -> 153 d / 10,026 m/s. This is "the most optimal route in time and energy, or whatever
+  we weight" -- the user's coherence framework operationalized as multi-objective route choice.
+- **Low-thrust regime (G23c):** an Edelbaum heliocentric estimate gives ~5,118 m/s / 296 d as the
+  alternative propulsion point (HONEST: heliocentric orbit-change only; excludes Earth-escape and
+  Mars-capture spirals + inclination; low-thrust's real edge is high Isp / low propellant, not lower
+  Delta-v). Figure: grand_tradeoff.png. Run: `... -m ariadne.validate.stage23`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -941,6 +959,13 @@ turn authority) with a differential-evolution global search over launch epoch + 
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.23` — Stage 23 (unified multi-objective grand optimizer) complete. Added
+  interplanetary/grand.py (launch-window robustness axis + coherence-balanced route selection over
+  energy/time/robustness with steerable weights + an Edelbaum low-thrust estimate), validate/stage23.py,
+  test_grand.py (3 tests), viz.figure_grand_tradeoff. G23 PASS: the Earth->Mars trade space shows
+  no-free-lunch structure (cheapest=most robust=309 d/5,683 m/s; fastest=priciest+fragile=120 d/
+  13,314 m/s); coherence picks a genuine middle ground (186 d/8,085 m/s) and the weights steer it
+  (energy-first 219 d, time-first 153 d). The synthesis the project was driving toward.
 - 2026-05-29 `v0.22` — Stage 22 (gravity-assist multi-flyby global optimizer) complete. Added
   interplanetary/flyby.py (patched-conic flyby chain + turn-authority + differential-evolution
   global search + stored Galileo-class VEEGA reference), validate/stage22.py, test_flyby.py
