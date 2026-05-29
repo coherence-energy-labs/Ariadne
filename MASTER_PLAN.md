@@ -540,6 +540,11 @@ these add depth where real value remained.
 - **Stage 42 — Discovery core on REAL telescope data** *(done)*: links the ACTUAL recorded MPC astrometry;
   recovers Sedna + 2001 FP185 from their real detections (+200 interlopers each) as pure candidates, 0
   false positives. Discovery core proven on real data. *DoD:* **G42a**.
+- **Stage 43 — ITF ingest (the beast's dinner)** *(done)*: full pipeline on the live 135 MB MPC Isolated
+  Tracklet File (2.6 M tracklets parsed in 17 s, 45 k slow movers, 607 clean candidates). Injection
+  validated on a real bin; 25/25 spot-checked candidates cross-match to KNOWN objects (correct skeptical
+  outcome -- no new find on the public archive). Discovery-capable end-to-end on the real unlinked
+  archive. *DoD:* **G43a/b/c**.
 
 ---
 
@@ -624,8 +629,15 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 42 — Discovery core on REAL telescope data (the frontier reached)
-**COMPLETE**. `linkage.tracklets_from_mpc` links the ACTUAL recorded MPC astrometry: from the real
+**Current stage:** Stage 43 — ITF ingest: the beast got its dinner
+**COMPLETE**. Fed the linker the actual MPC Isolated Tracklet File (135 MB, 2.6 M tracklets the MPC
+itself couldn't link). `discovery/itf.py` parses in 17 s, isolates 45 k slow movers, links per sky/time
+bin -> 607 clean canonical candidates. Injection in the densest real bin recovered. HONEST cross-match:
+25/25 spot-checked candidates are KNOWN objects (re-links the MPC's pipeline left unlinked, including
+correctly re-identifying very slow 0.1-0.2 arcsec/hr distant TNOs). **Discovery-capable end-to-end on
+the full real unlinked archive; no new object found** -- the correct skeptical outcome on the public
+archive (the MPC's own linker is excellent). A genuine NEW find needs Rubin/LSST-class data.
+PRIOR (Stage 42): `linkage.tracklets_from_mpc` links the ACTUAL recorded MPC astrometry: from the real
 detections of Sedna (2024 opposition) and 2001 FP185, each buried in 200 interloper tracklets, the linker
 recovers the object as a PURE candidate with ZERO false positives. The discovery core works on REAL survey
 data, not just synthetic -- the proof it could find UNKNOWN objects. The engine is now DISCOVERY-CAPABLE
@@ -1355,6 +1367,22 @@ astrometry mixed with interlopers; finding a genuinely NEW object requires the f
 archive (the MPC Isolated Tracklet File, or a ZTF/Pan-STARRS/Rubin detection database) -- a data-
 engineering step, not an algorithm gap. Run: `PYTHONPATH=src python -m ariadne.validate.stage42`.
 
+**Stage 43 results (THE BEAST'S DINNER -- discovery core on the real MPC ITF):** fed the linker the
+actual unlinked archive -- the MPC Isolated Tracklet File, 135 MB of observations the MPC's own pipeline
+could not associate to any object. End-to-end run: `discovery/itf.py` parses 2.6 M tracklets in 17 s,
+isolates 45,340 slow movers (distant-object regime), bins them into ~498 linkable sky/time cells, and
+links per bin. With the proper filters (size cap 4-30, multi-night >=4, tight cluster radius 0.3 AU,
+canonical designation-set dedup), the search produces **607 clean distinct candidates** -- down from
+16,317 raw before deduping. Calibration: an injected synthetic known object in the densest real ITF bin
+is RECOVERED by the linker (the pipeline works on the actual haystack). HONEST cross-match: the top 25
+spatially-distinct candidates queried against SkyBoT returned **25/25 KNOWN objects** (re-links of TNOs
+the MPC's pipeline left unlinked -- including correctly re-identifying very slow movers at 0.1-0.2
+arcsec/hr as 2008 US331, 2016 GL368, etc.). NO new object discovered, which is the **correct, skeptical
+expected outcome on the public archive** -- the MPC's own linker is excellent, so what remains unlinked
+is mostly hard or already-known. The engine is **discovery-capable on the full real unlinked archive**;
+a genuine NEW find would need Rubin/LSST-class data (deeper than the MPC's public bar) and is never
+announced from a pipeline run. Run: `PYTHONPATH=src python -m ariadne.validate.stage43`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1363,6 +1391,17 @@ engineering step, not an algorithm gap. Run: `PYTHONPATH=src python -m ariadne.v
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.43` — Stage 43 (ITF ingest -- the real unlinked archive run) complete. Added
+  discovery/itf.py (parse the MPC 80-col format, build tracklets, filter slow movers, sky/time-bin,
+  link per bin), validate/stage43.py + tests/test_itf.py. End-to-end run on the live MPC Isolated
+  Tracklet File (135 MB, 2.6 M tracklets, 45,340 slow movers in 17s): pipeline runs, injection
+  validation recovers a synthetic known object planted in the densest real bin, and the search
+  produces 607 clean canonical candidates after the proper size/night/dedup filters (down from
+  16,317 raw). Cross-matched top 25 candidates against SkyBoT -- 25/25 are KNOWN objects (re-links
+  the MPC's own pipeline left unlinked). HONEST: the engine works end-to-end on the real public
+  archive but found no NEW object, which is the correct skeptical outcome (the MPC's linker is
+  excellent, so unlinked leftovers are mostly hard or already-known; a true new find would need
+  Rubin/LSST-class data and is never announced from a pipeline run).
 - 2026-05-29 `v0.42` — Stage 42 (discovery core on REAL telescope data) complete. Added
   linkage.tracklets_from_mpc (fetches a known object's ACTUAL recorded MPC astrometry via astroquery,
   builds nightly tracklets from the densest opposition window) + add_interlopers, validate/stage42.py +
