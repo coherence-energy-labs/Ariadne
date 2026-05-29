@@ -83,8 +83,14 @@ direct), pinning the published result to within tens of m/s with real data.
 > it precisely needs the paper's boundary conditions and a multi-week trajectory optimization
 > (Stage 9). Every number is reported from the optimizer, never fitted.
 
+And it is cross-validated against **NASA GMAT itself**: an identical trans-lunar state
+propagated in both Ariadne and GMAT (GmatConsole, point masses Earth+Sun+Luna) agrees to
+**149 m in position and 0.89 mm/s in velocity over 3 days** — our propagator matches the
+industry-standard mission-analysis tool. (Install GMAT under `tools/gmat-R2026a/`;
+`ariadne.io.gmat_export.run_with_gmat()` drives it headlessly.)
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage8` (and `stage1`–`stage7`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage9` (and `stage1`–`stage8`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

@@ -8,6 +8,10 @@ data/kernels/*
 *.tf
 *.ti
 
+# Bundled GMAT install (~1 GB) and its run artifacts — never commit
+tools/
+*.report.txt
+
 # Generated results / atlas
 results/
 *.h5

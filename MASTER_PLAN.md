@@ -420,9 +420,12 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 - **Stage 8 — Full-ephemeris transfer** *(done)*: real DE440 trans-lunar transfer (Lambert seed
   + ephemeris differential correction targeting the real Moon to ~50 m); TOF-optimized direct
   transfer 3,953 m/s; brackets Coimbra 3,925. *DoD:* **G8e, G8b**.
-- **Stage 9 — Exact reproduction (WSB)**: multi-week Sun-assisted ballistic-capture transfer in
-  the ephemeris (low v_inf at the Moon -> ~625 m/s LOI), matched to the paper's BCs, to converge
-  the *exact* 3,925 m/s / 32 d; literal GMAT run. *DoD:* **G8(exact), G10(literal)**.
+- **Stage 9 — Literal GMAT cross-validation** *(done)*: GMAT R2026a installed locally; Ariadne vs
+  GMAT propagation of an identical trans-lunar state agree to 149 m. *DoD:* **G10 (literal)**.
+- **Stage 10 — Exact reproduction (WSB exterior)**: Sun-assisted exterior transfer (apogee to
+  Sun-Earth L1/L2, ballistic lunar capture) seeded by the Sun-Earth manifolds + full-ephemeris
+  collocation, matched to the paper's BCs, to converge the *exact* 3,925 m/s / 32 d.
+  *DoD:* **G8 (exact)**.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -514,15 +517,16 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 8 — Full-ephemeris transfer **COMPLETE** (gates G8e/G8b pass:
-real DE440 transfer converges + brackets Coimbra 3,925 m/s). Next: Stage 9 (WSB optimization).
-**Next action:** Stage 9 — converge the EXACT 3,925 m/s. The ephemeris DIRECT transfer is
-3,953 m/s (hyperbolic capture); to reach 3,925 (low-energy) requires a multi-week Sun-assisted
-ballistic-capture (WSB/Belbruno) trajectory in the ephemeris that trades the 817 m/s hyperbolic
-LOI for the ~625 m/s ballistic LOI. Build the WSB optimizer (long-TOF ephemeris targeting low
-v_inf at the Moon) seeded by the Sun-Earth manifolds; match the paper's exact boundary
-conditions. Optionally install + run GMAT externally for the literal G10.
+**Current stage:** Stage 9 — Literal NASA GMAT cross-validation **COMPLETE** (gate G10 LITERAL
+passes: Ariadne vs GMAT agree to 149 m). Next: Stage 10 (WSB exterior transfer for exact 3,925).
+**Next action:** Stage 10 — the exact 3,925 m/s requires a multi-week Sun-assisted EXTERIOR
+(WSB/Belbruno) trajectory: raise apogee to the Sun-Earth L1/L2 region (~1.5e6 km), let the Sun
+lower the energy, return to a ballistic lunar capture (~625 m/s LOI). The simple two-impulse
+transfer bottoms at ~3,947 m/s (Stage 9 probe), so this needs the exterior route seeded by the
+Sun-Earth manifolds (Stage 7 tooling) + full-ephemeris collocation. Match the paper's BCs.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
+**GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
+exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it.
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
 STM vs finite-diff max err=3.7e-6; Lagrange points match published values to ~5e-11
@@ -618,6 +622,17 @@ so the Stage-7 independent cross-checks (spiceypy/jplephem 6 mm; DOP853/Radau 0.
 cross-validation and the GMAT script is exported (docs/examples/). Number reported, not fitted.
 Figure: ephemeris_transfer.png. Run: `PYTHONPATH=src python -m ariadne.validate.stage8`.
 
+**Stage 9 results (LITERAL NASA GMAT cross-validation — G10 closed for real):** GMAT R2026a is
+installed locally (tools/gmat-R2026a, git-ignored) and GmatConsole runs our exported scripts
+headless. An identical trans-lunar state was propagated 3.0 days in BOTH Ariadne and GMAT
+(point masses Earth+Sun+Luna, RK89): **position agreement 149 m, velocity 0.89 mm/s.** Ariadne's
+propagator is now validated against the industry-standard tool itself. `io/gmat_export.py` writes
+the script + ReportFile and `run_with_gmat()` runs GMAT and parses the result; validate/stage9.py
++ test_gmat.py (skips if GMAT absent). HONEST on exact 3,925: the two-impulse ephemeris transfer
+bottoms at ~3,947 m/s and worsens with TOF (v_inf rises) — the exact low-energy optimum needs a
+multi-week Sun-assisted WSB EXTERIOR trajectory (ballistic capture, ~625 m/s LOI), Stage 10.
+Run: `PYTHONPATH=src python -m ariadne.validate.stage9`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -626,6 +641,12 @@ Figure: ephemeris_transfer.png. Run: `PYTHONPATH=src python -m ariadne.validate.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.9` — Stage 9 (literal NASA GMAT cross-validation) complete. Installed GMAT
+  R2026a locally (tools/, git-ignored); enhanced io/gmat_export.py (ReportFile + locate_gmat +
+  run_with_gmat headless runner + report parser); validate/stage9.py + test_gmat.py (skip if
+  absent). G10 LITERAL: Ariadne vs GMAT trans-lunar propagation agree to 149 m / 0.89 mm/s.
+  Stage 9 probe: two-impulse ephemeris transfer bottoms ~3,947 m/s (worsens with TOF) -> exact
+  3,925 needs a WSB exterior route (Stage 10).
 - 2026-05-28 `v0.8` — Stage 8 (full DE440 ephemeris transfer) complete. Added
   transfers/ephemeris_transfer.py (Lambert seed + ephemeris differential correction targeting
   the real Moon to ~50 m; TLI/v_inf/LOI; TOF optimization), validate/stage8.py,
