@@ -503,6 +503,10 @@ these add depth where real value remained.
   universal-variable Kepler + symplectic Wisdom-Holman (democratic heliocentric); energy bounded +
   2nd-order, DE440 cross-check 5.7e-4/century; real eTNOs diverge 0.7-64 AU/100 kyr with vs without
   Planet 9 -- the secular-accumulation proof. *DoD:* **G30a/b/c/d**.
+- **Stage 31 — Secular/Gyr frontier + 427x acceleration** *(done)*: numba-JIT exact map (427x);
+  doubly-averaged Gauss-ring secular integrator (reaches Gyr), validated vs analytic Laplace-Lagrange
+  (ratio 1.0000) AND the exact integrator (14%/4% on the real eTNOs). Honest: fixed-ring P9 disperses,
+  not confines (averaging removes resonances). *DoD:* **G31a/b/c/d**.
 
 ---
 
@@ -587,16 +591,19 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 30 — Long-term symplectic dynamics + the secular Planet 9 problem
-**COMPLETE**. Built the genuine long-term tool the project was missing (the SWIFT/MERCURY/REBOUND
-method): a machine-precision universal-variable Kepler propagator + a 2nd-order symplectic Wisdom-Holman
-map in democratic-heliocentric coordinates. Validated to the gold standard -- energy BOUNDED (dE=1.1e-5,
-no secular drift) and 2nd-order (dt^2 ratio 0.243), angular momentum to 2.6e-13, and it reproduces JPL
-DE440 to 5.7e-4 over a century. Applied to the REAL clustered eTNOs, it shows the with/without-Planet-9
-trajectories DIVERGE 0.7-64 AU over 100 kyr from a ~1e-13 km/s^2 snapshot residual -- the quantitative
-proof of why a secular baseline sees what a snapshot cannot. 126 tests pass (8 new).
-HONEST: standard Newtonian gravity, no new physics, NO Planet 9 claim -- the full clustering evolution
-is Gyr-scale and we measure the 100-kyr secular rates, not a 4-Gyr origin story.
+**Current stage:** Stage 31 — Secular/Gyr frontier + 427x acceleration
+**COMPLETE**. Removed the two walls Stage 30 left: (1) `secular_fast.py` -- a numba-JIT of the exact
+symplectic map, **427x faster** (1.5k -> 640k steps/s), faithful to 1.3e-11, so 10-100 Myr is reachable
+EXACTLY; (2) `secular_avg.py` -- a doubly-averaged Gauss-ring secular integrator that freezes the
+semi-major axes (averaging out the fast orbital phases) so a 1-Myr step is stable, reaching Gyr in
+minutes. The averaged model is validated TWO independent ways: da/dt -> 1e-14 (the theorem) + analytic
+Laplace-Lagrange ratio 1.0000 (near-circular), AND its dvarpi/dt + di/dt match the EXACT integrator to
+14%/4% across all 6 real high-e/i eTNOs. Gyr science (honest): a fixed-ring Planet 9 in the secular
+model DISPERSES the eTNO perihelia (R 0.80->0.50), it does NOT confine them -- because orbit-averaging
+removes the mean-motion resonances central to real P9 shepherding (the resonant mechanism needs the
+exact integrator at scale -- the GPU frontier). Stage 30's mixed-sign finite-difference dvarpi rates
+were short-period-contaminated; Stage 31's cross-validated rates supersede them. 133 tests pass.
+HONEST: standard Newtonian gravity, no new physics, NO Planet 9 claim.
 **Next action:** none required. HONEST bottom line: a complete, validated, open engine spanning
 CR3BP -> ephemeris -> GMAT -> search/discovery -> interplanetary -> a principled coherence field ->
 a forward+inverse hidden-mass localizer -> a real-data catalog bridge -> a long-term symplectic secular
@@ -1125,6 +1132,15 @@ heliocentric coordinates** (Duncan, Levison & Lee 1998). Standard Newtonian grav
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.31` — Stage 31 (secular/Gyr frontier + 427x acceleration) complete. Added
+  dynamics/secular_fast.py (numba-JIT of the exact symplectic map: 1.5k->640k steps/s = 427x, faithful
+  to 1.3e-11; integrate_fast + integrate_fast_elements) and dynamics/secular_avg.py (doubly-averaged
+  Gauss-ring secular integrator: universal Kepler-eq sampler, ring-averaged perturbing accel with the
+  indirect term, orbit-averaged Gauss planetary equations; reaches Gyr). validate/stage31.py
+  (G31a numba 427x + faithful; G31b da/dt=1.3e-14 + Laplace-Lagrange ratio 1.0000; G31c secular-vs-exact
+  14%/4% across the 6 real eTNOs; G31d 1-Gyr with/without P9). tests/test_secular_avg.py (7 tests).
+  Honest Gyr finding: a fixed-ring P9 DISPERSES rather than confines (orbit-averaging removes the
+  mean-motion resonances central to shepherding) -> motivates the GPU resonance-preserving frontier.
 - 2026-05-29 `v0.30` — Stage 30 (long-term symplectic dynamics + secular Planet 9) complete. Added
   dynamics/secular.py: universal-variable (Stumpff) Kepler propagator (machine-precision to e~0.93)
   + 2nd-order symplectic Wisdom-Holman map in democratic-heliocentric coordinates (DLL98), elements
