@@ -430,8 +430,12 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
   *DoD:* **G_coh**.
 - **Stage 12 — Coherence-weighted optimizer** *(done)*: Δv-vs-robustness Pareto front + knee
   (coherence-guided route chooser, standard gravity). *DoD:* **G_opt**.
-- **Stage 13+ (optional)** — discovery engine on an under-mapped system (novelty, long shot);
-  or consolidation into a polished open release + white-paper. Earth-Moon is now covered.
+- **Stage 13 — Engine generalization + low-thrust regime** *(done)*: transfers/jovian.py ports the
+  CR3BP/manifold engine to the four Galilean moons with only constants (sensible L-points, periodic
+  Lyapunov orbits, moon-tour Delta-v); dynamics/low_thrust.py adds continuous-acceleration dynamics
+  (zero-thrust = CR3BP; tangential dC/dt = -2a|v| -> spiral). *DoD:* **G_jov, G_lt**.
+- **Stage 14+ (optional)** — discovery engine mining novel Galilean tour legs (novelty, long shot);
+  or consolidation into a polished open release + white-paper. Earth-Moon + Jupiter now covered.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -523,13 +527,12 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 12 — Coherence-WEIGHTED optimizer **COMPLETE** (gate G_opt: resolves the
-Δv-vs-robustness Pareto front and its knee — the 4-day transfer is 3.6x more robust than the
-cheapest WSB route for only +71 m/s). This realizes the "coherence-guided Earth-Moon optimizer."
-Next: the user's call — discovery engine (Jovian/Saturnian, long shot at novelty), or consolidate.
-**Next action:** (a) point the discovery engine at an under-mapped multi-body system, or
-(b) consolidate into a polished open release + white-paper. The Earth-Moon problem (incl. the
-coherence/robustness lens) is now thoroughly covered.
+**Current stage:** Stage 13 — Engine generalization (Jovian moons) + low-thrust regime **COMPLETE**
+(gates G_jov, G_lt). The engine generalizes to a new system with only constants; low-thrust
+dynamics validated. Next: consolidation/white-paper, or deeper Jovian route discovery.
+**Next action:** (a) deepen the Jovian discovery (manifold connections / gravity-assist tours),
+or (b) consolidate into a polished open release + white-paper. Earth-Moon is thoroughly covered;
+the engine now spans multiple systems and both propulsion regimes.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -692,6 +695,27 @@ data-limited. Honest: this is the user's separate cosmology theory; Ariadne's dy
 standard-gravity regardless.
 Run: `PYTHONPATH=src python -m ariadne.validate.stage10`.
 
+**Stage 13 results (engine generalization + low-thrust regime):**
+- **Galilean moons (`transfers/jovian.py`):** the CR3BP/manifold engine generalizes to the four
+  Jupiter systems (Io/Europa/Ganymede/Callisto) with ONLY constant changes -- sensible
+  Lagrange-point distances (Io L1 = 10,469 km .. Callisto L1 = 49,691 km), periodic Lyapunov
+  orbits for all four (half-period residual < 1e-9), periods 0.84-7.90 d. Moon-tour Hohmann
+  baseline Io->Callisto = 8,990 m/s (the manifold/gravity-assist "Petit Grand Tour" reduces this).
+  Honest: the Galilean tour is known (Koon-Lo-Marsden-Ross); this proves our engine ports to a
+  new system and sets up route discovery -- not a new route.
+- **Low-thrust (`dynamics/low_thrust.py`):** continuous-acceleration CR3BP, a genuine regime
+  change. Validated: zero thrust = CR3BP (Jacobi conserved to 2.7e-10); tangential thrust gives
+  dC/dt = -2 a_T |v| to 2e-5 rel err (the continuous-thrust power theorem) -> a spiral
+  (`figures/low_thrust_spiral.png`). This is where "ride the dynamical gradients" has the most
+  teeth. Run: `PYTHONPATH=src python -m ariadne.validate.stage13` (gates G_jov, G_lt -> ALL PASS).
+
+**More cosmology side-quests (separate project):** ran the BTFR on the SPARC master table
+(slope 3.41; slope-4-forced a0 = 1.52e-10 ~ 1.46x g_A) and a cross-scale falsification test --
+the SAME g_A's BE-function boost at clusters is 3.55 vs observed 4.06 (within 14%, BEATS
+MOND-simple's ~2x cluster failure). So one g_A is roughly consistent galaxies<->clusters to tens
+of percent (caveats: galaxy scale wants ~1.4x g_A, clusters ~14% short, sensitive to M/L and
+r500). Artifacts: `independent_btfr_test.py`, `independent_crossscale_test.py`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -700,6 +724,14 @@ Run: `PYTHONPATH=src python -m ariadne.validate.stage10`.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.13` — Stage 13 (engine generalization + low-thrust regime) complete. Added
+  transfers/jovian.py (Galilean-moon libration + moon-tour Delta-v), dynamics/low_thrust.py
+  (continuous-acceleration CR3BP + energy-rate theorem), validate/stage13.py, test_stage13.py
+  (4 tests), viz.figure_low_thrust_spiral. Gates G_jov + G_lt PASS: engine ports to Jupiter with
+  only constants (Io..Callisto L1 10,469..49,691 km, periodic to <1e-9); low-thrust validated
+  (zero-thrust = CR3BP to 2.7e-10, dC/dt = -2a|v| to 2e-5). (Separately, cosmology project: BTFR
+  slope 3.41 / slope-4 a0 ~ 1.46x g_A, and a cross-scale cluster test 3.55 vs 4.06 within 14%,
+  beating MOND-simple. Cosmology lives in Coherence_Energy_Labs, not here.)
 - 2026-05-28 `v0.12` — Stage 12 (coherence-weighted optimizer) complete. Added
   transfers/coherence_optimizer.py (Δv-vs-robustness Pareto front, knee, weighted optimum),
   validate/stage12.py, test_coherence_optimizer.py, knee marked on coherence_frontier.png.

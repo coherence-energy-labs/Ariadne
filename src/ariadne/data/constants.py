@@ -64,3 +64,11 @@ SUN_EARTH = make_system("Sun-Earth", GM_SUN, GM_EARTH, AU_KM, "Sun", "Earth")
 
 # Sun-(Earth+Moon barycenter): the physically consistent Sun-Earth system.
 SUN_EMB = make_system("Sun-EMB", GM_SUN, GM_EARTH + GM_MOON, AU_KM, "Sun", "EMB")
+
+# Jovian (Galilean) moon systems: GM (km^3/s^2) and mean orbital radius (km).
+GM_IO, GM_EUROPA, GM_GANYMEDE, GM_CALLISTO = 5959.916, 3202.739, 9887.834, 7179.289
+JUPITER_IO = make_system("Jupiter-Io", GM_JUPITER, GM_IO, 421800.0, "Jupiter", "Io")
+JUPITER_EUROPA = make_system("Jupiter-Europa", GM_JUPITER, GM_EUROPA, 671100.0, "Jupiter", "Europa")
+JUPITER_GANYMEDE = make_system("Jupiter-Ganymede", GM_JUPITER, GM_GANYMEDE, 1070400.0, "Jupiter", "Ganymede")
+JUPITER_CALLISTO = make_system("Jupiter-Callisto", GM_JUPITER, GM_CALLISTO, 1882700.0, "Jupiter", "Callisto")
+GALILEAN = [JUPITER_IO, JUPITER_EUROPA, JUPITER_GANYMEDE, JUPITER_CALLISTO]

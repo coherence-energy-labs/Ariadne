@@ -120,8 +120,21 @@ than the cheapest route for only +71 m/s**. Raising the robustness weight sweeps
 the cheap-but-fragile WSB route to the fast-but-robust one. That's a smoother, lower-correction
 route chooser on standard gravity.
 
+Finally, the engine **generalizes**: pointed at Jupiter it reproduces the libration structure of
+all four **Galilean moons** (Io→Callisto) with only a change of constants — sensible Lagrange-point
+distances (Io L1 = 10,469 km), periodic Lyapunov orbits (to <1e-9), and a moon-to-moon tour Δv
+baseline — the setting of the multi-moon "Petit Grand Tour." And it spans a second propulsion
+regime: a **low-thrust** (continuous-acceleration) CR3BP that conserves the Jacobi constant at
+zero thrust and, under tangential thrust, raises the energy at exactly the predicted rate
+`dC/dt = -2·a_T·|v|` — a validated spiral-out, where "ride the dynamical gradients" has the most teeth.
+
+![Low-thrust spiral](docs/figures/low_thrust_spiral.png)
+
+> Honest scope: the Galilean tour is known (Koon–Lo–Marsden–Ross); this proves the engine ports to
+> a new system and sets up route discovery — not a new route. Standard gravity throughout.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage11` (and `stage1`–`stage10`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage13` (and `stage1`–`stage12`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

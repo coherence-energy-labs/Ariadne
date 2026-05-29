@@ -457,6 +457,34 @@ def figure_coherence_frontier():
     return path
 
 
+def figure_low_thrust_spiral(mu=None):
+    from ..data.constants import EARTH_MOON
+    from ..dynamics.low_thrust import propagate_low_thrust
+    mu = EARTH_MOON.mu if mu is None else mu
+    # start on a bound orbit in the Earth realm; continuous tangential thrust -> spiral out
+    s0 = np.array([-mu + 0.05, 0.0, 0.0, 0.0, 4.2, 0.0])
+    coast = propagate_low_thrust(s0, (0.0, 12.0), mu, 0.0, t_eval=np.linspace(0, 12, 3000))
+    burn = propagate_low_thrust(s0, (0.0, 12.0), mu, 7e-3, "tangential",
+                                t_eval=np.linspace(0, 12, 3000))
+    fig, ax = plt.subplots(figsize=(7.6, 7.0))
+    ax.plot(coast.y[0], coast.y[1], color="0.75", lw=0.8, label="ballistic (no thrust)")
+    ax.plot(burn.y[0], burn.y[1], color="tab:red", lw=0.7, label="low-thrust spiral")
+    ax.plot(-mu, 0, "o", color="tab:blue", ms=11, label="Earth")
+    lim = float(np.max(np.abs(burn.y[:2]))) * 1.1
+    ax.set_xlim(-lim, lim); ax.set_ylim(-lim, lim)
+    ax.set_aspect("equal")
+    ax.set_xlabel("x (rotating, nondim)"); ax.set_ylabel("y")
+    ax.set_title("Low-thrust regime (CR3BP): continuous tangential thrust\n"
+                 "raises energy and spirals outward (vs ballistic coast)")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "low_thrust_spiral.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
@@ -478,6 +506,8 @@ def main():
     print("  ->", figure_wsb_transfer())
     print("Rendering Delta-v vs coherence frontier ...")
     print("  ->", figure_coherence_frontier())
+    print("Rendering low-thrust spiral ...")
+    print("  ->", figure_low_thrust_spiral())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
