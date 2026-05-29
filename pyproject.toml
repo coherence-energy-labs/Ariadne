@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ariadne-astro"
+version = "0.24.0"
+description = "Low-energy trajectory design & discovery of the solar system's natural transport network"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ariadne project contributors" }]
+keywords = ["astrodynamics", "CR3BP", "trajectory-optimization", "low-energy-transfer",
+            "invariant-manifolds", "interplanetary", "gravity-assist", "ephemeris"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "matplotlib>=3.8",
+    "spiceypy>=6.0",
+    "h5py>=3.10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+crosscheck = ["jplephem>=2.21"]
+
+[project.urls]
+Homepage = "https://github.com/Jphilbrick10/Ariadne"
+"Master plan" = "https://github.com/Jphilbrick10/Ariadne/blob/master/MASTER_PLAN.md"
+"White paper" = "https://github.com/Jphilbrick10/Ariadne/blob/master/docs/WHITE_PAPER.md"
+
+[project.scripts]
+ariadne-atlas = "ariadne.atlas.release:main"
+ariadne-figures = "ariadne.viz.figures:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

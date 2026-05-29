@@ -483,7 +483,9 @@ these add depth where real value remained.
   optimizer balancing energy/time/robustness with coherence as the dial; picks a middle-ground
   Earth->Mars route (186 d/8,085 m/s), weights steer it; Edelbaum low-thrust estimate included.
   *DoD:* **G23a/b/c**.
-- **Stage 24 — Packaging + open-source** *(planned)*: pyproject, CI, pip-installable, docs.
+- **Stage 24 — Packaging + open-source** *(done)*: pyproject.toml (src-layout, deps, entry points),
+  MIT LICENSE, GitHub Actions CI (fast tests on 3.11/3.12), pip-installable, wheel builds.
+  *DoD:* **G_pkg**. **Enhancement arc (Stages 18-24) closed.**
 
 ---
 
@@ -568,13 +570,14 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 23 — Unified multi-objective grand optimizer **COMPLETE** (gates G23a/b/c).
-One optimizer now balances energy, time, and robustness for Earth->Mars with coherence as the dial:
-the cheapest route is also the most robust, the fastest is priciest + fragile, and the coherence
-balancer picks a genuine middle ground (186 d / 8,085 m/s) that the weights steer. This is the
-synthesis the user asked for -- "the most optimal route in time and energy, or anything else."
-**Next action:** Stage 24 — package + open-source (pyproject, CI, pip-installable, docs). That is
-the final planned stage.
+**Current stage:** Stage 24 — Packaging + open-source **COMPLETE** (gate G_pkg). Ariadne is now a
+real installable package (pyproject, MIT license, GitHub Actions CI, `pip install -e .`, wheel
+builds). **The user-requested enhancement arc (Stages 18-24) is closed**, on top of the original
+roadmap (Stages 0-17). The engine now spans CR3BP -> ephemeris -> GMAT, manifolds + transport-graph
+search + discovery, NRHO, gravity-assist tours, and a unified epoch-swept multi-objective
+interplanetary optimizer -- all validated, all with PNG + GMAT visual output.
+**Next action:** none required -- both the original roadmap and the enhancement arc are complete.
+Optional: a real low-thrust optimal-control solver, a 3D-Poincare halo transport graph, or PyPI release.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -951,6 +954,15 @@ principle as the dial. For Earth->Mars (2026):
   Mars-capture spirals + inclination; low-thrust's real edge is high Isp / low propellant, not lower
   Delta-v). Figure: grand_tradeoff.png. Run: `... -m ariadne.validate.stage23`.
 
+**Stage 24 results (packaging + open-source):** Ariadne is now a real, installable, open package.
+Added `pyproject.toml` (setuptools, src layout, runtime deps numpy/scipy/matplotlib/spiceypy/h5py,
+`[dev]`/`[crosscheck]` extras, console entry points `ariadne-atlas` + `ariadne-figures`), an MIT
+`LICENSE`, and `.github/workflows/ci.yml` (GitHub Actions: install + fast tests `-m "not slow"` +
+import smoke on Python 3.11/3.12, with SPICE-kernel caching). `pip install -e .` works; a wheel
+builds (`ariadne_astro-0.24.0-py3-none-any.whl`). G_pkg PASS: pyproject version matches
+`ariadne.__version__` (0.24.0), license + CI present, all 8 key subsystems import.
+Run: `PYTHONPATH=src python -m ariadne.validate.stage24`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -959,6 +971,12 @@ principle as the dial. For Earth->Mars (2026):
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.24` — Stage 24 (packaging + open-source) complete; the user-requested enhancement
+  arc (Stages 18-24) is closed. Added pyproject.toml (setuptools src-layout, runtime deps, console
+  entry points ariadne-atlas/ariadne-figures), MIT LICENSE, .github/workflows/ci.yml (fast-test CI
+  on 3.11/3.12 + kernel cache), validate/stage24.py, test_packaging.py (4 tests); bumped
+  __version__ to 0.24.0. G_pkg PASS: version consistent, license + CI present, all subsystems
+  import, `pip install -e .` works and a wheel builds.
 - 2026-05-29 `v0.23` — Stage 23 (unified multi-objective grand optimizer) complete. Added
   interplanetary/grand.py (launch-window robustness axis + coherence-balanced route selection over
   energy/time/robustness with steerable weights + an Edelbaum low-thrust estimate), validate/stage23.py,

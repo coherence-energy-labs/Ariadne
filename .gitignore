@@ -25,6 +25,8 @@ venv/
 *.egg-info/
 .pytest_cache/
 .ipynb_checkpoints/
+build/
+dist/
 
 # OS / editor
 .DS_Store

@@ -191,20 +191,42 @@ is the capstone paper. The reference-route table is honestly tagged: only the di
 transfer is labelled *GMAT-validated* (149 m), and Earth→Moon transfers are kept in a separate class
 from libration-network reconfigurations so their very different Δv scales are never conflated.
 
-Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage17` (and `stage1`–`stage16`). Build the release:
-`PYTHONPATH=src python -m ariadne.atlas.release`. SPICE kernels download on first use (DE440s ~33 MB).
+## Interplanetary: the grand multi-objective optimizer
+
+Beyond the Earth–Moon system, Ariadne frees the variable that matters most for real missions — the
+**launch epoch** — and optimizes whole interplanetary routes. A global (differential-evolution)
+search over launch date and time of flight reproduces the real **Earth→Mars launch windows** (the
+~26-month cadence) and the porkchop trade space; a **gravity-assist** chain optimizer cuts the
+launch C₃ to Jupiter from the direct 85 km²/s² to a **Galileo-class VEEGA at ~17** (4.6×); and a
+**unified optimizer** balances *time, energy, and robustness* with coherence as the dial — picking a
+genuine middle-ground Mars route (≈186 d / 8.1 km/s) that the weights steer toward cheaper-and-robust
+or faster-and-pricier.
+
+![Earth→Mars porkchop](docs/figures/porkchop_earth_mars.png)
+![Grand time/energy/robustness trade space](docs/figures/grand_tradeoff.png)
+
+Every route renders as a **PNG flight path** (`docs/figures/mars_transfer.png`,
+`veega_jupiter.png`) and exports as a **Sun-centered GMAT script** (`ariadne.interplanetary.gmat_helio`)
+you can drop straight into GMAT.
+
+> Honest scope: patched-conic, standard gravity. The gravity-assist solution is feasible but not
+> fully ballistic; the low-thrust figure is a heliocentric Edelbaum estimate (low-thrust's real edge
+> is high specific impulse, not lower Δv). None of this is new physics — it's an open, validated,
+> epoch-swept multi-objective router on real ephemeris.
 
 ## What this is (and is not)
 - It **is**: an open, high-fidelity, validated engine + atlas for low-energy spaceflight,
   built on standard gravity and real ephemerides, cross-validated against NASA GMAT.
 - It **is not**: new physics. The dynamics are standard n-body gravity. (See §1.4 / §13.)
 
-## Quick setup (once code exists)
+## Install
 ```bash
 python -m venv .venv && . .venv/Scripts/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e ".[dev]"        # editable install + test deps (or: pip install -r requirements.txt)
+pytest -m "not slow" -q        # fast tests; drop the marker to run the full (slow) suite
 ```
+Console commands after install: `ariadne-atlas` (build the open release bundle) and
+`ariadne-figures` (regenerate all figures). CI runs the fast suite on Python 3.11/3.12.
 
 ## Layout
 See `MASTER_PLAN.md` §8. Source in `src/ariadne/`, tests in `tests/`, generated atlas in
