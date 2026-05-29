@@ -671,6 +671,57 @@ def figure_planet9():
     return path
 
 
+def figure_secular(span_yr=100_000.0, dt_yr=1.0):
+    """Stage 30: symplectic energy conservation + the secular with/without-Planet-9 divergence."""
+    from ..dynamics import secular as S
+    from ..fields.hidden_mass import CLUSTERED_ETNOS, PLANET9, GM_EARTH
+
+    # Panel A: energy conservation, bounded + 2nd-order (massive-only, short)
+    curves = {}
+    for d in (1.0, 0.5):
+        sysm = S.build_system("2026-01-01T00:00:00")
+        n = int(8000 / d)
+        out = S.integrate(sysm, d * S.YEAR_S, n, record_every=max(1, n // 200))
+        en = out["energy"]
+        curves[d] = (out["times_yr"], np.abs(en - en[0]) / abs(en[0]))
+
+    # Panel B: secular divergence of the real eTNOs, with vs without P9
+    def run(with_p9):
+        sys = S.build_system("2026-01-01T00:00:00")
+        if with_p9:
+            q, v = S.elements_to_state(PLANET9["a_au"], PLANET9["e"], PLANET9["i"],
+                                       PLANET9["Omega"], PLANET9["omega"], 180.0)
+            sys = S.add_massive(sys, "P9", PLANET9["m_earth"] * GM_EARTH, q, v)
+        sys = S.add_test_particles(sys, [S.elements_to_state(o["a_au"], o["e"], o["i"],
+                                   o["Omega"], o["omega"], 180.0) for o in CLUSTERED_ETNOS])
+        n = int(span_yr / dt_yr)
+        return S.integrate(sys, dt_yr * S.YEAR_S, n, record_every=max(1, n // 60))
+    wo, w = run(False), run(True)
+    t = wo["times_yr"] / 1000.0
+    div = np.linalg.norm(w["q_test"] - wo["q_test"], axis=2) / S.AU_KM
+
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    for d, (tt, dE) in curves.items():
+        axA.semilogy(tt / 1000.0, np.maximum(dE, 1e-16), lw=1.3, label=f"dt = {d} yr")
+    axA.set_xlabel("time (kyr)"); axA.set_ylabel("|$\\Delta E / E$|")
+    axA.set_title("Symplectic energy conservation (Wisdom-Holman)\n"
+                  "bounded, no secular drift; halving dt drops error ~4x (2nd order)")
+    axA.legend(fontsize=9); axA.grid(True, which="both", alpha=0.2)
+
+    for k, o in enumerate(CLUSTERED_ETNOS):
+        axB.plot(t, div[:, k], lw=1.2, label=o["name"])
+    axB.set_xlabel("time (kyr)"); axB.set_ylabel("with-P9 vs without-P9 divergence (AU)")
+    axB.set_title("Secular accumulation: a snapshot-invisible perturbation grows\n"
+                  f"real clustered eTNOs, {PLANET9['m_earth']} M$_\\oplus$ Planet 9 over {span_yr/1000:.0f} kyr")
+    axB.legend(fontsize=8, ncol=2); axB.grid(True, alpha=0.2)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "secular_planet9.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_coherence_field():
     """The coherence (FLI) field of the Earth-Moon rotating frame with the manifold tubes overlaid."""
     from ..data.constants import EARTH_MOON
@@ -1059,6 +1110,8 @@ def main():
     print("  ->", figure_grand_tradeoff())
     print("Rendering coherence (FLI) field + manifold tubes ...")
     print("  ->", figure_coherence_field())
+    print("Rendering secular symplectic energy + Planet 9 divergence ...")
+    print("  ->", figure_secular())
     print("Rendering Planet 9 residual at the real clustered eTNOs ...")
     print("  ->", figure_planet9())
     print("Rendering hidden-mass detectability map (any body) ...")

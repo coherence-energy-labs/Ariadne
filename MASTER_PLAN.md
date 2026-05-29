@@ -487,6 +487,23 @@ these add depth where real value remained.
   MIT LICENSE, GitHub Actions CI (fast tests on 3.11/3.12), pip-installable, wheel builds.
   *DoD:* **G_pkg**. **Enhancement arc (Stages 18-24) closed.**
 
+**Discovery / coherence / secular arc (user-requested, Stages 25-30)** -- full results in §16:
+- **Stage 25 — Coherence (FLI) atlas** *(done, later partly OVERTURNED by Stage 26)*: FLI field +
+  manifold-tube overlay; the "coherence skeleton" claim was refuted by Stage 26's fair test.
+- **Stage 26 — Solar-system coherence atlas + self-correction** *(done)*: region-matched statistics
+  refute the Stage-25 skeleton as a sampling artifact (the right honesty move). *DoD:* **G26a/b**.
+- **Stage 27 — Principled coherence field + residual hidden-mass detector** *(done)*: tau_c field
+  reduces to Newtonian gravity to |Phi|/c^2 (~1e-8, Newton recovery); trajectory-residual detector vs
+  the real eTNOs + Kuiper floor. *DoD:* **G27a/b/c**.
+- **Stage 28 — Inverse hidden-mass localizer + two-tier pipeline** *(done)*: weighted-LSQ inverse
+  solver recovers an injected body's (mass, position); confidence region hones with N. *DoD:* **G28a/b/c**.
+- **Stage 29 — Real-data bridge to Signalbook** *(done)*: indexes 4.4M real celestial sources, cross-
+  matches a localization to 703 catalogued sources. Honest: confirmation handoff, not new-body detection.
+- **Stage 30 — Long-term symplectic dynamics + secular Planet 9** *(done)*: machine-precision
+  universal-variable Kepler + symplectic Wisdom-Holman (democratic heliocentric); energy bounded +
+  2nd-order, DE440 cross-check 5.7e-4/century; real eTNOs diverge 0.7-64 AU/100 kyr with vs without
+  Planet 9 -- the secular-accumulation proof. *DoD:* **G30a/b/c/d**.
+
 ---
 
 ## 11. Compute & performance plan
@@ -570,21 +587,22 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 29 — Real-data bridge: Ariadne localization -> Signalbook catalog cross-match
-**COMPLETE**. Crossed from simulation into REAL public observational data. `discovery/skybridge.py`
-indexes 4,414,657 real celestial sources out of the 47M-record Signalbook atlas (a gap fixed: their
-sky positions lived in payload_json, not the indexed lat/lon columns), then cross-matches an Ariadne
-Stage-28 localization sky-box (ecliptic -> equatorial) to **703 real catalogued sources in < 1 s**
-(IceCube/SDSS/Chandra/Fermi); a galactic-centre cone returns 95% X-ray (a real dense-field check).
-Contributed the index back to Signalbook (`discovery/celestial_index.py`, commit b72aeaf). 118 tests
-pass. HONEST: this cross-matches against KNOWN sources (the confirmation handoff), NOT new-moving-body
-detection (which needs multi-epoch imaging).
+**Current stage:** Stage 30 — Long-term symplectic dynamics + the secular Planet 9 problem
+**COMPLETE**. Built the genuine long-term tool the project was missing (the SWIFT/MERCURY/REBOUND
+method): a machine-precision universal-variable Kepler propagator + a 2nd-order symplectic Wisdom-Holman
+map in democratic-heliocentric coordinates. Validated to the gold standard -- energy BOUNDED (dE=1.1e-5,
+no secular drift) and 2nd-order (dt^2 ratio 0.243), angular momentum to 2.6e-13, and it reproduces JPL
+DE440 to 5.7e-4 over a century. Applied to the REAL clustered eTNOs, it shows the with/without-Planet-9
+trajectories DIVERGE 0.7-64 AU over 100 kyr from a ~1e-13 km/s^2 snapshot residual -- the quantitative
+proof of why a secular baseline sees what a snapshot cannot. 126 tests pass (8 new).
+HONEST: standard Newtonian gravity, no new physics, NO Planet 9 claim -- the full clustering evolution
+is Gyr-scale and we measure the 100-kyr secular rates, not a 4-Gyr origin story.
 **Next action:** none required. HONEST bottom line: a complete, validated, open engine spanning
 CR3BP -> ephemeris -> GMAT -> search/discovery -> interplanetary -> a principled coherence field ->
-a forward+inverse hidden-mass localizer -> a real-data catalog bridge, all on real data, firewall
-intact. No new physics, no body actually detected -- the outputs are confidence regions,
-floor/degeneracy-limited, GM-only. The one
-genuine path to a real hidden-body find is a long-term (secular, Myr) symplectic integrator + the
+a forward+inverse hidden-mass localizer -> a real-data catalog bridge -> a long-term symplectic secular
+integrator, all on real data, firewall intact. No new physics, no body actually detected -- the outputs
+are confidence regions and secular signatures, floor/degeneracy-limited, GM-only. The remaining
+genuine path to a real hidden-body find is extending the secular integrator to Myr-Gyr ensembles + the
 live eTNO/tracking catalog + statistical inference + the IR/optical confirmation -- a serious
 specialist effort, noted not overclaimed.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
@@ -1071,6 +1089,34 @@ neutrinos -- real public surveys).
   genuine simulation->real-data link: Ariadne says "look here", Signalbook searches 4.4M real sources
   there. Run: `PYTHONPATH=src python -m ariadne.validate.stage29`.
 
+**Stage 30 results (long-term SYMPLECTIC dynamics + the secular Planet 9 problem):** the project's
+real ceiling-raiser. Every prior stage works on short arcs (a snapshot residual); a genuine
+hidden-body search lives in the SECULAR regime, where a tiny perturbation ACCUMULATES over long
+baselines. `dynamics/secular.py` is the genuine long-term tool (the method SWIFT / MERCURY / REBOUND
+use): a universal-variable (Stumpff) Kepler propagator exact to machine precision for any eccentricity
+(the real eTNOs reach e ~ 0.93), and a 2nd-order symplectic **Wisdom-Holman map in democratic-
+heliocentric coordinates** (Duncan, Levison & Lee 1998). Standard Newtonian gravity throughout
+(firewall intact -- coherence never enters the dynamics).
+- **G30a (symplecticity, the correctness proof):** energy error is BOUNDED with no secular drift
+  (max |dE/E| = 1.14e-5 over 20 kyr at dt=1 yr) and falls as dt^2 (halving dt gives ratio **0.243**,
+  theory 0.25); angular momentum conserved to **2.6e-13**. A non-symplectic scheme (DOP853) would drift
+  over these spans -- this is the gold-standard proof the integrator is correct.
+- **G30b (validation against NASA's own ephemeris):** forward-integrating Sun + the 4 giant planets
+  from REAL DE440 initial conditions reproduces JPL's DE440 to **5.7e-4 (relative) over a century**.
+  The residual is honest and expected -- the model omits the inner planets, the asteroid belt and GR,
+  so it accumulates along-track phase; it is NOT machine-exact and we report exactly that.
+- **G30c (secular accumulation -- the headline):** the with-Planet-9 vs without-Planet-9 trajectories
+  of the REAL clustered eTNOs start identical (the instantaneous snapshot residual is ~1e-13 km/s^2,
+  effectively nothing) but DIVERGE to **0.7-64 AU over 100 kyr** (growth 6x-237x per object). This is
+  the quantitative answer to the user's question "why does a long baseline see what a snapshot cannot":
+  the difference accumulates. A snapshot is blind to it; 100 kyr of secular evolution makes it AU-scale.
+- **G30d (differential precession -- the real mechanism + honest limit):** the giant planets alone
+  precess the eTNO perihelia at DIFFERENT rates (-4.5 to +4.2 deg/Myr, spread 8.8 deg/Myr), so they
+  cannot by themselves preserve the observed apsidal clustering -- which is precisely the dynamical
+  puzzle the Planet 9 hypothesis addresses. HONEST: the full clustering evolution is a Gyr-scale
+  process beyond a 100-kyr run; we measure the secular RATES and their spread, NOT a 4-Gyr origin story,
+  and we do NOT claim to have proven Planet 9 exists. Run: `PYTHONPATH=src python -m ariadne.validate.stage30`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1079,6 +1125,15 @@ neutrinos -- real public surveys).
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.30` — Stage 30 (long-term symplectic dynamics + secular Planet 9) complete. Added
+  dynamics/secular.py: universal-variable (Stumpff) Kepler propagator (machine-precision to e~0.93)
+  + 2nd-order symplectic Wisdom-Holman map in democratic-heliocentric coordinates (DLL98), elements
+  <-> state, osculating-element extraction, and the perihelion-clustering statistics. validate/stage30.py
+  (G30a symplecticity dE=1.1e-5 bounded + dt^2 ratio 0.243 + L=2.6e-13; G30b DE440 cross-check 5.7e-4
+  over a century; G30c with/without-P9 eTNO divergence 0.7-64 AU over 100 kyr; G30d differential
+  precession -4.5..+4.2 deg/Myr). tests/test_secular.py (8 tests). viz figure_secular (energy + divergence).
+  The honest ceiling-raiser: turns a snapshot residual into an accumulating secular signal. No new physics,
+  no Planet 9 claim -- standard Newtonian gravity, a Gyr-scale problem measured over 100 kyr.
 - 2026-05-29 `v0.29` — Stage 29 (real-data bridge to Signalbook) complete. Added
   discovery/skybridge.py (build_celestial_index extracts ra/dec from Signalbook payload_json into an
   indexed celestial_sources table; query_sky cone search; ecliptic->equatorial; crossmatch_localization),
