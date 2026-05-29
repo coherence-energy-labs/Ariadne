@@ -38,6 +38,18 @@ def test_gradient_matches_finite_difference():
     assert np.max(np.abs(g - fd) / (np.abs(fd) + 1e-3)) < 1e-5
 
 
+def test_transfer_dv_is_valid_and_reasonable():
+    """A single Earth->Mars transfer near the known optimum: valid arrival + ~5-6 km/s."""
+    from ariadne.data.ephemeris import et, body_state
+    e0 = et("2026-01-01T00:00:00")
+    rE = body_state("EARTH", e0, "J2000", "SUN")
+    rM = body_state("MARS BARYCENTER", e0, "J2000", "SUN")
+    dv, miss, v1 = AD.transfer_dv(rE[:3], rE[3:], rM[:3], rM[3:],
+                                  300 * 86400.0, 315 * 86400.0, n_steps=300)
+    assert miss < 1.0                     # arrival enforced by the autodiff shooting
+    assert 5.0 <= dv <= 6.5               # known Earth->Mars heliocentric class
+
+
 def test_gauss_newton_shooting_hits_target():
     r1 = np.array([AU, 0.0, 0.0])
     th = math.radians(75.0)

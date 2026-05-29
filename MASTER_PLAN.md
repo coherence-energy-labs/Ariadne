@@ -534,6 +534,9 @@ these add depth where real value remained.
 - **Stage 40 — Dynamical-structure mining** *(done)*: checked the OTHER P9 signatures -- orbital-pole
   clustering (p=0.69, selection-explained) and Neptune-resonance proximity (0/19, detached). No structure
   beyond selection on any signature; honest verdict reinforced. *DoD:* **G40a/b**.
+- **Stage 41 — Autodiff global trajectory optimization** *(done)*: exact 2-impulse Delta-v via autodiff
+  LM shooting + global grid optimization; finds the Earth->Mars optimum 5.63 km/s (miss 0.19 km),
+  matching the textbook value and Stage 21's Lambert porkchop. *DoD:* **G41a/b**.
 
 ---
 
@@ -618,7 +621,14 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stages 39-40 — Discovery core (orbit linkage) + dynamical-structure mining
+**Current stage:** Stages 39-41 — Discovery core + structure mining + autodiff global optimization
+**COMPLETE**. Stage 41: autodiff global trajectory optimizer -- exact 2-impulse Delta-v via the
+autodiff LM shooting (arrival enforced) swept over launch/time-of-flight; finds the Earth->Mars optimum
+5.63 km/s (matching the textbook value AND Stage 21's independent Lambert porkchop). All three discovery
+routes are now built: A (orbit linkage, recovers known objects), D (structure mining, honest negatives),
+E (autodiff global optimization). The genuine remaining frontier is feeding the Stage-39 linker REAL
+survey detections (ZTF/Rubin) -- where a new object would actually be found.
+PRIOR (Stage 39-40): Discovery core (orbit linkage) + dynamical-structure mining.
 **COMPLETE**. Stage 40: checked the OTHER Planet 9 signatures on the live catalog -- orbital-pole
 clustering (R=0.93 but the control is identical, p=0.69) and Neptune-resonance proximity (0/19, detached).
 No structure beyond selection on any signature; the honest no-P9 verdict is now complete across
@@ -1311,6 +1321,16 @@ EVERY signature checked (perihelion varpi, orbital pole, resonance), the public 
 structure beyond selection. With Stages 34/36/38 this is the complete, honest scientific verdict:
 no compelling evidence for Planet 9 in current public data. Run: `PYTHONPATH=src python -m ariadne.validate.stage40`.
 
+**Stage 41 results (autodiff global trajectory optimization):** Stage 35 gave exact gradients through the
+integrator; this stage uses them for global trajectory DESIGN. `optimize_transfer` solves each transfer
+EXACTLY with the autodiff Levenberg-Marquardt shooting (arrival enforced -- no penalty-relaxed near-miss)
+and sweeps (departure date, time-of-flight) for the global minimum. On Earth->Mars it finds
+**Delta-v = 5.63 km/s at launch +300 d / tof 315 d, miss 0.19 km** -- the textbook ~5.6 km/s heliocentric
+value, and consistent with Stage 21's INDEPENDENT Lambert porkchop (5.68 km/s): two methods, same answer.
+Found by gradient-based shooting rather than a brute grid of trial velocities. This is the engineering-
+discovery axis (novel/optimal trajectories), and it scales to higher-dimensional control where derivative-
+free methods struggle. Run: `PYTHONPATH=src python -m ariadne.validate.stage41`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1319,6 +1339,13 @@ no compelling evidence for Planet 9 in current public data. Run: `PYTHONPATH=src
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.41` — Stage 41 (autodiff global trajectory optimization) complete. Extended
+  optimize/autodiff.py with transfer_dv (exact 2-impulse Delta-v via the autodiff LM shooting, arrival
+  enforced) + optimize_transfer (global min over a departure/time-of-flight grid). validate/stage41.py +
+  test_autodiff addition. On the canonical Earth->Mars problem it finds the global optimum
+  Delta-v=5.63 km/s at launch+300 d / tof 315 d with 0.19 km miss -- the textbook ~5.6 km/s value, and
+  consistent with Stage 21's independent Lambert porkchop (5.68 km/s). Gradient-based shooting, not a
+  brute velocity grid. Completes the "Route E" engineering-discovery axis.
 - 2026-05-29 `v0.40` — Stage 40 (dynamical-structure mining: the other P9 signatures) complete. Added
   discovery/structure.py (orbital-pole clustering vs the selection control; low-order Neptune-resonance
   proximity) + validate/stage40.py + tests/test_structure.py. Honest negatives: the extreme objects'

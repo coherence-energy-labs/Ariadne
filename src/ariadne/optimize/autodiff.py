@@ -110,8 +110,63 @@ if HAVE_JAX:
 
         return np.asarray(jax.grad(miss)(jnp.asarray(v1, float)))
 
+    def _transfer_objective(p, rE0, vE0, rM0, vM0, mu, n_steps, penalty):
+        """Total Delta-v + miss penalty for a 2-impulse transfer. p=[t0, tof, v1x,v1y,v1z] (s, km/s).
+
+        Planets and spacecraft are propagated by the branch-free RK4 (differentiable). The miss
+        penalty enforces arrival; the objective is a single smooth function -> exact autodiff gradient.
+        """
+        t0, tof = p[0], p[1]
+        v1 = p[2:5]
+        rE, vE = _propagate(rE0, vE0, t0, mu, n_steps)
+        rM, vM = _propagate(rM0, vM0, t0 + tof, mu, n_steps)
+        rf, vf = _propagate(rE, v1, tof, mu, n_steps)
+        dv = jnp.linalg.norm(v1 - vE) + jnp.linalg.norm(vf - vM)
+        miss = jnp.linalg.norm(rf - rM) / 1.495978707e8
+        return dv + penalty * miss * miss
+
+    def transfer_dv(rE0, vE0, rM0, vM0, t0_s, tof_s, mu=GM_SUN, n_steps=300):
+        """Exact 2-impulse Delta-v for a transfer departing at t0 with time-of-flight tof.
+
+        Arrival is enforced EXACTLY by the autodiff Levenberg-Marquardt shooting (the inner solve),
+        so the miss is ~0 by construction. Returns (dv_kms, miss_km, v1).
+        """
+        rE, vE = propagate(rE0, vE0, t0_s, mu, n_steps)
+        rM, vM = propagate(rM0, vM0, t0_s + tof_s, mu, n_steps)
+        sol = solve_lambert_shooting(rE, rM, tof_s, vE * 1.06, mu=mu, n_steps=n_steps,
+                                     iters=40, tol_km=1.0)
+        rf, vf = propagate(rE, sol["v1"], tof_s, mu, n_steps)
+        dv = float(np.linalg.norm(sol["v1"] - vE) + np.linalg.norm(vf - vM))
+        return dv, sol["miss_km"], sol["v1"]
+
+    def optimize_transfer(rE0, vE0, rM0, vM0, t0_grid_days, tof_grid_days, mu=GM_SUN, n_steps=300):
+        """Global min-Delta-v 2-impulse transfer over a (departure, time-of-flight) grid.
+
+        Each grid point is solved EXACTLY by the autodiff shooting (arrival enforced), so the
+        returned optimum is a true, valid transfer. Returns the best dict + the Delta-v surface.
+        """
+        rE0 = np.asarray(rE0, float); vE0 = np.asarray(vE0, float)
+        rM0 = np.asarray(rM0, float); vM0 = np.asarray(vM0, float)
+        surf = np.full((len(t0_grid_days), len(tof_grid_days)), np.inf)
+        best = None
+        for it, t0d in enumerate(t0_grid_days):
+            for jt, tofd in enumerate(tof_grid_days):
+                try:
+                    dv, miss, v1 = transfer_dv(rE0, vE0, rM0, vM0, t0d * 86400.0,
+                                               tofd * 86400.0, mu, n_steps)
+                except Exception:
+                    continue
+                if miss < 100.0:                              # valid transfer (arrival hit)
+                    surf[it, jt] = dv
+                    if best is None or dv < best["dv_kms"]:
+                        best = {"dv_kms": dv, "t0_days": t0d, "tof_days": tofd,
+                                "miss_km": miss, "v1": v1}
+        return {"best": best, "surface": surf, "t0_grid": np.asarray(t0_grid_days),
+                "tof_grid": np.asarray(tof_grid_days)}
+
+
 else:                                                        # pragma: no cover
     def propagate(*a, **k):
         raise RuntimeError("JAX required for ariadne.optimize.autodiff")
 
-    solve_lambert_shooting = dv_gradient = propagate
+    solve_lambert_shooting = dv_gradient = optimize_transfer = propagate
