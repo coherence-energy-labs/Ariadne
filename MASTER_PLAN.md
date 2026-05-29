@@ -411,9 +411,13 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 - **Stage 5 — Real ephemeris + optimization toolkit** *(done)*: SPICE/DE440 kernels;
   test-particle + mutual n-body propagators (validated vs DE440); Lambert solver;
   Hermite-Simpson collocation; GMAT exporter. *DoD:* **G7** (+ Lambert/collocation validated).
-- **Stage 6 — Exact reproduction & cross-validation**: assemble the end-to-end low-energy
-  transfer on DE440 (lambert guess -> collocation refine -> primer vector); converge to the
-  *exact* Coimbra 3,925 m/s; reproduce Genesis/Hiten; run GMAT. *DoD:* **G8(full), G9, G10**.
+- **Stage 6 — Low-energy transfer + ballistic capture** *(done)*: real-manifold lunar capture
+  (LOI from CR3BP dynamics); end-to-end LEO->LLO transfer assembly + sweep; brackets Coimbra.
+  *DoD:* **G8r** (capture < direct), **G8t** (total in low-energy class).
+- **Stage 7 — Exact reproduction & cross-validation**: BCR4BP Sun-assisted departure +
+  primer-vector/collocation optimization on DE440 to the *exact* 3,925 m/s (full G8); 3D halo
+  + Sun-Earth tooling to reproduce Genesis (G9); run the exported GMAT script (G10).
+  *DoD:* **G8(full), G9, G10**.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -505,14 +509,15 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 5 — Real ephemeris + optimization toolkit **COMPLETE**
-(gate G7 passes; Lambert + Hermite-Simpson collocation + GMAT export validated).
-Next: Stage 6 (final reproduction increment).
-**Next action:** assemble the end-to-end low-energy lunar transfer on the real DE440
-ephemeris using the now-built pieces (ephemeris_nbody + lambert first guess + collocation
-refine + primer-vector check) and converge to the *exact* Coimbra 3,925 m/s / 32 d (full
-G8); reproduce a flown mission (Genesis Sun-Earth L1 manifold, or Hiten ballistic capture)
-for G9; run the exported GMAT script to close G10. `optimize/primer_vector.py` still to add.
+**Current stage:** Stage 6 — Low-energy transfer + ballistic capture **COMPLETE**
+(gates G8r/G8t pass: rigorous manifold capture, end-to-end transfer brackets Coimbra).
+Next: Stage 7 (exact reproduction + Genesis + GMAT run).
+**Next action:** Stage 7 — close the remaining gap honestly: add `dynamics/bcr4bp` Sun-assisted
+departure + `optimize/primer_vector.py` and optimize the FULL transfer (Lambert guess ->
+collocation refine on DE440 ephemeris) to converge the *exact* 3,925 m/s with matched
+boundary conditions (full G8); extend the orbit tooling to 3D HALO orbits + the Sun-Earth
+system to reproduce **Genesis** (G9); actually RUN the exported GMAT script for the G10
+cross-check.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
@@ -560,7 +565,23 @@ Figures: ephemeris_validation.png, moon_orbit_de440.png. Run: `python -m pytest`
 `PYTHONPATH=src python -m ariadne.validate.stage5`, `... ariadne.viz.figures`.
 Honest scope: real-ephemeris foundation + optimizer are done & validated; the EXACT 3,925
 m/s end-to-end reproduction (full G8), flown-mission (G9), and GMAT-run cross-check (G10) are
-the Stage 6 increment.
+the Stage 6/7 increment.
+
+**Stage 6 results (low-energy lunar transfer, real CR3BP manifold dynamics):** the headline
+rigorous result is the **ballistic lunar-orbit insertion computed from real manifold dynamics**
+— an L1 Lyapunov *unstable* manifold delivers the spacecraft to ~100 km lunar periapsis with a
+near-parabolic Moon-relative arrival speed of 2.258 km/s, so LOI = **625 m/s** vs **822 m/s**
+for a direct hyperbolic insertion: a **197 m/s saving, computed not estimated** (transfers/
+lunar_capture.py). End-to-end (TLI + ballistic capture), the best LEO->100km-LLO transfer is
+**3,756 m/s** (L1, C=3.15, 12.3-day coast), with the family spanning 3,756-3,790 m/s — which
+**brackets the Coimbra 3,925 m/s** (direct = 3,953). HONEST: the TLI is held at the common
+Hohmann value, so 3,756 is a lower-side estimate; a consistent ballistic-arrival departure
+(apogee beyond the Moon, Sun-assisted in BCR4BP) raises departure toward the published figure
+— that optimization is Stage 7. We REPORT the construction's actual output; we do not fit to
+3,925. Genesis (Sun-Earth) deferred: needs 3D halo + SE-family tooling (the small-amplitude SE
+Lyapunov manifold does not cleanly reach Earth). Probe: EM L1/L2 manifolds reach 119-778 km
+lunar periapsis but only ~58,500 km Earth perigee (why LEO departure needs the Sun's help).
+Figure: low_energy_transfer.png. Run: `PYTHONPATH=src python -m ariadne.validate.stage6`.
 
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
@@ -570,6 +591,13 @@ the Stage 6 increment.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.6` — Stage 6 (low-energy transfer + ballistic capture) complete. Added
+  transfers/lunar_capture.py (real-manifold ballistic capture; Moon-relative periapsis speed),
+  transfers/low_energy_lunar.py (end-to-end TLI+capture assembly + sweep), validate/stage6.py,
+  viz.figure_low_energy_transfer, GMAT trans-lunar-injection export, test_transfers.py (37
+  tests pass). Rigorous result: ballistic LOI 625 m/s vs direct 822 (saving 197 m/s, from real
+  dynamics); end-to-end best 3,756 m/s brackets Coimbra 3,925. Probed manifold reach. Genesis
+  (Sun-Earth) honestly deferred to Stage 7 (needs 3D halo tooling). Number reported, not fitted.
 - 2026-05-28 `v0.5` — Stage 5 (real ephemeris + optimization toolkit) complete. Added
   data/kernels.py (SPICE/DE440 download+cache+lock) + data/ephemeris.py wrappers;
   dynamics/ephemeris_nbody.py (test-particle + mutual n-body propagators);

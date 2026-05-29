@@ -221,6 +221,53 @@ def figure_moon_orbit(epoch="2025-06-01T00:00:00", days=28.0, n=400):
     return path
 
 
+def figure_low_energy_transfer(mu=None, C=3.15):
+    from ..data.constants import EARTH_MOON
+    from ..orbits.families import lyapunov_orbit_at_jacobi
+    from ..orbits.lagrange import lagrange_points
+    from ..transfers.lunar_capture import ballistic_capture
+    from ..manifolds.manifold import manifold_trajectory
+    mu = EARTH_MOON.mu if mu is None else mu
+    orb = lyapunov_orbit_at_jacobi(mu, "L1", C)
+    cap = ballistic_capture(orb, llo_alt=100.0)
+    t, Y = manifold_trajectory(mu, cap["seed"], stable=False, t_max=6.0, n=1200)
+    i = cap["peri_index"]
+    L = lagrange_points(mu)
+
+    fig, (ax, axz) = plt.subplots(1, 2, figsize=(13.5, 6.2))
+    for a in (ax, axz):
+        a.plot(-mu, 0, "o", color="tab:blue", ms=11, label="Earth")
+        a.plot(1 - mu, 0, "o", color="0.5", ms=7, label="Moon")
+        a.plot(L["L1"][0], 0, "k+", ms=10)
+        xo, yo = _orbit_xy(mu, orb)
+        a.plot(xo, yo, color="darkgreen", lw=1.8, label="L1 Lyapunov orbit")
+        a.plot(Y[0, :i + 1], Y[1, :i + 1], color="tab:red", lw=1.4,
+               label="ballistic capture coast")
+        a.plot(Y[0, i], Y[1, i], "r*", ms=14, label="LLO capture")
+        a.set_aspect("equal")
+    ax.annotate("L1", (L["L1"][0], 0.01), fontsize=9)
+    ax.set_xlim(0.78, 1.08)
+    ax.set_xlabel("x (rotating, nondim)")
+    ax.set_ylabel("y")
+    ax.set_title(f"Low-energy Earth–Moon transfer (C={C}): "
+                 f"manifold ballistic capture")
+    ax.legend(loc="upper left", fontsize=8)
+    # zoom near the Moon
+    axz.set_xlim(1 - mu - 0.04, 1 - mu + 0.04)
+    axz.set_ylim(-0.04, 0.04)
+    axz.set_title(f"Zoom at the Moon: capture to {cap['periapsis_alt_km']:.0f} km, "
+                  f"LOI {cap['dv_capture_kms']*1000:.0f} m/s")
+    axz.set_xlabel("x")
+    fig.suptitle("Ariadne — ballistic lunar capture via invariant manifold "
+                 "(real CR3BP dynamics)", fontsize=12)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "low_energy_transfer.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
@@ -230,6 +277,8 @@ def main():
     print("  ->", figure_moon_orbit())
     print("Rendering ephemeris validation (n-body vs DE440) ...")
     print("  ->", figure_ephemeris_validation())
+    print("Rendering low-energy lunar transfer (ballistic capture) ...")
+    print("  ->", figure_low_energy_transfer())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

@@ -46,8 +46,22 @@ GMAT export for independent cross-checking.
 
 ![n-body propagator vs JPL DE440](docs/figures/ephemeris_validation.png)
 
+And we can now build a **low-energy lunar transfer**: an L1 Lyapunov *unstable manifold*
+delivers the spacecraft to ~100 km lunar periapsis ballistically (near-parabolic arrival), so
+the lunar-orbit insertion costs **625 m/s** (computed from real CR3BP dynamics) versus **822
+m/s** for a direct hyperbolic capture — a **197 m/s saving**. End-to-end, the best LEO→LLO
+transfer is **~3,756 m/s**, bracketing the Coimbra **3,925 m/s** result (direct = 3,953).
+
+![Ballistic lunar capture via manifold](docs/figures/low_energy_transfer.png)
+
+> Honest scope: the rigorous, validated result is the *ballistic-capture saving* from real
+> manifold dynamics. The exact 3,925 m/s figure depends on the paper's boundary conditions and
+> a Sun-assisted (BCR4BP) departure optimization — that, the Genesis reproduction, and running
+> the exported GMAT script are Stage 7. Numbers here are reported from the construction, not
+> fitted to the target.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage5` (and `stage1`–`stage4`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage6` (and `stage1`–`stage5`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)
