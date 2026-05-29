@@ -104,8 +104,18 @@ being a longer ~49-day flight time.
 > not the identical transfer. The WSB region is chaotic, so the solution is stored as a fixed
 > state that re-evaluates deterministically. Found from the dynamics, never fitted.
 
+Finally, we apply a **coherence lens** — operationalizing "coherence" as **robustness**: how many
+km the arrival drifts per 1 m/s of injection error. This maps the **Δv-vs-coherence frontier** and
+shows a clean, honest result: **robustness costs fuel.** The cheapest (WSB) path is ~8× more fragile
+than a fast, pricier transfer; a stable orbit is ~23× more coherent than any lunar transfer.
+
+![Δv vs coherence frontier](docs/figures/coherence_frontier.png)
+
+> This is a real, *different* objective (robustness), not a way to beat the energy floor — physics
+> fixes the minimum Δv. The cheapest path is simply the least coherent.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage10` (and `stage1`–`stage9`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage11` (and `stage1`–`stage10`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

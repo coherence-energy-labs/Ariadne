@@ -401,6 +401,53 @@ def figure_wsb_transfer():
     return path
 
 
+def figure_coherence_frontier():
+    from ..data.ephemeris import et
+    from ..data.constants import R_MOON
+    from ..dynamics.ephemeris_nbody import propagate_test_particle
+    from ..transfers.ephemeris_transfer import design_transfer
+    from ..transfers.wsb import _capture_state, _frame, SOLUTION_PARAMS, evaluate_transfer
+    from ..analysis.coherence import endpoint_sensitivity
+
+    e0 = et("2025-06-01T00:00:00")
+    dv, sens, lab = [], [], []
+    for tof in (3.0, 4.0, 5.0, 6.0):
+        d = design_transfer(e0, tof)
+        s0 = np.concatenate([d["r1"], d["v1"]]); T = tof * 86400.0
+        prop = lambda s, T=T: propagate_test_particle(
+            s[:3], s[3:], e0, (0, T), perturbers=("SUN", "MOON")).y[:, -1]
+        dv.append(d["total_ms"]); sens.append(endpoint_sensitivity(prop, s0))
+        lab.append(f"direct {tof:.0f} d")
+
+    ec = et("2025-11-12T00:00:00"); fr = _frame(ec)
+    fa, al, be, ph = SOLUTION_PARAMS
+    pos, vel, _ = _capture_state(ec, fa, al, be, ph, R_MOON + 100.0, *fr)
+    s0w = np.concatenate([pos, vel]); Tw = 48.8 * 86400.0
+    propw = lambda s: propagate_test_particle(
+        s[:3], s[3:], ec, (0, -Tw), perturbers=("SUN", "MOON")).y[:, -1]
+    bw = evaluate_transfer(SOLUTION_PARAMS)
+    dv.append(bw["total_ms"]); sens.append(endpoint_sensitivity(propw, s0w))
+    lab.append("WSB 49 d")
+
+    fig, ax = plt.subplots(figsize=(8.4, 6.4))
+    colors = ["tab:green"] * 4 + ["tab:purple"]
+    ax.scatter(dv, sens, c=colors, s=90, zorder=3)
+    for x, y, t in zip(dv, sens, lab):
+        ax.annotate(t, (x, y), textcoords="offset points", xytext=(8, 4), fontsize=9)
+    ax.set_yscale("log")
+    ax.set_xlabel("total Δv  (m/s)  —  cheaper →")
+    ax.set_ylabel("endpoint sensitivity  km per m/s  (↑ = more fragile / less coherent)")
+    ax.set_title("Robustness costs fuel: the Δv–coherence frontier\n"
+                 "(the cheapest WSB path is ~8x more fragile than the fast transfer)")
+    ax.grid(True, which="both", alpha=0.3)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "coherence_frontier.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
@@ -420,6 +467,8 @@ def main():
     print("  ->", figure_ephemeris_transfer())
     print("Rendering Sun-assisted low-energy WSB transfer ...")
     print("  ->", figure_wsb_transfer())
+    print("Rendering Delta-v vs coherence frontier ...")
+    print("  ->", figure_coherence_frontier())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

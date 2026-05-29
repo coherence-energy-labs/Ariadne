@@ -425,8 +425,11 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 - **Stage 10 — Sun-assisted low-energy (WSB) transfer** *(done)*: Belbruno backward-from-capture
   in DE440, optimized for min Delta-v; LEO-departing low-energy transfer at **3,907 m/s** (below
   direct 3,953 and below Coimbra 3,925, longer TOF). *DoD:* **G_wsb**.
-- **Stage 11+ (optional)** — discovery engine on an under-mapped multi-body system (novelty, long
-  shot) OR consolidation into a polished open release + white-paper. Earth-Moon is now covered.
+- **Stage 11 — Coherence / robustness lens** *(done)*: analysis/coherence.py (endpoint sensitivity
+  + FTLE); measured the Δv-vs-coherence frontier (robustness costs fuel; cheapest=least coherent).
+  *DoD:* **G_coh**.
+- **Stage 12+ (optional)** — coherence-WEIGHTED optimizer (most-robust path per Δv premium);
+  discovery engine on an under-mapped system (novelty, long shot); or consolidation + white-paper.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -518,14 +521,15 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 10 — Sun-assisted low-energy (WSB) transfer **COMPLETE** (gate G_wsb:
-a real DE440 low-energy transfer at **3,907 m/s — below the direct 3,953 AND below Coimbra's
-3,925**, at a longer TOF). The original Coimbra chase is essentially closed: bracketed (Stage 8)
-then beaten (Stage 10). Next: discovery engine (novelty) OR consolidation/white-paper.
-**Next action:** decide the goal — (a) point the discovery engine at an under-mapped multi-body
-system (Jovian/Saturnian moons) to hunt uncatalogued routes [only real shot at novelty; manage
-expectations]; or (b) consolidate into a polished open release + white-paper. The Earth-Moon
-low-energy problem is now well-covered by this engine.
+**Current stage:** Stage 11 — Coherence / robustness lens **COMPLETE** (gate G_coh: the coherence
+metric ranks a stable orbit ~23x more coherent than a transfer and resolves the Δv-vs-coherence
+frontier — "robustness costs fuel"). This is the project's *own* coherence framework applied as a
+real objective. Next: the user's call — coherence-OPTIMIZED transfers, the discovery engine, or
+consolidation.
+**Next action:** decide the goal — (a) build a coherence-weighted optimizer (find the most robust
+path for a given Δv premium), (b) point the discovery engine at an under-mapped system
+(Jovian/Saturnian moons) [only real shot at uncatalogued routes; manage expectations], or
+(c) consolidate into a polished open release + white-paper.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -652,6 +656,22 @@ region is chaotic (4-decimal param rounding shifts the Earth perigee by thousand
 solution is stored as a fixed full-precision state that re-evaluates deterministically to 3,907.
 Probe trail: backward-from-capture reached 37,000 km (coarse), then the optimizer drove perigee
 to LEO. Figure: wsb_transfer.png.
+
+**Stage 11 results (coherence / robustness lens — the project's framework applied):** built
+analysis/coherence.py — coherence is operationalized as ROBUSTNESS: `endpoint_sensitivity` = km
+of arrival drift per 1 m/s injection error (the nav-budget number). Measured across our transfers:
+stable LEO **261** km/(m/s) (coherence 0.28) vs lunar transfers **6,000-46,000** km/(m/s) — the
+metric cleanly ranks stable ~23x above chaotic. The **Δv-vs-coherence frontier is monotonic**:
+fast/pricey (direct 3 d, 4,090 m/s) = most coherent (5,898), cheapest (WSB 3,907 m/s) = least
+coherent (45,877) — **robustness costs fuel** (the WSB saving buys an ~8x fragility increase).
+HONEST corrections from measuring: (1) BOTH lunar transfers are fragile (all need midcourse
+corrections) — I'd over-dramatized the WSB as a unique "knife-edge"; the WSB is ~2x more sensitive
+total but with an ~8x LOWER per-day rate (its fragility is distributed, the direct's is concentrated
+at the violent lunar flyby). (2) The `decoherence_rate` (FTLE) metric is UNRELIABLE (a single-window
+finite-difference conflates polynomial along-track drift with exponential chaos; a 1-day LEO scores
+higher than a 49-day WSB) — kept only as a coarse signal; `endpoint_sensitivity` is the trustworthy
+one. KEY POINT: coherence == robustness is a real & DIFFERENT objective; it does NOT beat the energy
+floor (physics fixes that). Figure: coherence_frontier.png. Run: `... ariadne.validate.stage11`.
 Run: `PYTHONPATH=src python -m ariadne.validate.stage10`.
 
 **Decisions on record:**
@@ -662,6 +682,13 @@ Run: `PYTHONPATH=src python -m ariadne.validate.stage10`.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.11` — Stage 11 (coherence / robustness lens) complete. Added analysis/coherence.py
+  (endpoint_sensitivity = km arrival-drift per m/s = robustness; decoherence_rate FTLE as a coarse,
+  caveated signal), validate/stage11.py, viz.figure_coherence_frontier, test_coherence.py. Mapped
+  the Δv-vs-coherence frontier: robustness costs fuel (cheapest WSB ~8x more fragile than the fast
+  transfer); stable LEO ~23x more coherent than a transfer. Honest corrections: both transfers are
+  fragile (corrected my "WSB knife-edge" over-claim); the FTLE metric is unreliable (demoted).
+  Coherence == robustness, a real DIFFERENT objective — does not beat the energy floor.
 - 2026-05-28 `v0.10` — Stage 10 (Sun-assisted low-energy / WSB transfer) complete. Added
   transfers/wsb.py (Belbruno backward-from-capture in DE440 + min-Delta-v optimization of the
   capture velocity/phase), validate/stage10.py, viz.figure_wsb_transfer, test_wsb.py. Converged
