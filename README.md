@@ -89,8 +89,23 @@ propagated in both Ariadne and GMAT (GmatConsole, point masses Earth+Sun+Luna) a
 industry-standard mission-analysis tool. (Install GMAT under `tools/gmat-R2026a/`;
 `ariadne.io.gmat_export.run_with_gmat()` drives it headlessly.)
 
+And finally, a **Sun-assisted low-energy (weak-stability-boundary) transfer**: built the
+Belbruno way — propagate *backward* from a near-ballistic lunar capture in full DE440 gravity
+and optimize the capture so the arc returns to LEO with minimum Δv. The result departs LEO,
+arrives at the Moon at lower energy than a direct transfer, and totals **3,907 m/s — below the
+direct transfer (3,953) and below the published Coimbra result (3,925 m/s)** — the tradeoff
+being a longer ~49-day flight time.
+
+![Sun-assisted low-energy WSB transfer](docs/figures/wsb_transfer.png)
+
+> Honest scope: a two-impulse patched model on real ephemeris; the converged route is a
+> multi-revolution Sun-perturbed low-energy transfer (apogee near lunar distance), longer
+> (~49 d) than Coimbra's 32-day route — so 3,907 < 3,925 is a same-class low-energy solution,
+> not the identical transfer. The WSB region is chaotic, so the solution is stored as a fixed
+> state that re-evaluates deterministically. Found from the dynamics, never fitted.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage9` (and `stage1`–`stage8`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage10` (and `stage1`–`stage9`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

@@ -370,6 +370,37 @@ def figure_ephemeris_transfer(epoch="2025-06-01T00:00:00", tof_days=5.5):
     return path
 
 
+def figure_wsb_transfer():
+    from ..data.ephemeris import et, body_pos
+    from ..transfers.wsb import evaluate_transfer, transfer_trajectory, SOLUTION_PARAMS
+    b = evaluate_transfer(SOLUTION_PARAMS)       # deterministic canonical solution
+    t, Y = transfer_trajectory(b)               # forward: LEO -> WSB loop -> Moon
+    e0 = et(b["epoch"])
+    # Moon orbit over the transfer window (for context)
+    ts = np.linspace(t[0], t[-1], 300)
+    moon = np.array([body_pos("MOON", e0 + tt, "J2000", "EARTH") for tt in ts])
+
+    fig, ax = plt.subplots(figsize=(8.4, 7.6))
+    ax.plot(moon[:, 0], moon[:, 1], color="0.7", lw=1.0, ls="--", label="Moon orbit (DE440)")
+    ax.plot(Y[0], Y[1], color="tab:purple", lw=1.3, label="WSB low-energy transfer")
+    ax.plot(0, 0, "o", color="tab:blue", ms=12, label="Earth")
+    ax.plot(Y[0, 0], Y[1, 0], "g^", ms=10, label="LEO departure")
+    ax.plot(Y[0, -1], Y[1, -1], "r*", ms=15, label="ballistic lunar capture")
+    ax.set_aspect("equal")
+    ax.set_xlabel("x (km, J2000)")
+    ax.set_ylabel("y (km, J2000)")
+    ax.set_title(f"Sun-assisted low-energy (WSB) Earth→Moon transfer\n"
+                 f"{b['total_ms']:.0f} m/s (< direct 3953, < Coimbra 3925), "
+                 f"TOF {b['tof_days']:.0f} d, v∞ {b['v_inf']:.2f} km/s")
+    ax.legend(fontsize=8, loc="upper left")
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "wsb_transfer.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
@@ -387,6 +418,8 @@ def main():
     print("  ->", figure_genesis())
     print("Rendering full-ephemeris Earth-Moon transfer (DE440) ...")
     print("  ->", figure_ephemeris_transfer())
+    print("Rendering Sun-assisted low-energy WSB transfer ...")
+    print("  ->", figure_wsb_transfer())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
