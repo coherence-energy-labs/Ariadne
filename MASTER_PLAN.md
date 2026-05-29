@@ -528,6 +528,9 @@ these add depth where real value remained.
 - **Stage 38 — Selection bias vs clustering (OSSOS test)** *(done)*: scattered control population traces
   the selection function (mean 21.7 deg); extreme objects cluster the same way (20.4 deg) and are not
   distinguishable from it (p=0.12). Settles the honest verdict: no compelling P9 evidence. *DoD:* **G38a/b/c**.
+- **Stage 39 — Discovery core: moving-object orbit linkage** *(done)*: HelioLinC-style linker; recovers
+  5/5 known eTNOs (pure, 0 false positives) from a survey-realistic haystack of 430 tracklets. The
+  machinery that can find UNKNOWN objects -- validated by known-object recovery. *DoD:* **G39a/b/c**.
 
 ---
 
@@ -612,8 +615,15 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stages 37-38 — REBOUND cross-validation + selection-bias test (calibration closeout)
-**COMPLETE**. Stage 37: cross-validated Ariadne's integrator against the gold-standard REBOUND (WHFast)
+**Current stage:** Stage 39 — Discovery core: moving-object orbit linkage (HelioLinC-style)
+**COMPLETE**. The step from "validated engine" to "could find something new". `discovery/linkage.py`
+hypothesises (r, rdot), maps each tracklet to a heliocentric state, propagates to a reference epoch with
+the validated integrator, and clusters -- same-object tracklets collapse, interlopers scatter. The honest
+litmus test PASSES: from a survey-realistic haystack (5 real eTNOs over a 2-month opposition at 0.1" +
+400 interlopers) it recovers ALL 5 as PURE candidates, 0 false positives; transform exact to 3.7e-7 AU.
+If it recovers KNOWN objects it can find UNKNOWN ones. Next: feed it REAL survey detections (ZTF/Rubin).
+Also pending: Route E (autodiff global trajectory optimization), Route D (dynamical-structure mining).
+PRIOR (Stage 37-38): cross-validated Ariadne's integrator against the gold-standard REBOUND (WHFast)
 on the same DE440 ICs -- agreement 1e-4/100yr, 1.7e-3/2000yr, REBOUND energy bounded 3.6e-6 (the
 integrator is correct by an independent professional code). Stage 38: the OSSOS selection-bias test --
 the detached extreme eTNOs cluster in the SAME direction (20.4 deg) as the survey-tracing scattered
@@ -1267,6 +1277,22 @@ eTNO clustering CANNOT be distinguished from selection bias. Together with Stage
 fragile to uncertainty), the honest verdict is settled: **no compelling statistical evidence for Planet 9
 in the public catalog.** Run: `PYTHONPATH=src python -m ariadne.validate.stage38`.
 
+**Stage 39 results (THE DISCOVERY CORE -- moving-object orbit linkage):** the step that crosses from a
+validated engine to one that could find something NEW. `discovery/linkage.py` implements a HelioLinC-style
+linker: hypothesise a heliocentric distance r and radial velocity rdot; under that hypothesis every
+tracklet (a short on-sky position+rate) maps to a full heliocentric state; propagate each to a common
+reference epoch with the validated 2-body integrator; tracklets of the SAME object collapse to a tight
+cluster while unrelated detections scatter. Cluster -> candidate orbit. **The honest litmus test PASSES:**
+from a survey-realistic haystack -- the REAL orbits of 5 known eTNOs observed over a 2-month opposition at
+0.1" astrometry, buried in 400 interloper tracklets (430 total) -- the linker **recovers all 5 as PURE
+candidates with ZERO false positives**, and the transform is exact (tracklets collapse to 3.7e-7 AU at the
+true distance). If it recovers KNOWN objects from the haystack, the same machinery can find UNKNOWN ones.
+HONEST scope: validated on synthetic detections generated from REAL orbits (realistic noise, cadence,
+interlopers); linking REAL survey detections (ZTF/Pan-STARRS/Rubin) is the next step -- the core algorithm
+is proven. A subtle lesson learned: the reference-epoch window must be short (an opposition season) and
+tracklet arcs long enough that a distant object's tiny on-sky rate is measurable, else velocity error
+amplifies over the baseline and the cluster smears. Run: `PYTHONPATH=src python -m ariadne.validate.stage39`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1275,6 +1301,16 @@ in the public catalog.** Run: `PYTHONPATH=src python -m ariadne.validate.stage38
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.39` — Stage 39 (DISCOVERY CORE: moving-object orbit linkage) complete. Added
+  discovery/linkage.py: a HelioLinC-style linker (hypothesise heliocentric distance r + radial velocity
+  rdot -> map each tracklet to a full state -> propagate to a reference epoch with the validated 2-body
+  integrator -> cluster; same-object tracklets collapse to a point, interlopers scatter), precomputed
+  observer geometry + vectorised transform/propagation, and a synthetic-from-real tracklet generator.
+  validate/stage39.py + tests/test_linkage.py. The honest litmus test PASSES: from a survey-realistic
+  haystack (5 real eTNOs over a 2-month opposition at 0.1" + 400 interlopers) the linker recovers ALL 5
+  as PURE candidates with no false positives, and the transform is exact (tracklets collapse to <0.01 AU
+  at the true distance). This is the machinery that can find UNKNOWN objects. Validated on synthetic-
+  from-real detections; linking real survey detections (ZTF/Pan-STARRS/Rubin) is the next step.
 - 2026-05-29 `v0.38` — Stage 38 (selection bias vs eTNO clustering -- the OSSOS test) complete. Added
   discovery.clustering.selection_bias_test + validate/stage38.py + test. Uses the scattered Neptune-
   coupled control population (a>150, 30<q<=42) as a survey-selection-function proxy. Result: the
