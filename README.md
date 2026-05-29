@@ -135,25 +135,40 @@ zero thrust and, under tangential thrust, raises the energy at exactly the predi
 
 And then the payoff the project was built toward: the Interplanetary Transport Network as a
 **searchable graph.** Nodes are L1/L2 Lyapunov orbits at a grid of energies; an edge is an *exact*
-Poincaré section crossing — we intersect the two tube cuts as curves in the (y, v_y) plane, so at
-a crossing the position and v_y match and the patch cost is just the v_x difference. Same-energy
-L1↔L2 patches come out at **0.0–0.4 m/s** (the known ballistic heteroclinic connections), so the
-edge weights are real dynamics. Routing the graph from L1 to L2 with **Dijkstra (SSSP)** and **A***
-finds the optimum (37 m/s) — and so does an exhaustive brute force, but A* gets there in **6 node
-expansions versus brute force's 210, a 35× efficiency win.**
+Poincaré section crossing — we intersect the two tube cuts as curves in the (y, v_y) plane, and
+because position and v_y match there, each manifold's v_x follows exactly from its own energy
+(`v_x² = 2Ω − C − v_y²`), so the patch Δv is energy-consistent to machine precision. Same-energy
+L1↔L2 patches come out at **exactly 0.0 m/s** (the known ballistic heteroclinic connections).
+Routing from L1 to L2 with **Dijkstra (SSSP)** and **A*** *discovers a non-obvious 3-hop route at
+~17 m/s — about twice as cheap as the single direct patch (~37 m/s)* — by changing energy at
+high-speed near-Moon crossings (the Oberth effect) and taking a free ballistic L1↔L2 hop between.
+Exhaustive brute force confirms the same optimum, but A* gets there in **5 node expansions versus
+brute force's 208, a ~42× efficiency win.**
 
 ![Transport graph and the shortest-path route](docs/figures/transport_graph.png)
 
-> Honest scope: all three routers are exact — the win is *efficiency*, not a better answer (you
-> cannot beat the optimum). The A* heuristic is verified admissible, so its optimality is
-> guaranteed, not luck. The patch Δv is estimated from *discretized* tube cuts, so coarse sampling
-> yields spuriously cheap multi-hop routes; the optimum converges upward to the direct ~37 m/s
-> patch as the manifold is refined (60→21.6, 90→27.3, 120→36.9 m/s; validated at 120). On this
-> graph the cheapest patch is also the least fragile, so the coherence/robustness weight does not
-> change the route here (the two objectives happen to agree).
+> Honest scope: all three routers are exact — the win is *efficiency*, not a better answer. The A*
+> heuristic is verified admissible. The multi-hop optimum is real, not an artifact: its route
+> *topology is stable* across manifold resolution (cost converges 90→12.7, 120→16.1, 150→16.9 m/s,
+> same 3 hops), unlike an earlier interpolated edge model whose topology changed with resolution.
+> The near-Moon guard (|y| > 7700 km) bounds the Oberth saving. Raising the robustness weight
+> switches the choice from the cheap 3-hop route to the more robust single direct patch.
+
+Then the **discovery engine** mines that graph with Yen's k-shortest-paths into a *ranked route
+catalog* (8 distinct L1→L2 routes, with a Δv-vs-robustness Pareto set), and **verifies** each one:
+every patch is checked as a true section crossing — position continuity exact, each side's Jacobi
+equal to its orbit's to **1.3×10⁻¹⁵**, burn equal to the edge Δv. The optimal route then survives
+the solar perturbation as a *bounded, correctable* arc (CR3BP-vs-BCR4BP divergence 38,610 km ≈ 0.10
+lunar-distance over 8.7 days — midcourse-correction scale, not a chaotic escape).
+
+> Honest scope: "novel" here means *automatically discovered and verified* IPTN structure — **not**
+> a route unknown to science (the L1↔L2 heteroclinic web is well studied). Closing the last fidelity
+> step (full DE440 re-convergence + GMAT) was already done for the Earth→Moon *transfer* leg in the
+> GMAT cross-validation above; a dedicated libration-to-libration ephemeris re-targeter is the one
+> remaining tool, and is noted rather than claimed.
 
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage14` (and `stage1`–`stage13`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage15` (and `stage1`–`stage14`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

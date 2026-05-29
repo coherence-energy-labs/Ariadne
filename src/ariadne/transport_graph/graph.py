@@ -26,6 +26,7 @@ import numpy as np
 
 from ..orbits.families import lyapunov_orbit_at_jacobi
 from ..connections.poincare import tube_section_cut
+from ..dynamics.cr3bp import pseudo_potential
 
 _Y_MOON_GUARD = 0.02     # drop crossings within ~7700 km of the Moon (section singularity)
 
@@ -127,13 +128,17 @@ def _seg_intersection(p1, p2, p3, p4):
     return None
 
 
-def _patch_edge(a: Node, b: Node) -> Edge | None:
+def _patch_edge(a: Node, b: Node, mu: float) -> Edge | None:
     """Minimum-Delta-v patch from a's unstable tube to b's stable tube on the section.
 
     Intersects every unstable-branch cut of a with every stable-branch cut of b in the
-    (y, v_y) plane. At a crossing, position and v_y match exactly, so Delta-v = |v_x^a -
-    v_x^b| (v_x interpolated along each segment). The edge is the minimum over all crossings.
+    (y, v_y) plane. At a crossing the position (x = x_sec, y) and v_y are shared, so each
+    manifold's v_x follows EXACTLY from its own energy: v_x^2 = 2*Omega(x,y) - C - v_y^2
+    (with C the source/destination orbit's Jacobi). The patch Delta-v is |v_x^src - v_x^dst|
+    -- energy-consistent to machine precision (no curve interpolation of v_x). The edge is
+    the minimum over all crossings.
     """
+    c_src, c_dst = a.jacobi, b.jacobi
     best_dv, best_meta = math.inf, None
     for ca in a.unstable_curves:
         Ay = ca[:, [1, 4]]          # (y, v_y)
@@ -144,13 +149,22 @@ def _patch_edge(a: Node, b: Node) -> Edge | None:
                     r = _seg_intersection(Ay[i], Ay[i + 1], By[j], By[j + 1])
                     if r is None:
                         continue
-                    t, u, (yint, vyint) = r
-                    vx_a = ca[i, 3] + t * (ca[i + 1, 3] - ca[i, 3])
-                    vx_b = cb[j, 3] + u * (cb[j + 1, 3] - cb[j, 3])
-                    dv = abs(vx_a - vx_b)
+                    _, _, (yint, vyint) = r
+                    xsec = float(ca[i, 0])     # = x_section (constant along the cut)
+                    om = pseudo_potential([xsec, yint, 0.0, 0.0, 0.0, 0.0], mu)
+                    arg_src = 2.0 * om - c_src - vyint * vyint
+                    arg_dst = 2.0 * om - c_dst - vyint * vyint
+                    if arg_src < 0.0 or arg_dst < 0.0:
+                        continue               # crossing not physical at that energy
+                    vx_src = math.sqrt(arg_src)     # require_vx_positive -> +root
+                    vx_dst = math.sqrt(arg_dst)
+                    dv = abs(vx_src - vx_dst)
                     if dv < best_dv:
                         best_dv = dv
-                        best_meta = {"y": float(yint), "vy": float(vyint)}
+                        pre = [xsec, float(yint), 0.0, vx_src, float(vyint), 0.0]
+                        post = [xsec, float(yint), 0.0, vx_dst, float(vyint), 0.0]
+                        best_meta = {"y": float(yint), "vy": float(vyint),
+                                     "pre": pre, "post": post}
     if best_meta is None:
         return None
     frag = math.log(max(a.lambda_u, 1.0 + 1e-9))     # tube stretching = decoherence proxy
@@ -187,7 +201,7 @@ def build_transport_graph(system, energies, points=("L1", "L2"), x_sec=None,
         for kb in keys:
             if ka == kb:
                 continue
-            e = _patch_edge(g.nodes[ka], g.nodes[kb])
+            e = _patch_edge(g.nodes[ka], g.nodes[kb], mu)
             if e is not None:
                 g.add_edge(e)
     return g

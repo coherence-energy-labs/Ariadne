@@ -22,10 +22,10 @@ ENERGIES = [3.120, 3.140, 3.160, 3.172]    # Jacobi grid inside both L1 and L2 f
 
 
 def build():
-    # n_seeds=120: the converged resolution. Coarser sampling produces spuriously cheap
-    # multi-hop routes (artifact intersections of under-resolved tube cuts); the optimum
-    # converges to a direct ~37 m/s patch as the manifold curves are refined (see MASTER_PLAN
-    # Stage 14 convergence note: 60->21.6, 90->27.3, 120->36.9 m/s).
+    # n_seeds=120: converged resolution. With the energy-exact edge model (v_x from energy
+    # conservation at each crossing) the optimal ROUTE TOPOLOGY is stable across resolution
+    # and the cost converges to ~17 m/s (90->12.7, 120->16.1, 150->16.9; same 3-hop route) --
+    # a genuine multi-hop optimum, not an artifact. See MASTER_PLAN Stage 14 convergence note.
     return build_transport_graph(EARTH_MOON, ENERGIES, points=("L1", "L2"),
                                  n_seeds=120)
 
