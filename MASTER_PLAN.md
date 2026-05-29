@@ -570,16 +570,20 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 28 — Inverse hidden-mass localizer + two-tier discovery pipeline
-**COMPLETE**. The full flag-then-localize vision: a weighted least-squares inverse solver recovers
-an injected body's (mass, position) from noisy residuals at the 6 real clustered eTNOs (6 M_E @ 625
-AU -> 7.3 M_E @ 745 AU, within 1-sigma), the confidence region HONES from 504 AU (N=2) to 209 AU
-(N=6), a single body is correctly degenerate, and the localization emits a telescope sky search-box
-(the IR/optical fusion handoff). All-sky sensitivity map shows where a body could hide.
+**Current stage:** Stage 29 — Real-data bridge: Ariadne localization -> Signalbook catalog cross-match
+**COMPLETE**. Crossed from simulation into REAL public observational data. `discovery/skybridge.py`
+indexes 4,414,657 real celestial sources out of the 47M-record Signalbook atlas (a gap fixed: their
+sky positions lived in payload_json, not the indexed lat/lon columns), then cross-matches an Ariadne
+Stage-28 localization sky-box (ecliptic -> equatorial) to **703 real catalogued sources in < 1 s**
+(IceCube/SDSS/Chandra/Fermi); a galactic-centre cone returns 95% X-ray (a real dense-field check).
+Contributed the index back to Signalbook (`discovery/celestial_index.py`, commit b72aeaf). 118 tests
+pass. HONEST: this cross-matches against KNOWN sources (the confirmation handoff), NOT new-moving-body
+detection (which needs multi-epoch imaging).
 **Next action:** none required. HONEST bottom line: a complete, validated, open engine spanning
 CR3BP -> ephemeris -> GMAT -> search/discovery -> interplanetary -> a principled coherence field ->
-a forward+inverse hidden-mass localizer, all on real data, firewall intact. No new physics, no body
-actually detected -- the outputs are confidence regions, floor/degeneracy-limited, GM-only. The one
+a forward+inverse hidden-mass localizer -> a real-data catalog bridge, all on real data, firewall
+intact. No new physics, no body actually detected -- the outputs are confidence regions,
+floor/degeneracy-limited, GM-only. The one
 genuine path to a real hidden-body find is a long-term (secular, Myr) symplectic integrator + the
 live eTNO/tracking catalog + statistical inference + the IR/optical confirmation -- a serious
 specialist effort, noted not overclaimed.
@@ -1047,6 +1051,26 @@ Verrier method) -- made rigorous. `discovery/inverse_mass.py`.
   bands are gravity + thermal-IR + optical (NOT X-ray/gamma -- cold bodies don't emit there).
   Run: `PYTHONPATH=src python -m ariadne.validate.stage28`.
 
+**Stage 29 results (real-data bridge: Ariadne localization -> Signalbook catalog cross-match):**
+crossed from simulation into REAL public observational data. `discovery/skybridge.py` converts an
+Ariadne Stage-28 localization sky-box to (RA, Dec) and cross-matches it against Signalbook's
+celestial catalog (Gaia/Pan-STARRS/SDSS optical, Chandra/XMM/Swift X-ray, Fermi gamma, IceCube
+neutrinos -- real public surveys).
+- **A gap closed in Signalbook itself:** its 47M-record atlas indexes only lat_deg/lon_deg, but
+  celestial sources keep their sky position in `payload_json` -- so millions weren't sky-queryable.
+  `build_celestial_index` extracts them into an indexed table: **4,414,657 real celestial sources**
+  (optical 3.05M, neutrino 0.90M, x_ray 0.44M, gamma 17.6k, ...) in ~37 s. (Also contributed back to
+  Signalbook as `discovery/celestial_index.py` -- commit b72aeaf on that repo.)
+- **Working real cross-match (G29):** an Ariadne localization -> RA/Dec -> **703 real catalogued
+  sources in < 1 s** (IceCube neutrinos, SDSS optical, Chandra X-ray, Fermi gamma); a galactic-centre
+  cone correctly returns **95% X-ray** sources (a known dense field -- a real sanity check). Ecliptic
+  -> equatorial astrometry exact; synthetic cone-query + modality-filter tests pass.
+- **HONEST scope:** this cross-matches a gravitational localization against KNOWN catalogued sources
+  (the IR/optical confirmation handoff -- rule-out / candidate flag). It does NOT detect a NEW moving
+  body; that needs multi-epoch imaging / proper motion beyond a static source catalog. But it is the
+  genuine simulation->real-data link: Ariadne says "look here", Signalbook searches 4.4M real sources
+  there. Run: `PYTHONPATH=src python -m ariadne.validate.stage29`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1055,6 +1079,14 @@ Verrier method) -- made rigorous. `discovery/inverse_mass.py`.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.29` — Stage 29 (real-data bridge to Signalbook) complete. Added
+  discovery/skybridge.py (build_celestial_index extracts ra/dec from Signalbook payload_json into an
+  indexed celestial_sources table; query_sky cone search; ecliptic->equatorial; crossmatch_localization),
+  validate/stage29.py, test_skybridge.py (5 tests). On the real 47M atlas it indexes 4,414,657 celestial
+  sources and an Ariadne localization cross-matches to 703 real catalogued sources (<1 s); galactic
+  centre 95% X-ray. Closed a Signalbook gap (celestial sources weren't sky-indexed) and contributed
+  the fix back as signalbook discovery/celestial_index.py (commit b72aeaf). Honest: cross-match against
+  KNOWN sources (confirmation handoff), not new-moving-body detection.
 - 2026-05-29 `v0.28` — Stage 28 (inverse hidden-mass localizer + two-tier discovery pipeline)
   complete. Added discovery/inverse_mass.py (weighted nonlinear least-squares localizer with
   covariance/confidence region; simulate_observations; localization_vs_n honing; sky_box telescope
