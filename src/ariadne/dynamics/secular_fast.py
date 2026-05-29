@@ -17,10 +17,11 @@ import numpy as np
 from .secular import YEAR_S, energy as _energy_py, integrate as _integrate_py
 
 try:
-    from numba import njit
+    from numba import njit, prange
     HAVE_NUMBA = True
 except Exception:                                            # pragma: no cover
     HAVE_NUMBA = False
+    prange = range
 
     def njit(*a, **k):                                       # no-op decorator
         def wrap(f):
@@ -164,6 +165,119 @@ def _run_full(Q, V, gm, gm0, nm, dt, n_steps, rec_every, q_all, v_all):
         _jump(Q, V, gm, gm0, nm, 0.5 * dt)
         _kick(Q, V, gm, nm, 0.5 * dt)
     return ri
+
+
+@njit(cache=True, inline="always")
+def _kepler_scalar(rx, ry, rz, vx, vy, vz, mu, dt):
+    """Allocation-free universal-variable Kepler step (scalars in, 6-tuple out)."""
+    sqrtmu = mu ** 0.5
+    r0 = (rx * rx + ry * ry + rz * rz) ** 0.5
+    v2 = vx * vx + vy * vy + vz * vz
+    rdotv = rx * vx + ry * vy + rz * vz
+    u = rdotv / sqrtmu
+    alpha = 2.0 / r0 - v2 / mu
+    chi = sqrtmu * dt * alpha
+    if alpha < 0.0:
+        a = 1.0 / alpha
+        den = rdotv + np.sign(dt) * (-mu * a) ** 0.5 * (1.0 - r0 * alpha)
+        if den == 0.0:
+            den = 1e-300
+        chi = np.sign(dt) * (-a) ** 0.5 * np.log((-2.0 * mu * alpha * dt) / den)
+    for _ in range(80):
+        psi = chi * chi * alpha
+        if psi > 1e-8:
+            sp = psi ** 0.5; c2 = (1.0 - np.cos(sp)) / psi; c3 = (sp - np.sin(sp)) / (sp * sp * sp)
+        elif psi < -1e-8:
+            sn = (-psi) ** 0.5; c2 = (1.0 - np.cosh(sn)) / psi; c3 = (np.sinh(sn) - sn) / (sn * sn * sn)
+        else:
+            c2 = 0.5 - psi / 24.0 + psi * psi / 720.0; c3 = 1.0 / 6.0 - psi / 120.0 + psi * psi / 5040.0
+        chi2 = chi * chi
+        r = chi2 * c2 + u * chi * (1.0 - psi * c3) + r0 * (1.0 - psi * c2)
+        fc = chi2 * chi * c3 + u * chi2 * c2 + r0 * chi * (1.0 - psi * c3) - sqrtmu * dt
+        dchi = -fc / r
+        chi += dchi
+        if -1e-12 < dchi < 1e-12:
+            break
+    psi = chi * chi * alpha
+    if psi > 1e-8:
+        sp = psi ** 0.5; c2 = (1.0 - np.cos(sp)) / psi; c3 = (sp - np.sin(sp)) / (sp * sp * sp)
+    elif psi < -1e-8:
+        sn = (-psi) ** 0.5; c2 = (1.0 - np.cosh(sn)) / psi; c3 = (np.sinh(sn) - sn) / (sn * sn * sn)
+    else:
+        c2 = 0.5 - psi / 24.0 + psi * psi / 720.0; c3 = 1.0 / 6.0 - psi / 120.0 + psi * psi / 5040.0
+    chi2 = chi * chi
+    f = 1.0 - chi2 / r0 * c2
+    g = dt - chi2 * chi / sqrtmu * c3
+    nrx = f * rx + g * vx; nry = f * ry + g * vy; nrz = f * rz + g * vz
+    rn = (nrx * nrx + nry * nry + nrz * nrz) ** 0.5
+    gd = 1.0 - chi2 / rn * c2
+    fd = sqrtmu / (rn * r0) * chi * (psi * c3 - 1.0)
+    return nrx, nry, nrz, fd * rx + gd * vx, fd * ry + gd * vy, fd * rz + gd * vz
+
+
+@njit(parallel=True, cache=True)
+def _ensemble_par(g0, gm, gm0, nm, tp0, dt, n_steps, out):
+    """Parallel CPU ensemble: each test particle integrated (with its own giant copy)
+    on its own core via prange. Allocation-free inner loop (scalar Kepler)."""
+    N = tp0.shape[0]
+    hdt = 0.5 * dt
+    for p in prange(N):
+        qx = np.empty(nm + 1); qy = np.empty(nm + 1); qz = np.empty(nm + 1)
+        vx = np.empty(nm + 1); vy = np.empty(nm + 1); vz = np.empty(nm + 1)
+        for j in range(nm):
+            qx[j] = g0[j, 0]; qy[j] = g0[j, 1]; qz[j] = g0[j, 2]
+            vx[j] = g0[j, 3]; vy[j] = g0[j, 4]; vz[j] = g0[j, 5]
+        t = nm
+        qx[t] = tp0[p, 0]; qy[t] = tp0[p, 1]; qz[t] = tp0[p, 2]
+        vx[t] = tp0[p, 3]; vy[t] = tp0[p, 4]; vz[t] = tp0[p, 5]
+        for _ in range(n_steps):
+            for i in range(nm + 1):
+                ax = 0.0; ay = 0.0; az = 0.0
+                for j in range(nm):
+                    if j == i:
+                        continue
+                    dx = qx[j] - qx[i]; dy = qy[j] - qy[i]; dz = qz[j] - qz[i]
+                    d2 = dx * dx + dy * dy + dz * dz
+                    inv = gm[j] / (d2 * np.sqrt(d2))
+                    ax += dx * inv; ay += dy * inv; az += dz * inv
+                vx[i] += hdt * ax; vy[i] += hdt * ay; vz[i] += hdt * az
+            sx = 0.0; sy = 0.0; sz = 0.0
+            for j in range(nm):
+                sx += gm[j] * vx[j]; sy += gm[j] * vy[j]; sz += gm[j] * vz[j]
+            sx = hdt * sx / gm0; sy = hdt * sy / gm0; sz = hdt * sz / gm0
+            for i in range(nm + 1):
+                qx[i] += sx; qy[i] += sy; qz[i] += sz
+            for i in range(nm + 1):
+                qx[i], qy[i], qz[i], vx[i], vy[i], vz[i] = _kepler_scalar(
+                    qx[i], qy[i], qz[i], vx[i], vy[i], vz[i], gm0, dt)
+            sx = 0.0; sy = 0.0; sz = 0.0
+            for j in range(nm):
+                sx += gm[j] * vx[j]; sy += gm[j] * vy[j]; sz += gm[j] * vz[j]
+            sx = hdt * sx / gm0; sy = hdt * sy / gm0; sz = hdt * sz / gm0
+            for i in range(nm + 1):
+                qx[i] += sx; qy[i] += sy; qz[i] += sz
+            for i in range(nm + 1):
+                ax = 0.0; ay = 0.0; az = 0.0
+                for j in range(nm):
+                    if j == i:
+                        continue
+                    dx = qx[j] - qx[i]; dy = qy[j] - qy[i]; dz = qz[j] - qz[i]
+                    d2 = dx * dx + dy * dy + dz * dz
+                    inv = gm[j] / (d2 * np.sqrt(d2))
+                    ax += dx * inv; ay += dy * inv; az += dz * inv
+                vx[i] += hdt * ax; vy[i] += hdt * ay; vz[i] += hdt * az
+        out[p, 0] = qx[t]; out[p, 1] = qy[t]; out[p, 2] = qz[t]
+        out[p, 3] = vx[t]; out[p, 4] = vy[t]; out[p, 5] = vz[t]
+
+
+def integrate_ensemble_parallel(giants0, gm, gm0, tp0, dt, n_steps):
+    """24-core parallel CPU ensemble. Returns (N,6) final test-particle states."""
+    giants0 = np.ascontiguousarray(giants0, np.float64)
+    gm = np.ascontiguousarray(gm, np.float64)
+    tp0 = np.ascontiguousarray(tp0, np.float64)
+    out = np.zeros((tp0.shape[0], 6))
+    _ensemble_par(giants0, gm, gm0, giants0.shape[0], tp0, dt, n_steps, out)
+    return out
 
 
 def integrate_fast(sys, dt, n_steps, record_every=0):

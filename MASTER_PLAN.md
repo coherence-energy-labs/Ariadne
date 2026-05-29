@@ -507,6 +507,10 @@ these add depth where real value remained.
   doubly-averaged Gauss-ring secular integrator (reaches Gyr), validated vs analytic Laplace-Lagrange
   (ratio 1.0000) AND the exact integrator (14%/4% on the real eTNOs). Honest: fixed-ring P9 disperses,
   not confines (averaging removes resonances). *DoD:* **G31a/b/c/d**.
+- **Stage 32 — Multi-backend ensemble + intelligent selector** *(done)*: 24-core parallel (8.7x@N=1k)
+  + numba.cuda GPU (faithful 1.2e-14) ensemble integrators + a measured-crossover selector; honest
+  forge audit (tau-field cost methods are redundant in astrodynamics; the selector is the transfer).
+  *DoD:* **G32a/b/c**.
 
 ---
 
@@ -591,8 +595,16 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 31 — Secular/Gyr frontier + 427x acceleration
-**COMPLETE**. Removed the two walls Stage 30 left: (1) `secular_fast.py` -- a numba-JIT of the exact
+**Current stage:** Stage 32 — Multi-backend ensemble integration + intelligent selector
+**COMPLETE**. "Use exactly what works best, and when": measured the backend crossovers and built a
+selector (`dynamics/integrators.py`) routing each job to the winner -- single trajectory -> numba
+(427x); ensemble N<1k -> 1-core, 1k-5k -> 24-core CPU (8.7x at N=1k), >=5k -> RTX 5080 GPU (~3x, both
+faithful: parallel 0.0, GPU 1.2e-14); Gyr -> secular-averaged. GeForce float64 is throttled ~1/64 so
+the 24-core CPU is the workhorse and the GPU edge is only ~1.5x -- reported honestly. Also did the deep
+forge-shootouts audit: the tau-field cost methods do NOT help Ariadne (tau is DERIVED from gravity ->
+redundant; confirmed by Ariadne's own Stage-12 note + the forge's own honest-loss files); the
+transferable win is the SELECTOR pattern (gap17/22/23), now built. All Stage 32 gates pass.
+PRIOR (Stage 31): Removed the two walls Stage 30 left: (1) `secular_fast.py` -- a numba-JIT of the exact
 symplectic map, **427x faster** (1.5k -> 640k steps/s), faithful to 1.3e-11, so 10-100 Myr is reachable
 EXACTLY; (2) `secular_avg.py` -- a doubly-averaged Gauss-ring secular integrator that freezes the
 semi-major axes (averaging out the fast orbital phases) so a 1-Myr step is stable, reaching Gyr in
@@ -1124,6 +1136,30 @@ heliocentric coordinates** (Duncan, Levison & Lee 1998). Standard Newtonian grav
   process beyond a 100-kyr run; we measure the secular RATES and their spread, NOT a 4-Gyr origin story,
   and we do NOT claim to have proven Planet 9 exists. Run: `PYTHONPATH=src python -m ariadne.validate.stage30`.
 
+**Stage 32 results (multi-backend ensemble integration + intelligent selector; honest forge audit):**
+The directive was "use exactly what works best, and when." There is no single best integrator, so we
+MEASURED the crossovers and built a selector that routes each job to the winner.
+- **Backends (all faithful):** `secular_fast.integrate_ensemble_parallel` (24-core, rel err 0.0 vs the
+  serial map) and `secular_gpu` (numba.cuda RTX 5080, rel err 1.2e-14). Measured ensemble speedups:
+  24-core **8.7x at N=1k**, GPU **~3x at N=80k**. KEY honest caveat: a GeForce GPU throttles float64 to
+  ~1/64, so the GPU's edge over the 24-core CPU is only ~1.5x -- the CPU is the workhorse.
+- **The selector (`dynamics/integrators.py`):** N<1000 -> single-core numba; 1000<=N<5000 -> 24-core;
+  N>=5000 -> GPU (else 24-core). Single trajectory -> numba (427x); Gyr non-crossing -> secular-averaged.
+  Its switching signals are EXACT and known per call, so (unlike the forge's noisy network selectors)
+  no hysteresis is needed. This is the ACE-forge "intelligent selector" (gap17/22/23) -- the soundest,
+  fair-tested idea in that directory -- applied where it belongs.
+- **Honest forge audit (the tau-field methods):** ported the forge coherence-guided A* (`astar_coherence`,
+  the cost=beta*w/tau idea) to the transport graph. It does NOT help: the admissible energy heuristic
+  already expands ~4 nodes and the manifold-coherence field is nearly flat, so a tau-bias only breaks
+  optimality. This is STRUCTURAL, confirmed four ways: (a) this benchmark, (b) Ariadne's own Stage-12
+  note that dropped the tau_c gradient term, (c) Stage-27 Newton recovery (tau_c collapses to the
+  Newtonian potential), (d) the forge's OWN honest-loss files (`run_outputs/transport_t1` = "LOSS",
+  `crack_honest_losses.py`). The lesson: forge tau-methods shine where tau is an INDEPENDENT learned
+  signal (One Link networking -- peer reliability you can't compute from physics); they are redundant
+  where tau is DERIVED from the governing dynamics (astrodynamics). Same framework, opposite regime.
+  `astar_coherence` is kept (gamma=0 == optimal A*) but not oversold. Run: `PYTHONPATH=src python -m
+  ariadne.validate.stage32`; full perf table: `PYTHONPATH=src python -m ariadne.perf`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1132,6 +1168,15 @@ heliocentric coordinates** (Duncan, Levison & Lee 1998). Standard Newtonian grav
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.32` — Stage 32 (multi-backend ensemble + intelligent selector) complete. Added
+  dynamics/secular_gpu.py (numba.cuda one-thread-per-particle ensemble, faithful 1.2e-14),
+  secular_fast.integrate_ensemble_parallel (24-core, allocation-free scalar Kepler; 8.7x at N=1k),
+  dynamics/integrators.py (the selector: measured crossovers parallel>=1k, gpu>=5k), perf.py (unified
+  harness), transport_graph.search.astar_coherence + node_coherence (forge tau-field port),
+  validate/stage32.py + tests/test_integrators.py. HONEST: the tau-field cost methods do NOT help
+  Ariadne's search/optimization (tau is derived from gravity -> redundant; Newton recovery), confirmed
+  by Ariadne's own Stage-12 note + the forge's own honest-loss files. The transferable forge win is the
+  SELECTOR pattern, now the brain of the multi-backend integrator. No new physics; firewall intact.
 - 2026-05-29 `v0.31` — Stage 31 (secular/Gyr frontier + 427x acceleration) complete. Added
   dynamics/secular_fast.py (numba-JIT of the exact symplectic map: 1.5k->640k steps/s = 427x, faithful
   to 1.3e-11; integrate_fast + integrate_fast_elements) and dynamics/secular_avg.py (doubly-averaged
