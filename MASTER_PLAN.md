@@ -434,15 +434,20 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
   CR3BP/manifold engine to the four Galilean moons with only constants (sensible L-points, periodic
   Lyapunov orbits, moon-tour Delta-v); dynamics/low_thrust.py adds continuous-acceleration dynamics
   (zero-thrust = CR3BP; tangential dC/dt = -2a|v| -> spiral). *DoD:* **G_jov, G_lt**.
-- **Stage 14+ (optional)** — discovery engine mining novel Galilean tour legs (novelty, long shot);
-  or consolidation into a polished open release + white-paper. Earth-Moon + Jupiter now covered.
-- **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
-  baseline; efficiency benchmark. *DoD:* **G11**.
-- **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
-  *DoD:* **G12** + first verified novel route.
-- **Stage 8 — Generalize**: Sun–Earth, Mars system, Jovian/Saturnian moons, asteroids;
-  scale the atlas.
-- **Stage 9 — Deliverables**: white paper, open atlas release, GMAT-validated reference routes.
+- **Stage 14 — Field/heuristic search + efficiency benchmark** *(done)*: discretize the
+  IPTN into a transport graph (nodes = Lyapunov orbits at energy levels, edges = exact
+  section-crossing patches); route with Dijkstra (SSSP) and A* (admissible energy heuristic)
+  against an exhaustive brute-force baseline; report the optimum-match + node-expansion speedup.
+  (FMM/HJB continuous-field reachability is the continuous-control cousin, most relevant to the
+  low-thrust regime — noted as a future extension, not wired to real dynamics here.) *DoD:* **G11**.
+- **Stage 15 — Discovery engine + first verified novel route** *(planned)*: mine the transport
+  graph for non-obvious multi-hop routes; promote a candidate only if it survives full-ephemeris
+  re-convergence **and** an independent GMAT check (§7.4 burden of proof). *DoD:* **G12**.
+- **Stage 16 — Generalize + scale the atlas** *(planned)*: extend beyond Earth–Moon/Jupiter to the
+  Mars system, Saturnian moons, and asteroids; persist orbits/manifolds/connections/routes to an
+  HDF5 atlas with provenance and a ranked route database.
+- **Stage 17 — Deliverables** *(planned)*: white paper (methods + validation + the efficiency
+  result + any verified novel route), open atlas release, and GMAT-validated reference routes.
 
 ---
 
@@ -527,12 +532,15 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 13 — Engine generalization (Jovian moons) + low-thrust regime **COMPLETE**
-(gates G_jov, G_lt). The engine generalizes to a new system with only constants; low-thrust
-dynamics validated. Next: consolidation/white-paper, or deeper Jovian route discovery.
-**Next action:** (a) deepen the Jovian discovery (manifold connections / gravity-assist tours),
-or (b) consolidate into a polished open release + white-paper. Earth-Moon is thoroughly covered;
-the engine now spans multiple systems and both propulsion regimes.
+**Current stage:** Stage 14 — Field/heuristic search + efficiency benchmark **COMPLETE** (gate
+G11). The IPTN is now a `transport_graph` routed by Dijkstra (SSSP) and A*; all routers agree on
+the 36.9 m/s optimum and A* reaches it with 35x less work than brute force. Same-energy L1<->L2
+patches come out at 0.0-0.4 m/s (real ballistic heteroclinics). The SSSP/Dijkstra payoff the
+project was built toward is now demonstrated and benchmarked.
+**Next action:** Stage 15 — the discovery engine (mine the transport graph for non-obvious
+multi-hop routes; promote a candidate only if it survives full-ephemeris re-convergence AND an
+independent GMAT check, per §7.4). Then Stage 16 (generalize + HDF5 atlas) and Stage 17 (white
+paper + open release).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -716,6 +724,41 @@ MOND-simple's ~2x cluster failure). So one g_A is roughly consistent galaxies<->
 of percent (caveats: galaxy scale wants ~1.4x g_A, clusters ~14% short, sensitive to M/L and
 r500). Artifacts: `independent_btfr_test.py`, `independent_crossscale_test.py`.
 
+**Stage 14 results (transport-graph search + efficiency benchmark, G11):** discretized the
+Earth-Moon IPTN into a `transport_graph` -- nodes are L1/L2 Lyapunov orbits at a Jacobi grid
+{3.120, 3.140, 3.160, 3.172}, edges are EXACT Poincare section crossings (x = 1-mu): the two
+tube cuts are intersected as curves in (y, v_y), so at a crossing position and v_y match and the
+patch Delta-v is just |v_x^A - v_x^B|. No position-gap fudge -- if the cuts do not cross, there
+is no edge. The 8-node graph has 53 patch edges.
+- **Physical sanity (G11d):** the same-energy L1<->L2 patches come out at **0.0-0.4 m/s** -- the
+  known ballistic heteroclinic connections (consistent with G6), so the edge weights are real
+  dynamics, not arbitrary numbers. 37 edges are < 50 m/s.
+- **Optimality (G11a):** Dijkstra (SSSP), A* (admissible energy heuristic), and exhaustive
+  brute force ALL return the same optimum, **36.9 m/s** for L1@3.120 -> L2@3.172 (a single
+  cross-energy patch, whose |Delta v_x| equals the energy change -- physically self-consistent).
+- **Efficiency (G11b):** A* finds that optimum in **6 node-expansions** vs brute force's **210
+  edge-expansions -- 35x less work** (Dijkstra 8). The win is purely efficiency: all three are
+  exact, so search does not sacrifice the optimum, it just reaches it far cheaper. This is the
+  benchmark the project promised, and the SSSP/Dijkstra formulation that motivated it.
+- **Admissibility (G11c):** the energy heuristic h(n) = k|C_n - C_target| is verified to never
+  overestimate the true remaining cost, so A*'s optimality is guaranteed by construction.
+- **Convergence / discretization honesty (IMPORTANT):** the patch Delta-v is estimated from
+  intersections of *discretized* tube cuts, so it depends on the seed count. Coarse sampling
+  produces spuriously CHEAP multi-hop routes (artifact intersections of under-resolved curves);
+  refining converges the optimum upward and simplifies the route: **n_seeds 60 -> 21.6 m/s
+  (5 hops); 90 -> 27.3 (2 hops); 120 -> 36.9 (direct)**. We validate at n_seeds=120 (converged
+  regime; the direct edge itself is stable to ~1 m/s from n_seeds 80). A flown route would refine
+  the winning patch locally. The G11 efficiency claim holds at every resolution (search is exact).
+- **Coherence-weighted variant:** Dijkstra on `dv + w*fragility` (fragility = log Floquet
+  stretching) -- HONEST finding: on this graph the min-Delta-v patch is also the least-fragile
+  (one short hop), so the robustness weight does not change the route here; the two objectives
+  agree (unlike the Stage-11 transfers, where they conflicted). The mechanism is exercised in a
+  unit test that makes an edge artificially fragile and confirms the route changes.
+- **Scope honesty:** FMM/HJB continuous-field reachability (the other half of the original
+  "field search") is the continuous-control cousin, most relevant to the low-thrust regime; it
+  is noted as a future extension, NOT wired to real dynamics here. Figure: transport_graph.png.
+  Run: `PYTHONPATH=src python -m ariadne.validate.stage14`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -724,6 +767,18 @@ r500). Artifacts: `independent_btfr_test.py`, `independent_crossscale_test.py`.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.14` — Stage 14 (transport-graph search + efficiency benchmark, G11) complete.
+  Added the `transport_graph` package: graph.py (IPTN as a graph; edges are exact Poincare
+  section-crossing patches, Delta-v = |dv_x| at the (y,v_y) curve intersection), search.py
+  (Dijkstra SSSP + A* with an admissible energy heuristic + exhaustive brute-force baseline +
+  admissibility verifier), benchmark.py; validate/stage14.py, test_transport_graph.py (6 tests),
+  viz.figure_transport_graph, pytest.ini (slow marker). G11 PASS (at converged n_seeds=120): all
+  three routers agree on the 36.9 m/s optimum; A* reaches it in 6 expansions vs brute force's 210
+  (35x); heuristic verified admissible; same-energy L1<->L2 patches are 0.0-0.4 m/s (ballistic
+  heteroclinics, consistent with G6). Honest: search wins on efficiency only (all exact); patch
+  Delta-v is discretization-dependent (coarse seeds give spurious cheap multi-hop artifacts;
+  converges 60->21.6, 90->27.3, 120->36.9 m/s); coherence weight does not change the route here
+  (min-Delta-v patch is also least-fragile). FMM/HJB deferred as a noted extension.
 - 2026-05-29 `v0.13` — Stage 13 (engine generalization + low-thrust regime) complete. Added
   transfers/jovian.py (Galilean-moon libration + moon-tour Delta-v), dynamics/low_thrust.py
   (continuous-acceleration CR3BP + energy-rate theorem), validate/stage13.py, test_stage13.py

@@ -485,6 +485,62 @@ def figure_low_thrust_spiral(mu=None):
     return path
 
 
+def figure_transport_graph():
+    """The Earth-Moon transport graph with the minimum-Delta-v route highlighted (Stage 14)."""
+    from ..data.constants import EARTH_MOON
+    from ..transport_graph.graph import build_transport_graph
+    from ..transport_graph.search import dijkstra, reconstruct_path
+
+    energies = [3.120, 3.140, 3.160, 3.172]
+    g = build_transport_graph(EARTH_MOON, energies, points=("L1", "L2"),
+                              n_seeds=120)        # converged resolution (see Stage 14 note)
+    source = f"L1@{energies[0]:.3f}"
+    target = f"L2@{energies[-1]:.3f}"
+    dj = dijkstra(g, source)
+    route = reconstruct_path(dj["prev"], source, target) or []
+    route_edges = set(zip(route[:-1], route[1:]))
+
+    def pos(node):
+        return (node.jacobi, 0.0 if node.point == "L1" else 1.0)
+
+    fig, ax = plt.subplots(figsize=(10.5, 5.2))
+    # all patch edges, faint; near-ballistic ones dashed green; route bold blue
+    for elist in g.edges.values():
+        for e in elist:
+            x0, y0 = pos(g.nodes[e.src]); x1, y1 = pos(g.nodes[e.dst])
+            dv_ms = g.dv_ms(e.dv)
+            if (e.src, e.dst) in route_edges:
+                ax.annotate("", xy=(x1, y1), xytext=(x0, y0),
+                            arrowprops=dict(arrowstyle="-|>", color="tab:blue", lw=2.4))
+            elif dv_ms < 50.0:
+                ax.plot([x0, x1], [y0, y1], color="tab:green", ls="--", lw=1.0, alpha=0.7)
+            else:
+                ax.plot([x0, x1], [y0, y1], color="0.8", lw=0.5, alpha=0.6, zorder=0)
+    for node in g.nodes.values():
+        x, y = pos(node)
+        on = node.key in route
+        ax.plot(x, y, "o", ms=13, color="tab:blue" if on else "0.5", zorder=3)
+        ax.annotate(node.key, (x, y + 0.08), fontsize=8, ha="center")
+
+    total = g.dv_ms(dj["dist"].get(target, float("nan")))
+    ax.plot([], [], color="tab:blue", lw=2.4, label=f"min-Δv route ({total:.0f} m/s)")
+    ax.plot([], [], color="tab:green", ls="--", label="near-ballistic patch (<50 m/s)")
+    ax.plot([], [], color="0.8", lw=0.8, label="other patch edges")
+    ax.set_yticks([0, 1]); ax.set_yticklabels(["L1", "L2"])
+    ax.set_ylim(-0.4, 1.5)
+    ax.set_xlabel("Jacobi constant C  (energy level)")
+    ax.set_title("Ariadne transport graph — Dijkstra/A* route over the L1/L2 manifold network\n"
+                 f"{source}  →  {target}   (SSSP = the shortest-path search that beats brute force)")
+    ax.legend(loc="upper center", fontsize=8, ncol=3)
+    ax.invert_xaxis()      # lower C (more energy) to the right reads naturally
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "transport_graph.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())

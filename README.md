@@ -133,8 +133,27 @@ zero thrust and, under tangential thrust, raises the energy at exactly the predi
 > Honest scope: the Galilean tour is known (Koon–Lo–Marsden–Ross); this proves the engine ports to
 > a new system and sets up route discovery — not a new route. Standard gravity throughout.
 
+And then the payoff the project was built toward: the Interplanetary Transport Network as a
+**searchable graph.** Nodes are L1/L2 Lyapunov orbits at a grid of energies; an edge is an *exact*
+Poincaré section crossing — we intersect the two tube cuts as curves in the (y, v_y) plane, so at
+a crossing the position and v_y match and the patch cost is just the v_x difference. Same-energy
+L1↔L2 patches come out at **0.0–0.4 m/s** (the known ballistic heteroclinic connections), so the
+edge weights are real dynamics. Routing the graph from L1 to L2 with **Dijkstra (SSSP)** and **A***
+finds the optimum (37 m/s) — and so does an exhaustive brute force, but A* gets there in **6 node
+expansions versus brute force's 210, a 35× efficiency win.**
+
+![Transport graph and the shortest-path route](docs/figures/transport_graph.png)
+
+> Honest scope: all three routers are exact — the win is *efficiency*, not a better answer (you
+> cannot beat the optimum). The A* heuristic is verified admissible, so its optimality is
+> guaranteed, not luck. The patch Δv is estimated from *discretized* tube cuts, so coarse sampling
+> yields spuriously cheap multi-hop routes; the optimum converges upward to the direct ~37 m/s
+> patch as the manifold is refined (60→21.6, 90→27.3, 120→36.9 m/s; validated at 120). On this
+> graph the cheapest patch is also the least fragile, so the coherence/robustness weight does not
+> change the route here (the two objectives happen to agree).
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage13` (and `stage1`–`stage12`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage14` (and `stage1`–`stage13`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)
