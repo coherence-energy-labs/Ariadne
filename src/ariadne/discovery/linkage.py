@@ -128,6 +128,62 @@ def recovery_report(candidates, geom, min_members=4, purity=0.8):
 
 
 # --------------------------------------------------------------------------- #
+# REAL detections: build tracklets from the JPL/MPC astrometric record
+# --------------------------------------------------------------------------- #
+def tracklets_from_mpc(designation, window_days=120, min_per_night=2, obj_label=0):
+    """Build nightly tracklets from a known object's REAL recorded MPC astrometry.
+
+    Fetches the actual telescope observations (RA, Dec, epoch) via astroquery, restricts to the
+    DENSEST `window_days` opposition window, and groups same-night detections into tracklets
+    (position + on-sky rate). Observatory-vs-geocenter parallax is ignored (negligible for distant
+    objects). Returns (tracklets, e0). Requires astroquery + network.
+    """
+    from astroquery.mpc import MPC
+    o = MPC.get_observations(designation)
+    jd = np.array([float(r["epoch"].value) for r in o])
+    ra = np.radians([float(r["RA"].value) for r in o])
+    dec = np.radians([float(r["DEC"].value) for r in o])
+    # densest window
+    best_n, best_t0 = 0, jd.min()
+    for t0 in np.sort(jd):
+        n = ((jd >= t0) & (jd < t0 + window_days)).sum()
+        if n > best_n:
+            best_n, best_t0 = n, t0
+    m = (jd >= best_t0) & (jd < best_t0 + window_days)
+    from collections import defaultdict
+    nights = defaultdict(list)
+    for j, r, d in zip(jd[m], ra[m], dec[m]):
+        nights[int(round(j))].append((j, r, d))
+    tracks = []
+    for pts in nights.values():
+        if len(pts) < min_per_night:
+            continue
+        pts = sorted(pts)
+        (j1, r1, d1), (j2, r2, d2) = pts[0], pts[-1]
+        if j2 - j1 < 1e-4:
+            continue
+        et = (0.5 * (j1 + j2) - 2451545.0) * 86400.0
+        tracks.append({"t": et, "ra": 0.5 * (r1 + r2), "dec": 0.5 * (d1 + d2),
+                       "dra": (r2 - r1) / ((j2 - j1) * 86400.0),
+                       "ddec": (d2 - d1) / ((j2 - j1) * 86400.0), "obj": obj_label})
+    e0 = tracks[0]["t"] if tracks else None
+    return tracks, e0
+
+
+def add_interlopers(tracks, n, seed=0, dec_max=0.5):
+    """Append n random interloper tracklets at the existing observation times (for a haystack)."""
+    rng = np.random.default_rng(seed)
+    times = [tr["t"] for tr in tracks]
+    out = list(tracks)
+    for _ in range(n):
+        out.append({"t": float(rng.choice(times)), "ra": rng.uniform(0, 2 * np.pi),
+                    "dec": float(np.arcsin(rng.uniform(-dec_max, dec_max))),
+                    "dra": rng.normal(0, 5e-9), "ddec": rng.normal(0, 5e-9), "obj": -1})
+    rng.shuffle(out)
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # Synthetic-from-real tracklet generator (for honest validation)
 # --------------------------------------------------------------------------- #
 def synthesize_tracklets(orbits, epoch="2026-01-01T00:00:00",
