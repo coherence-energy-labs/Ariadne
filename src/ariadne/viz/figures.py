@@ -268,6 +268,75 @@ def figure_low_energy_transfer(mu=None, C=3.15):
     return path
 
 
+def figure_halo_3d(mu=None):
+    from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+    from ..data.constants import EARTH_MOON
+    from ..dynamics.cr3bp import propagate
+    from ..orbits.lagrange import lagrange_points
+    from ..orbits.halo import halo_family
+    mu = EARTH_MOON.mu if mu is None else mu
+    halos = halo_family(mu, "L1", n=16, dz=2e-3)
+    L = lagrange_points(mu)
+    fig = plt.figure(figsize=(8.5, 7))
+    ax = fig.add_subplot(111, projection="3d")
+    cmap = plt.get_cmap("plasma")
+    for i, h in enumerate(halos):
+        sol = propagate(h.s0, (0.0, h.period), mu,
+                        t_eval=np.linspace(0, h.period, 300))
+        ax.plot(sol.y[0], sol.y[1], sol.y[2],
+                color=cmap(i / len(halos)), lw=0.9)
+    ax.scatter([1 - mu], [0], [0], color="0.5", s=60, label="Moon")
+    ax.scatter([L["L1"][0]], [0], [0], color="k", marker="+", s=80)
+    ax.set_xlabel("x"); ax.set_ylabel("y"); ax.set_zlabel("z")
+    ax.set_title("Earth–Moon L1 halo family (3D)\nbranching from the Lyapunov bifurcation")
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "halo_family_3d.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
+def figure_genesis():
+    from ..data.constants import SUN_EARTH as SE
+    from ..orbits.lagrange import lagrange_points
+    from ..manifolds.manifold import manifold_seeds, manifold_trajectory
+    from ..transfers.genesis import genesis_halo
+    mu, L = SE.mu, SE.L_star
+    h, _ = genesis_halo()
+    # find the manifold trajectory that comes closest to Earth
+    best_d, best_Y = np.inf, None
+    for stable in (True, False):
+        for br in (+1, -1):
+            seeds, _ = manifold_seeds(mu, h, n_seeds=100, displacement=1e-6,
+                                      stable=stable, branch=br)
+            for s in seeds:
+                _, Y = manifold_trajectory(mu, s, stable=stable, t_max=8.0, n=1500)
+                d = (np.sqrt((Y[0] - (1 - mu)) ** 2 + Y[1] ** 2 + Y[2] ** 2).min()) * L
+                if d < best_d:
+                    best_d, best_Y = d, Y
+    ex = (np.asarray([s.s0 for s in [h]])[0])
+    fig, ax = plt.subplots(figsize=(8.2, 6.6))
+    # plot in km relative to Earth
+    ex_e = (1 - mu)
+    ax.plot((best_Y[0] - ex_e) * L, best_Y[1] * L, color="tab:purple", lw=0.9,
+            label="manifold (superhighway)")
+    ax.plot(0, 0, "o", color="tab:blue", ms=12, label="Earth")
+    ax.plot((lagrange_points(mu)["L1"][0] - ex_e) * L, 0, "k+", ms=11, label="Sun–Earth L1")
+    ax.add_patch(plt.Circle((0, 0), 6378.0, color="tab:blue", alpha=0.3))
+    ax.set_aspect("equal")
+    ax.set_xlabel("x − Earth (km)"); ax.set_ylabel("y (km)")
+    ax.set_title(f"Genesis mechanism: Sun–Earth L1 halo manifold\n"
+                 f"reaches {best_d:,.0f} km from Earth (halo period 178 d)")
+    ax.legend(fontsize=9)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "genesis_superhighway.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
@@ -279,6 +348,10 @@ def main():
     print("  ->", figure_ephemeris_validation())
     print("Rendering low-energy lunar transfer (ballistic capture) ...")
     print("  ->", figure_low_energy_transfer())
+    print("Rendering Earth-Moon L1 halo family (3D) ...")
+    print("  ->", figure_halo_3d())
+    print("Rendering Genesis Sun-Earth superhighway ...")
+    print("  ->", figure_genesis())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 

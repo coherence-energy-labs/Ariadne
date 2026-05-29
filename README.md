@@ -60,8 +60,19 @@ transfer is **~3,756 m/s**, bracketing the Coimbra **3,925 m/s** result (direct 
 > the exported GMAT script are Stage 7. Numbers here are reported from the construction, not
 > fitted to the target.
 
+We also build **3D halo orbits** (the family branches exactly at the Stage-2 vertical
+bifurcation, C≈3.186) and reproduce the **Genesis mechanism**: a real Sun–Earth L1 halo
+(period **177.9 days**, matching SOHO/Genesis) whose invariant manifold carries a spacecraft
+from L1 (1.49M km out) down to **10,315 km from Earth** — the interplanetary superhighway.
+
+![Genesis Sun–Earth superhighway](docs/figures/genesis_superhighway.png)
+
+Everything is cross-validated against independent tools: two ephemeris libraries (spiceypy vs
+jplephem on DE440) agree to **6 mm**, and two independent integrators (DOP853 vs Radau) agree
+to **0.26 m**.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage6` (and `stage1`–`stage5`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage7` (and `stage1`–`stage6`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

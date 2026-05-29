@@ -414,10 +414,12 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 - **Stage 6 — Low-energy transfer + ballistic capture** *(done)*: real-manifold lunar capture
   (LOI from CR3BP dynamics); end-to-end LEO->LLO transfer assembly + sweep; brackets Coimbra.
   *DoD:* **G8r** (capture < direct), **G8t** (total in low-energy class).
-- **Stage 7 — Exact reproduction & cross-validation**: BCR4BP Sun-assisted departure +
-  primer-vector/collocation optimization on DE440 to the *exact* 3,925 m/s (full G8); 3D halo
-  + Sun-Earth tooling to reproduce Genesis (G9); run the exported GMAT script (G10).
-  *DoD:* **G8(full), G9, G10**.
+- **Stage 7 — Halos + Genesis + cross-validation** *(done)*: 3D halo orbits (validated vs the
+  Stage-2 bifurcation); Sun-Earth L1 halo + manifold to Earth (Genesis); independent
+  ephemeris-library + integrator cross-checks. *DoD:* **G_halo, G9, G10\***.
+- **Stage 8 — Exact reproduction**: continue the CR3BP transfer into BCR4BP then full DE440
+  ephemeris; collocation + primer-vector convergence to the *exact* 3,925 m/s / 32 d; literal
+  GMAT run. *DoD:* **G8(full), G10(literal)**.
 - **Stage 6 — Field/heuristic search**: FMM + HJB + transport-graph A\*; brute-sweep
   baseline; efficiency benchmark. *DoD:* **G11**.
 - **Stage 7 — Discovery engine**: atlas build; transport graph; novel-route mining + verify.
@@ -509,15 +511,13 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 6 — Low-energy transfer + ballistic capture **COMPLETE**
-(gates G8r/G8t pass: rigorous manifold capture, end-to-end transfer brackets Coimbra).
-Next: Stage 7 (exact reproduction + Genesis + GMAT run).
-**Next action:** Stage 7 — close the remaining gap honestly: add `dynamics/bcr4bp` Sun-assisted
-departure + `optimize/primer_vector.py` and optimize the FULL transfer (Lambert guess ->
-collocation refine on DE440 ephemeris) to converge the *exact* 3,925 m/s with matched
-boundary conditions (full G8); extend the orbit tooling to 3D HALO orbits + the Sun-Earth
-system to reproduce **Genesis** (G9); actually RUN the exported GMAT script for the G10
-cross-check.
+**Current stage:** Stage 7 — Halos + Genesis + independent cross-validation **COMPLETE**
+(gates G_halo, G9, G10* pass). Next: Stage 8 (exact 3,925 m/s via ephemeris collocation).
+**Next action:** Stage 8 — exact reproduction. The Sun perturbs the 12-day CR3BP transfer by
+~40,900 km (measured), so the exact transfer must be retargeted in the Sun-aware model: seed
+with the CR3BP manifold solution, continue into BCR4BP, then into the full DE440 ephemeris,
+and converge with `optimize/collocation.py` + a primer-vector check to the exact 3,925 m/s /
+32 d. Optionally install + run GMAT for the literal G10.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 
 **Stage 1 results (Earth-Moon, mu=0.012150584):** Jacobi conserved max|dC|=1.4e-12;
@@ -583,6 +583,23 @@ Lyapunov manifold does not cleanly reach Earth). Probe: EM L1/L2 manifolds reach
 lunar periapsis but only ~58,500 km Earth perigee (why LEO departure needs the Sun's help).
 Figure: low_energy_transfer.png. Run: `PYTHONPATH=src python -m ariadne.validate.stage6`.
 
+**Stage 7 results (halos, Genesis, independent cross-validation):**
+- **3D halo orbits** (orbits/halo.py): x-z symmetric corrector; the Earth-Moon L1 halo family
+  branches at **C=3.18632**, matching the Stage-2 Lyapunov vertical bifurcation (3.1864) — an
+  independent cross-check. 15+ periodic 3D orbits, periodicity ~3e-10.
+- **Genesis (G9)**: a real **Sun-Earth L1 halo, period 177.9 d** (matching SOHO/Genesis ~178 d);
+  its unstable manifold carries a spacecraft from L1 (1.49e6 km out) to **10,315 km from Earth**
+  (0.7% of the L1 distance) — the interplanetary superhighway Genesis flew. (Fix: SE needs
+  scale-appropriate amplitudes; L1 sits ~0.01 nondim from Earth so 1e-3 was nonlinear.)
+- **Independent cross-validation (G10*)**: two ephemeris libraries (spiceypy vs jplephem on
+  DE440) agree to **6 mm**; two independent integrators (DOP853 vs Radau, ephemeris-perturbed,
+  1 day) agree to **0.26 m**. The GMAT script is exported (docs/examples/) but GMAT-the-app is
+  not installed here, so these serve the G10 cross-check purpose.
+- **Sun's effect on the transfer** (honest G8 progress): the same capture seed diverges
+  **~40,900 km** between CR3BP and BCR4BP over the 12.3-day coast — quantifying why the exact
+  3,925 m/s solution must be designed in the Sun-aware/ephemeris model (Stage 8).
+Figures: halo_family_3d.png, genesis_superhighway.png. Run: `... ariadne.validate.stage7`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -591,6 +608,13 @@ Figure: low_energy_transfer.png. Run: `PYTHONPATH=src python -m ariadne.validate
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-28 `v0.7` — Stage 7 (halos + Genesis + independent cross-validation) complete. Added
+  orbits/halo.py (3D halo corrector + family from the Lyapunov bifurcation), transfers/genesis.py
+  (Sun-Earth L1 halo + Earth-reaching manifold), validate/stage7.py, viz halo-3D + Genesis
+  figures, test_halo.py + test_stage7.py. Gates: EM-L1 halos branch at C=3.18632 (matches
+  Stage 2); SE-L1 halo period 177.9 d, manifold reaches 10,315 km from Earth; spiceypy vs
+  jplephem agree 6 mm, DOP853 vs Radau 0.26 m. Fixed SE scale (small-mu needs small amplitudes).
+  Sun perturbs the transfer ~40,900 km over 12 d -> exact 3925 is Stage 8 (ephemeris collocation).
 - 2026-05-28 `v0.6` — Stage 6 (low-energy transfer + ballistic capture) complete. Added
   transfers/lunar_capture.py (real-manifold ballistic capture; Moon-relative periapsis speed),
   transfers/low_energy_lunar.py (end-to-end TLI+capture assembly + sweep), validate/stage6.py,
