@@ -475,8 +475,10 @@ these add depth where real value remained.
   -- launch epoch is now a free variable; recovers the real Earth->Mars windows (~26-mo cadence),
   global optimum 2026-11 / 5,679 m/s, time/energy Pareto + coherence knee; PNG + GMAT flight-path
   export. *DoD:* **G21a/b/c**.
-- **Stage 22 — Gravity-assist multi-flyby global optimizer** *(planned)*: differential evolution over
-  flyby sequence + epochs (e.g. Earth-Venus-Earth-Mars, Earth->Jupiter); grand-tour routing.
+- **Stage 22 — Gravity-assist multi-flyby global optimizer** *(done)*: `interplanetary/flyby.py` --
+  patched-conic flyby chain + turn authority + differential-evolution global search; a Venus-Earth-
+  Earth VEEGA cuts launch C3 to Jupiter 76.9 -> 16.8 km^2/s^2 (4.6x, Galileo-class), all flybys
+  feasible (feasible but not fully ballistic; minimal-DSM refinement noted). *DoD:* **G22a/b**.
 - **Stage 23 — Low-thrust + unified multi-objective grand optimizer** *(planned)*: continuous-thrust
   interplanetary leg + one optimizer over time/energy/robustness composing all tools (coherence-balanced).
 - **Stage 24 — Packaging + open-source** *(planned)*: pyproject, CI, pip-installable, docs.
@@ -564,14 +566,13 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 21 — Interplanetary porkchop + epoch-swept global optimizer **COMPLETE**
-(gates G21a/b/c). The launch epoch is now a FREE variable: the optimizer recovers the real
-Earth->Mars windows (~26-mo cadence), finds the 2026 global optimum (TOF 310 d, 5,679 m/s), and maps
-the time-vs-energy Pareto with a coherence-balanced knee -- with PNG porkchop/flight-path figures and
-a Sun-centered GMAT export. This begins the grand multi-objective optimizer the user asked for.
-**Next action:** Stage 22 — gravity-assist multi-flyby global optimizer (differential evolution over
-flyby sequence + epochs). Then Stage 23 (low-thrust + unified multi-objective grand optimizer),
-Stage 24 (packaging).
+**Current stage:** Stage 22 — Gravity-assist multi-flyby global optimizer **COMPLETE** (gates
+G22a/b). A Venus-Earth-Earth VEEGA cuts the launch C3 to Jupiter from the direct 76.9 to 16.8
+km^2/s^2 (4.6x, Galileo-class, ~6.4-yr flight) with all flybys turn-feasible; honest that it is
+feasible-but-not-fully-ballistic (~2.5 km/s powered-flyby Delta-v). PNG flight-path figure added.
+**Next action:** Stage 23 — the UNIFIED multi-objective grand optimizer: a low-thrust interplanetary
+leg + one optimizer over time/energy/robustness composing all the tools (coherence-balanced). Then
+Stage 24 (packaging + open-source).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -917,6 +918,21 @@ been holding fixed, is now a free optimization variable on the real DE440 epheme
   writes a Sun-centered GMAT script of the optimized transfer (drop into GMAT to fly it).
   Run: `PYTHONPATH=src python -m ariadne.validate.stage21`.
 
+**Stage 22 results (gravity-assist multi-flyby global optimizer):** built `interplanetary/flyby.py`
+-- a patched-conic flyby chain (Lambert per leg; at each planet a flyby that ROTATES v_inf but
+cannot change |v_inf|, any mismatch a powered Delta-v, the required turn bounded by the flyby's
+turn authority) with a differential-evolution global search over launch epoch + leg TOFs.
+- **Launch-energy cut (G22a):** the direct Earth->Jupiter transfer needs **C3 = 76.9 km^2/s^2**
+  (beyond most launchers); a **Galileo-class Venus-Earth-Earth VEEGA** reaches **C3 = 16.8** -- a
+  **4.6x reduction** -- launching 2029-12 and arriving Jupiter 2036 (6.4 yr, matching Galileo's class).
+- **Flyby feasibility (G22b):** all three flybys are within turn authority (Venus 66/66, Earth
+  43/43, Earth 30/47 deg). The single-Earth-flyby variant is correctly turn-INFEASIBLE (64 deg
+  needed vs 45 max at v_inf~10 km/s) -- exactly why real missions use TWO Earth flybys.
+- **HONEST:** the global search finds a FEASIBLE VEEGA but not a fully ballistic one -- it spends
+  ~2,487 m/s of powered-flyby maneuvers; Galileo, with finer phasing + small deep-space maneuvers,
+  flew closer to ballistic. The launch-energy cut and flyby feasibility are validated; the
+  minimal-DSM refinement is noted. Figure: veega_jupiter.png. Run: `... -m ariadne.validate.stage22`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -925,6 +941,13 @@ been holding fixed, is now a free optimization variable on the real DE440 epheme
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.22` — Stage 22 (gravity-assist multi-flyby global optimizer) complete. Added
+  interplanetary/flyby.py (patched-conic flyby chain + turn-authority + differential-evolution
+  global search + stored Galileo-class VEEGA reference), validate/stage22.py, test_flyby.py
+  (3 tests), viz.figure_veega. G22 PASS: a Venus-Earth-Earth VEEGA cuts launch C3 to Jupiter from
+  the direct 76.9 to 16.8 km^2/s^2 (4.6x), all flybys within turn authority, ~6.4-yr Galileo-class
+  flight. Honest: feasible but not fully ballistic (~2,487 m/s powered-flyby Delta-v; minimal-DSM
+  refinement noted). The single-Earth-flyby variant is correctly turn-infeasible.
 - 2026-05-29 `v0.21` — Stage 21 (interplanetary porkchop + epoch-swept global optimizer) complete.
   Added the `interplanetary` package: porkchop.py (heliocentric Lambert over launch-date x TOF,
   global differential-evolution optimum, launch-window finder, time/energy Pareto + coherence knee)

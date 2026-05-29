@@ -541,6 +541,55 @@ def figure_transport_graph():
     return path
 
 
+def figure_veega():
+    """Heliocentric flight path of the Galileo-class VEEGA to Jupiter (Stage 22)."""
+    from scipy.integrate import solve_ivp
+    from ..data.constants import GM_SUN, AU_KM
+    from ..data.ephemeris import body_pos, body_state
+    from ..interplanetary.flyby import reference_veega, GALILEO_VEEGA
+    from ..data.ephemeris import et
+    from ..optimize.lambert import lambert
+    v = reference_veega()
+    epochs = v["epochs"]; bodies = v["bodies"]
+
+    def helio(t, s):
+        r = s[:3]; rn = np.linalg.norm(r)
+        return np.concatenate([s[3:], -GM_SUN * r / rn ** 3])
+
+    fig, ax = plt.subplots(figsize=(8.4, 8.0))
+    ax.plot(0, 0, "o", color="gold", ms=14, label="Sun")
+    for body, col, yr in [("VENUS", "tab:orange", 225), ("EARTH", "tab:blue", 365),
+                          ("JUPITER BARYCENTER", "tab:red", 4333)]:
+        ts = epochs[0] + np.linspace(0, yr * 86400.0, 500)
+        P = np.array([body_pos(body, t, "J2000", "SUN") for t in ts])
+        ax.plot(P[:, 0] / AU_KM, P[:, 1] / AU_KM, color=col, lw=0.6, alpha=0.7)
+    # each leg's transfer arc
+    for i in range(len(bodies) - 1):
+        s0 = body_state(bodies[i], epochs[i], "J2000", "SUN")
+        s1 = body_state(bodies[i + 1], epochs[i + 1], "J2000", "SUN")
+        tof = epochs[i + 1] - epochs[i]
+        vv, _ = lambert(s0[:3], s1[:3], tof, GM_SUN)
+        sol = solve_ivp(helio, (0, tof), np.concatenate([s0[:3], vv]),
+                        t_eval=np.linspace(0, tof, 300), method="DOP853", rtol=1e-9, atol=1e-9)
+        ax.plot(sol.y[0] / AU_KM, sol.y[1] / AU_KM, "k-", lw=1.4)
+        # flyby marker
+        ax.plot(s0[0] / AU_KM, s0[1] / AU_KM, "o", color="0.3", ms=6)
+    ax.plot([], [], "k-", lw=1.4, label="transfer legs")
+    ax.plot([], [], "o", color="0.3", ms=6, label="flyby bodies (V/E/E)")
+    ax.set_aspect("equal")
+    ax.set_xlabel("x (AU)"); ax.set_ylabel("y (AU)")
+    ax.set_title(f"Galileo-class VEEGA to Jupiter (Venus-Earth-Earth)\n"
+                 f"launch C3 {v['c3']:.1f} km$^2$/s$^2$ (vs direct ~85), "
+                 f"{v['tof_total_days']/365.25:.1f} yr")
+    ax.legend(fontsize=8, loc="upper left")
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "veega_jupiter.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_porkchop():
     """Earth->Mars porkchop (total Delta-v over launch date x TOF) with the global optimum (Stage 21)."""
     from ..data.ephemeris import et, utc
@@ -763,6 +812,8 @@ def main():
     print("  ->", figure_porkchop())
     print("Rendering Earth->Mars optimal transfer (heliocentric) ...")
     print("  ->", figure_mars_transfer())
+    print("Rendering Galileo-class VEEGA to Jupiter ...")
+    print("  ->", figure_veega())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
