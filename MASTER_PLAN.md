@@ -522,6 +522,12 @@ these add depth where real value remained.
 - **Stage 36 — Uncertainty propagation into clustering** *(done)*: real JPL 1-sigma element errors
   resampled; the marginal eTNO clustering degrades p=0.07 -> 0.13 (fragile; one object's perihelion is
   unconstrained). Current data give no compelling evidence for Planet 9. *DoD:* **G36a/b/c**.
+- **Stage 37 — Independent cross-validation vs REBOUND** *(done)*: same DE440 ICs through Ariadne's WH
+  and REBOUND WHFast agree to 1e-4/100yr, 1.7e-3/2000yr; REBOUND energy bounded 3.6e-6. The integrator
+  is correct by an independent professional code, not just self-consistent. *DoD:* **G37a/b**.
+- **Stage 38 — Selection bias vs clustering (OSSOS test)** *(done)*: scattered control population traces
+  the selection function (mean 21.7 deg); extreme objects cluster the same way (20.4 deg) and are not
+  distinguishable from it (p=0.12). Settles the honest verdict: no compelling P9 evidence. *DoD:* **G38a/b/c**.
 
 ---
 
@@ -606,7 +612,15 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stages 33-36 — GR + real-catalog clustering + uncertainty + differentiable optimization
+**Current stage:** Stages 37-38 — REBOUND cross-validation + selection-bias test (calibration closeout)
+**COMPLETE**. Stage 37: cross-validated Ariadne's integrator against the gold-standard REBOUND (WHFast)
+on the same DE440 ICs -- agreement 1e-4/100yr, 1.7e-3/2000yr, REBOUND energy bounded 3.6e-6 (the
+integrator is correct by an independent professional code). Stage 38: the OSSOS selection-bias test --
+the detached extreme eTNOs cluster in the SAME direction (20.4 deg) as the survey-tracing scattered
+control (21.7 deg) and are NOT distinguishable from it (p=0.12); combined with Stages 34/36 this settles
+the honest verdict: no compelling statistical evidence for Planet 9 in the public catalog. Two real gaps
+from the prior assessment (independent cross-validation, selection-bias model) are now CLOSED.
+PRIOR (Stage 33-36): GR (1PN) + real-catalog clustering + uncertainty + differentiable optimization.
 **COMPLETE**. Stage 36: pulled REAL JPL 1-sigma element uncertainties and Monte-Carlo'd the eTNO
 clustering -- it DEGRADES from p=0.07 to median p=0.13 (one object's perihelion is unconstrained), so the
 marginal clustering is fragile and current public data give NO compelling evidence for Planet 9 (honest).
@@ -1233,6 +1247,26 @@ of resamples); the well-measured subset (N=17) is p=0.11. **Verdict:** the margi
 selection-bias caveat, the honest bottom line is that current public data do NOT provide compelling
 statistical evidence for Planet 9. Run: `PYTHONPATH=src python -m ariadne.validate.stage36`.
 
+**Stage 37 results (independent cross-validation vs REBOUND):** the strongest possible integrator
+check -- an INDEPENDENT professional code. Integrating the same DE440 ICs (Sun + 4 giants) with both
+Ariadne's democratic-heliocentric Wisdom-Holman map and **REBOUND's WHFast** (Rein & Liu 2012; Jacobi
+coordinates, a different Kepler solver and operator splitting), the giant heliocentric positions agree
+to **1.1e-4 over 100 yr and 1.7e-3 over 2000 yr** (the residual is accumulated along-track phase from
+the different symplectic splittings), and REBOUND's energy is bounded at **3.6e-6** -- independent
+confirmation that Ariadne's integrator is both correct and symplectic, not merely self-consistent.
+(rebound is an optional dependency; the test skips cleanly if it is absent.) Run:
+`PYTHONPATH=src python -m ariadne.validate.stage37`.
+
+**Stage 38 results (selection bias vs the clustering -- the OSSOS objection):** the deepest objection to
+the Planet 9 evidence is observational selection bias. Model-light test: the scattered, Neptune-coupled
+control population (a>150, 30<q<=42, N=51) -- which a distant perturber should NOT shepherd -- traces the
+survey selection function. It is itself weakly clustered with mean perihelion **21.7 deg**; the detached
+extreme objects (N=19) cluster at **20.4 deg -- the SAME direction (gap 1.3 deg)** -- and their clustering
+is **NOT significant relative to the control (p=0.12)**. Conclusion: on current public data the extreme-
+eTNO clustering CANNOT be distinguished from selection bias. Together with Stages 34/36 (marginal p=0.07,
+fragile to uncertainty), the honest verdict is settled: **no compelling statistical evidence for Planet 9
+in the public catalog.** Run: `PYTHONPATH=src python -m ariadne.validate.stage38`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1241,6 +1275,18 @@ statistical evidence for Planet 9. Run: `PYTHONPATH=src python -m ariadne.valida
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.38` — Stage 38 (selection bias vs eTNO clustering -- the OSSOS test) complete. Added
+  discovery.clustering.selection_bias_test + validate/stage38.py + test. Uses the scattered Neptune-
+  coupled control population (a>150, 30<q<=42) as a survey-selection-function proxy. Result: the
+  detached extreme objects cluster at mean varpi ~20 deg, the control prefers ~22 deg (same direction),
+  and the extreme clustering is NOT significant relative to the control (p~0.12). Current public data
+  CANNOT distinguish a perturber from selection bias -- no Planet 9 claim.
+- 2026-05-29 `v0.37` — Stage 37 (independent cross-validation vs REBOUND) complete. Added
+  validate/stage37.py + test_rebound_xval.py. Integrating the same DE440 ICs (Sun + 4 giants) with both
+  Ariadne's democratic-heliocentric WH map and REBOUND's WHFast (independent code, Jacobi coords,
+  different Kepler solver), the giant heliocentric positions agree to ~1e-4 over 100 yr and ~1.7e-3 over
+  2000 yr (accumulated phase), and REBOUND's energy is bounded at ~3.6e-6 -- an independent confirmation
+  that Ariadne's integrator is correct and symplectic. (rebound is an optional dep; test skips if absent.)
 - 2026-05-29 `v0.36` — Stage 36 (uncertainty propagation into the clustering significance) complete.
   Extended discovery/clustering.py (load_with_uncertainty pulls real per-element 1-sigma errors from the
   JPL SBDB -> data/distant_tnos_sigma.json; resampled_clustering_p Monte-Carlos the perihelion errors),

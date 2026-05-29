@@ -5,7 +5,8 @@ import numpy as np
 
 from ariadne.discovery.clustering import (load_distant_tnos, filter_population,
                                           circular_stats, rayleigh_mc, clustering_report,
-                                          load_with_uncertainty, resampled_clustering_p)
+                                          load_with_uncertainty, resampled_clustering_p,
+                                          selection_bias_test)
 
 
 def test_circular_stats_perfectly_clustered():
@@ -53,3 +54,11 @@ def test_uncertainty_propagation_runs_and_is_bounded():
     assert len(ext) >= 10 and all("sigma_varpi_deg" in r for r in ext)
     ps = resampled_clustering_p(ext, n_real=500, seed=0)
     assert len(ps) == 500 and ((ps >= 0) & (ps <= 1)).all()
+
+
+def test_selection_bias_test_runs():
+    rows = load_distant_tnos()
+    r = selection_bias_test(rows, n_mc=5000)
+    assert r["n_test"] >= 10 and r["n_ctrl"] >= 20
+    assert 0.0 <= r["p_vs_selection"] <= 1.0
+    assert 0.0 <= r["mean_dir_gap_deg"] <= 180.0

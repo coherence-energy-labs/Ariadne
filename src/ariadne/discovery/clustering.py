@@ -106,6 +106,36 @@ def filter_population(rows, a_min=250.0, q_min=42.0):
     return [r for r in rows if r["a_au"] >= a_min and r["q_au"] >= q_min]
 
 
+def selection_bias_test(rows, a_min=250.0, q_min=42.0, n_mc=20000, seed=0):
+    """Is the extreme-eTNO clustering distinguishable from the survey selection function?
+
+    The cleanest model-light test (the OSSOS argument): a CONTROL population that should NOT be
+    shepherded by a distant perturber -- the scattered, Neptune-coupled objects (a>150, 30<q<=q_min)
+    -- traces the survey selection function (where telescopes looked). If the detached extreme
+    population (a>=a_min, q>=q_min) clusters in the SAME direction and no more strongly than random
+    draws from that control, the clustering is consistent with selection bias, not a perturber.
+
+    Returns dict with the test/control mean directions and R, and p = fraction of control draws whose
+    R >= the test R (high p => clustering explained by the selection function).
+    """
+    test = [r for r in rows if r["a_au"] >= a_min and r["q_au"] >= q_min]
+    ctrl = [r for r in rows if r["a_au"] >= 150.0 and q_min - 12.0 < r["q_au"] <= q_min]
+    st_t = circular_stats([r["varpi_deg"] for r in test])
+    st_c = circular_stats([r["varpi_deg"] for r in ctrl])
+    ctrl_vp = np.array([r["varpi_deg"] for r in ctrl])
+    rng = np.random.default_rng(seed)
+    N = len(test)
+    Rs = np.empty(n_mc)
+    for k in range(n_mc):
+        a = np.radians(rng.choice(ctrl_vp, N, replace=True))
+        Rs[k] = math.hypot(np.cos(a).mean(), np.sin(a).mean())
+    dmean = abs(((st_t["mean_dir_deg"] - st_c["mean_dir_deg"] + 180) % 360) - 180)
+    return {"n_test": len(test), "n_ctrl": len(ctrl),
+            "test_R": st_t["R"], "test_mean_deg": st_t["mean_dir_deg"],
+            "ctrl_R": st_c["R"], "ctrl_mean_deg": st_c["mean_dir_deg"],
+            "mean_dir_gap_deg": dmean, "p_vs_selection": float((Rs >= st_t["R"]).mean())}
+
+
 def circular_stats(angles_deg):
     """Mean resultant length R, mean direction, and the Rayleigh test (analytic p)."""
     ang = np.radians(np.asarray(angles_deg, float))
