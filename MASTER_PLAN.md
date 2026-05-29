@@ -511,6 +511,11 @@ these add depth where real value remained.
   + numba.cuda GPU (faithful 1.2e-14) ensemble integrators + a measured-crossover selector; honest
   forge audit (tau-field cost methods are redundant in astrodynamics; the selector is the transfer).
   *DoD:* **G32a/b/c**.
+- **Stage 33 — General relativity (1PN)** *(done)*: Schwarzschild 1PN term; reproduces Mercury's
+  42.99 arcsec/century perihelion advance (analytic ratio 1.0002). Engine is GR-capable. *DoD:* **G33a/b**.
+- **Stage 34 — Real distant-TNO clustering significance** *(done)*: live JPL SBDB (706 bodies),
+  circular stats + Rayleigh + Monte-Carlo. Honest: extreme-sample varpi clustering is MARGINAL on
+  current data (p=0.07); selection bias uncontrolled; no Planet 9 claim. *DoD:* **G34a/b/c**.
 
 ---
 
@@ -595,7 +600,15 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 32 — Multi-backend ensemble integration + intelligent selector
+**Current stage:** Stages 33-34 — General relativity (1PN) + real distant-TNO clustering
+**COMPLETE**. Stage 33: added the Schwarzschild 1PN term (`dynamics/relativity.py`) -- the engine now
+reproduces Mercury's 42.99 arcsec/century perihelion advance (textbook 42.98), so it is GR-capable;
+the term is a ~3e-8 correction (firewall-safe). Stage 34: ran the actual Batygin-Brown clustering
+analysis on the LIVE JPL SBDB (706 bodies, a>150 AU) -- HONEST result: the famous extreme-sample (N=19)
+perihelion clustering is only MARGINAL on current data (p=0.07, ~1.8 sigma, weakened since 2016), broad
+node clustering is strong (p=0.0005) but selection-bias-exposed; statistics validated (Rayleigh ~ MC).
+No Planet 9 claim. Next: autodiff (JAX) gradient-based optimization; uncertainty clone-clouds.
+PRIOR (Stage 32): Multi-backend ensemble integration + intelligent selector.
 **COMPLETE**. "Use exactly what works best, and when": measured the backend crossovers and built a
 selector (`dynamics/integrators.py`) routing each job to the winner -- single trajectory -> numba
 (427x); ensemble N<1k -> 1-core, 1k-5k -> 24-core CPU (8.7x at N=1k), >=5k -> RTX 5080 GPU (~3x, both
@@ -1160,6 +1173,29 @@ MEASURED the crossovers and built a selector that routes each job to the winner.
   `astar_coherence` is kept (gamma=0 == optimal A*) but not oversold. Run: `PYTHONPATH=src python -m
   ariadne.validate.stage32`; full perf table: `PYTHONPATH=src python -m ariadne.perf`.
 
+**Stage 33 results (general relativity, 1PN):** `dynamics/relativity.py` adds the Schwarzschild
+1PN acceleration `a_GR = (mu/c^2 r^3)[(4mu/r - v^2) r + 4(r.v) v]`. Integrating a Mercury-like orbit
+under Newtonian+1PN reproduces the anomalous perihelion advance to **42.99 arcsec/century** (textbook
+42.98; the 1915 confirmation of GR), and the measured per-orbit advance matches the analytic
+`6 pi mu/(c^2 a(1-e^2))` to 0.02%. The term is a ~3e-8 fractional correction at 1 AU -- firewall-safe
+(it never disturbs the Newtonian dynamics; it matters only as accumulated precession over Myr, where
+it competes with any perturber's secular signal). The engine is now GR-capable. Run:
+`PYTHONPATH=src python -m ariadne.validate.stage33`.
+
+**Stage 34 results (real distant-TNO clustering -- the actual Batygin-Brown analysis on CURRENT data):**
+crossed from the 6-object 2016 sample to the **live JPL Small-Body Database**: 706 bodies with a>150 AU.
+`discovery/clustering.py` filters the detached extreme population and computes proper circular statistics
+(mean resultant R, Rayleigh test, Monte-Carlo null). HONEST findings:
+- **Extreme sample (a>=250, q>=42, N=19):** perihelion-longitude (varpi) clustering R=0.37, **p=0.07
+  (~1.8 sigma) -- MARGINAL, not significant at 0.05.** It has WEAKENED since 2016 as more objects were
+  found. omega and Omega are not significant.
+- **Broad population (a>=150, q>=30, N=75):** node (Omega) clustering p=0.0005 and omega p=0.028 (both
+  significant), but this population is the MOST exposed to observational selection bias.
+- The statistics are validated (analytic Rayleigh matches Monte-Carlo to 0.002; a uniform population is
+  correctly not flagged, a clustered one is). **Bottom line:** a low p is necessary but NOT sufficient --
+  the clustering could be where surveys looked. No Planet 9 claim; this is the honest current state of the
+  actual evidence. Run: `PYTHONPATH=src python -m ariadne.validate.stage34`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1168,6 +1204,21 @@ MEASURED the crossovers and built a selector that routes each job to the winner.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.34` — Stage 34 (real distant-TNO clustering significance) complete. Added
+  discovery/clustering.py (loads the live/cached JPL SBDB catalog -- 706 bodies with a>150 AU --
+  filters the detached extreme population, computes circular stats: mean resultant R, Rayleigh test,
+  Monte-Carlo null), validate/stage34.py, tests/test_clustering.py, viz figure_etno_clustering, and
+  the cached data/distant_tnos.json. HONEST result on CURRENT data: the famous extreme-sample (N=19,
+  a>=250, q>=42) perihelion (varpi) clustering is only MARGINAL (R=0.37, p=0.07, ~1.8 sigma -- weakened
+  since the 2016 6-object sample); broad-population (N=75) node clustering is strong (Omega p=0.0005)
+  but most exposed to observational selection bias. Low p is necessary, NOT sufficient, for a perturber.
+  No Planet 9 claim. The statistics are validated (analytic Rayleigh ~ Monte-Carlo to 0.002; unbiased).
+- 2026-05-29 `v0.33` — Stage 33 (general relativity, 1PN) complete. Added dynamics/relativity.py
+  (Schwarzschild 1PN acceleration `a_GR = (mu/c^2 r^3)[(4mu/r - v^2)r + 4(r.v)v]`, analytic
+  perihelion advance, Newtonian+GR helper), validate/stage33.py, tests/test_relativity.py.
+  Reproduces Mercury's anomalous perihelion advance to 42.99 arcsec/century (textbook 42.98,
+  ratio 1.0002). GR is a ~3e-8 fractional correction at 1 AU (firewall-safe; matters only as
+  accumulated precession over Myr). The engine is now GR-capable.
 - 2026-05-29 `v0.32` — Stage 32 (multi-backend ensemble + intelligent selector) complete. Added
   dynamics/secular_gpu.py (numba.cuda one-thread-per-particle ensemble, faithful 1.2e-14),
   secular_fast.integrate_ensemble_parallel (24-core, allocation-free scalar Kepler; 8.7x at N=1k),

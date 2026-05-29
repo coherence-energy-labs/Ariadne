@@ -722,6 +722,34 @@ def figure_secular(span_yr=100_000.0, dt_yr=1.0):
     return path
 
 
+def figure_etno_clustering():
+    """Stage 34: perihelion-longitude (varpi) and node (Omega) clustering of the REAL extreme eTNOs."""
+    from ..discovery.clustering import load_distant_tnos, filter_population, circular_stats
+    rows = load_distant_tnos()
+    ext = filter_population(rows, a_min=250.0, q_min=42.0)
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 6.0), subplot_kw={"projection": "polar"})
+    for ax, key, lab in ((axes[0], "varpi_deg", "$\\varpi$ (longitude of perihelion)"),
+                         (axes[1], "Omega_deg", "$\\Omega$ (longitude of node)")):
+        ang = np.radians([r[key] for r in ext])
+        rad = np.array([r["a_au"] for r in ext])
+        ax.scatter(ang, rad, c="tab:red", s=40, alpha=0.8, edgecolors="k", linewidths=0.4)
+        st = circular_stats([r[key] for r in ext])
+        md = np.radians(st["mean_dir_deg"])
+        ax.annotate("", xy=(md, rad.max()), xytext=(md, 0),
+                    arrowprops=dict(arrowstyle="-|>", color="navy", lw=2))
+        ax.set_title(f"{lab}\nN={len(ext)}  R={st['R']:.2f}  p={st['p_analytic']:.3f}", fontsize=10)
+        ax.set_rlabel_position(135)
+    fig.suptitle("Real extreme trans-Neptunian objects (JPL SBDB, a>=250 AU, q>=42 AU)\n"
+                 "apsidal clustering is MARGINAL on current data (~1.8 sigma); selection bias uncontrolled",
+                 fontsize=11)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "etno_clustering.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_coherence_field():
     """The coherence (FLI) field of the Earth-Moon rotating frame with the manifold tubes overlaid."""
     from ..data.constants import EARTH_MOON
@@ -1112,6 +1140,8 @@ def main():
     print("  ->", figure_coherence_field())
     print("Rendering secular symplectic energy + Planet 9 divergence ...")
     print("  ->", figure_secular())
+    print("Rendering real eTNO apsidal/node clustering ...")
+    print("  ->", figure_etno_clustering())
     print("Rendering Planet 9 residual at the real clustered eTNOs ...")
     print("  ->", figure_planet9())
     print("Rendering hidden-mass detectability map (any body) ...")
