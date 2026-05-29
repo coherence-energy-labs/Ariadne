@@ -531,6 +531,9 @@ these add depth where real value remained.
 - **Stage 39 — Discovery core: moving-object orbit linkage** *(done)*: HelioLinC-style linker; recovers
   5/5 known eTNOs (pure, 0 false positives) from a survey-realistic haystack of 430 tracklets. The
   machinery that can find UNKNOWN objects -- validated by known-object recovery. *DoD:* **G39a/b/c**.
+- **Stage 40 — Dynamical-structure mining** *(done)*: checked the OTHER P9 signatures -- orbital-pole
+  clustering (p=0.69, selection-explained) and Neptune-resonance proximity (0/19, detached). No structure
+  beyond selection on any signature; honest verdict reinforced. *DoD:* **G40a/b**.
 
 ---
 
@@ -615,8 +618,13 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 39 — Discovery core: moving-object orbit linkage (HelioLinC-style)
-**COMPLETE**. The step from "validated engine" to "could find something new". `discovery/linkage.py`
+**Current stage:** Stages 39-40 — Discovery core (orbit linkage) + dynamical-structure mining
+**COMPLETE**. Stage 40: checked the OTHER Planet 9 signatures on the live catalog -- orbital-pole
+clustering (R=0.93 but the control is identical, p=0.69) and Neptune-resonance proximity (0/19, detached).
+No structure beyond selection on any signature; the honest no-P9 verdict is now complete across
+perihelion + pole + resonance. Next: Route E (autodiff global trajectory optimization) and the genuine
+frontier -- feeding the Stage-39 linker REAL survey detections (ZTF/Rubin).
+PRIOR (Stage 39): The step from "validated engine" to "could find something new". `discovery/linkage.py`
 hypothesises (r, rdot), maps each tracklet to a heliocentric state, propagates to a reference epoch with
 the validated integrator, and clusters -- same-object tracklets collapse, interlopers scatter. The honest
 litmus test PASSES: from a survey-realistic haystack (5 real eTNOs over a 2-month opposition at 0.1" +
@@ -1293,6 +1301,16 @@ is proven. A subtle lesson learned: the reference-epoch window must be short (an
 tracklet arcs long enough that a distant object's tiny on-sky rate is measurable, else velocity error
 amplifies over the baseline and the cluster smears. Run: `PYTHONPATH=src python -m ariadne.validate.stage39`.
 
+**Stage 40 results (dynamical-structure mining -- the other P9 signatures):** beyond perihelion, the
+Planet 9 case invokes orbital-PLANE (pole) clustering and Neptune decoupling. `discovery/structure.py`
+checks both, selection-aware. Honest negatives: the extreme objects' orbital poles are concentrated
+(R=0.93) but the scattered control population is concentrated IDENTICALLY (p=0.69) -- the alignment is the
+low-inclination/selection triviality, not a perturber; and 0/19 extreme objects sit at a low-order
+Neptune mean-motion resonance (they are genuinely detached, as the population definition requires). So on
+EVERY signature checked (perihelion varpi, orbital pole, resonance), the public catalog shows no
+structure beyond selection. With Stages 34/36/38 this is the complete, honest scientific verdict:
+no compelling evidence for Planet 9 in current public data. Run: `PYTHONPATH=src python -m ariadne.validate.stage40`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1301,6 +1319,13 @@ amplifies over the baseline and the cluster smears. Run: `PYTHONPATH=src python 
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.40` — Stage 40 (dynamical-structure mining: the other P9 signatures) complete. Added
+  discovery/structure.py (orbital-pole clustering vs the selection control; low-order Neptune-resonance
+  proximity) + validate/stage40.py + tests/test_structure.py. Honest negatives: the extreme objects'
+  orbital poles are concentrated (R=0.93) but the scattered control is identical (p=0.69 -- selection,
+  not a perturber); 0/19 extreme objects sit at a low-order Neptune resonance (detached, as expected).
+  No dynamical structure beyond selection on ANY signature (perihelion + pole + resonance) -- with
+  Stages 34/36/38 the public catalog gives no compelling Planet 9 evidence.
 - 2026-05-29 `v0.39` — Stage 39 (DISCOVERY CORE: moving-object orbit linkage) complete. Added
   discovery/linkage.py: a HelioLinC-style linker (hypothesise heliocentric distance r + radial velocity
   rdot -> map each tracklet to a full state -> propagate to a reference epoch with the validated 2-body
