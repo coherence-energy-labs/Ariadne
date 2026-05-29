@@ -72,3 +72,22 @@ JUPITER_EUROPA = make_system("Jupiter-Europa", GM_JUPITER, GM_EUROPA, 671100.0, 
 JUPITER_GANYMEDE = make_system("Jupiter-Ganymede", GM_JUPITER, GM_GANYMEDE, 1070400.0, "Jupiter", "Ganymede")
 JUPITER_CALLISTO = make_system("Jupiter-Callisto", GM_JUPITER, GM_CALLISTO, 1882700.0, "Jupiter", "Callisto")
 GALILEAN = [JUPITER_IO, JUPITER_EUROPA, JUPITER_GANYMEDE, JUPITER_CALLISTO]
+
+# Stage 16 generalization systems: a deliberately diverse mass-ratio spectrum, all real
+# mission targets. GM (km^3/s^2), mean separation (km).
+GM_SATURN = 3.7931187e7
+GM_TITAN, GM_RHEA, GM_ENCELADUS = 8978.1382, 153.9426, 7.2027
+GM_PHOBOS = 7.087e-4
+# Binary asteroid 65803 Didymos / Dimorphos (DART/Hera target); GM from estimated masses.
+GM_DIDYMOS, GM_DIMORPHOS = 3.51e-8, 2.45e-10
+
+SATURN_TITAN = make_system("Saturn-Titan", GM_SATURN, GM_TITAN, 1221870.0, "Saturn", "Titan")
+SATURN_RHEA = make_system("Saturn-Rhea", GM_SATURN, GM_RHEA, 527108.0, "Saturn", "Rhea")
+SATURN_ENCELADUS = make_system("Saturn-Enceladus", GM_SATURN, GM_ENCELADUS, 237948.0, "Saturn", "Enceladus")
+MARS_PHOBOS = make_system("Mars-Phobos", GM_MARS, GM_PHOBOS, 9376.0, "Mars", "Phobos")
+SUN_MARS = make_system("Sun-Mars", GM_SUN, GM_MARS, 227939200.0, "Sun", "Mars")
+DIDYMOS_DIMORPHOS = make_system("Didymos-Dimorphos", GM_DIDYMOS, GM_DIMORPHOS, 1.19, "Didymos", "Dimorphos")
+
+# Ordered low-mu -> high-mu for the atlas (spans ~1.6e-8 to ~7e-3).
+ATLAS_SYSTEMS = [MARS_PHOBOS, SATURN_ENCELADUS, SUN_MARS, SATURN_RHEA,
+                 SATURN_TITAN, DIDYMOS_DIMORPHOS]

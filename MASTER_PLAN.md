@@ -447,9 +447,11 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
   survivability quantified. "Novel" = automatically discovered + verified, not unknown to science;
   full DE440+GMAT re-convergence done for the transfer leg (Stages 8-10), a libration ephemeris
   re-targeter noted as the remaining tool. *DoD:* **G12a/b/c**.
-- **Stage 16 — Generalize + scale the atlas** *(planned)*: extend beyond Earth–Moon/Jupiter to the
-  Mars system, Saturnian moons, and asteroids; persist orbits/manifolds/connections/routes to an
-  HDF5 atlas with provenance and a ranked route database.
+- **Stage 16 — Generalize + scale the atlas** *(done)*: 6 new systems (Mars-Phobos, Saturn moons,
+  Sun-Mars, the DART binary asteroid) verified to produce periodic libration orbits spanning ~6
+  orders of magnitude in mass ratio (tracking the Hill scaling); `atlas/store.py` + `build.py`
+  persist multi-system libration + the Earth-Moon graph + ranked routes to a round-trippable HDF5
+  atlas with provenance. *DoD:* **G_gen, G_atlas**.
 - **Stage 17 — Deliverables** *(planned)*: white paper (methods + validation + the efficiency
   result + any verified novel route), open atlas release, and GMAT-validated reference routes.
 
@@ -536,16 +538,14 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 15 — Discovery engine + route verification **COMPLETE** (gate G12). Yen
-k-shortest mining produces a ranked route catalog; the converged optimum is a 3-hop ~17 m/s route
-that the graph search DISCOVERS to be ~2x cheaper than the direct patch (Oberth burns at high-speed
-near-Moon crossings). Every mined route verifies at the CR3BP rung to machine precision (energy-exact
-edges), and the optimum survives the solar perturbation as a bounded correctable arc. (Stages 14+15
-together also fixed the edge model to energy-exact, revising Stage 14's optimum from the artifact
-"direct 37 m/s" to the stable multi-hop ~17 m/s.)
-**Next action:** Stage 16 — generalize the engine + atlas beyond Earth-Moon/Jupiter (Mars system,
-Saturnian moons, asteroids) and persist orbits/manifolds/connections/routes to an HDF5 atlas with a
-ranked route database. Then Stage 17 (white paper + open release + GMAT-validated reference routes).
+**Current stage:** Stage 16 — Generalization + HDF5 atlas **COMPLETE** (gates G_gen, G_atlas). The
+engine produces periodic libration orbits for 6 new systems spanning ~6 orders of magnitude in mass
+ratio (Mars-Phobos to the DART binary asteroid), tracking the Hill scaling; the Atlas persists the
+multi-system libration data + the Earth-Moon transport graph + ranked routes to HDF5 with provenance,
+round-tripping exactly. The Atlas (§12) deliverable now exists.
+**Next action:** Stage 17 — the deliverables: a white paper (methods + validation + the efficiency
+result + the discovered multi-hop route), the open atlas release, and GMAT-validated reference routes.
+That closes the original roadmap end-to-end.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -791,6 +791,25 @@ on top of the transport graph.
   TRANSFER leg (~50 m / 149 m); a dedicated libration-to-libration ephemeris re-targeter is the
   one remaining fidelity tool, noted not claimed. Run: `... -m ariadne.validate.stage15`.
 
+**Stage 16 results (generalization + HDF5 atlas):**
+- **Generalization (G_gen):** the engine produces a sensible L1 distance and a periodic L1 Lyapunov
+  orbit for SIX new systems with only constant changes, spanning **~6 orders of magnitude in mass
+  ratio**: Mars-Phobos (mu 1.66e-8, L1 16.6 km, 0.15 d), Saturn-Enceladus (1.90e-7, 947 km, 0.66 d),
+  Sun-Mars (3.23e-7, 1,082,335 km, 330.5 d), Saturn-Rhea (4.06e-6, 5,808 km, 2.16 d), Saturn-Titan
+  (2.37e-4, 51,645 km, 7.46 d), and the DART/Hera binary asteroid Didymos-Dimorphos (6.93e-3, L1 at
+  just **0.150 km**, 0.22 d). All periodic to < 1e-12. The L1 distances track the (mu/3)^(1/3) Hill
+  scaling across the whole spread (figure: atlas_systems.png) -- the engine recovers the known law.
+- **HDF5 atlas (G_atlas):** built `atlas/store.py` + `atlas/build.py` -- a persistent, browsable
+  store holding, per system, the parameters + libration summary, plus (for Earth-Moon) the full
+  transport graph (8 nodes, 53 patch edges) and the 8-route ranked catalog, all with provenance
+  (UTC timestamp, version, config). build -> write -> read round-trips EXACTLY (systems, graph
+  nodes/edges, route paths + Delta-v, provenance, libration all preserved). The Atlas (§12)
+  deliverable now exists. Run: `PYTHONPATH=src python -m ariadne.validate.stage16`.
+- **Honest scope:** route mining for the non-Earth-Moon systems uses the identical (system-agnostic)
+  code path and is a straightforward extension; here Earth-Moon carries the graph/routes and the
+  other six carry their libration summaries -- enough to demonstrate a real multi-system atlas. The
+  atlas .h5 is a regenerable artifact (git-ignored); the build/store CODE is the committed deliverable.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -799,6 +818,14 @@ on top of the transport graph.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.16` — Stage 16 (generalization + HDF5 atlas) complete. Added 6 new systems to
+  constants.py (Mars-Phobos, Saturn-Enceladus/Rhea/Titan, Sun-Mars, DART/Hera Didymos-Dimorphos;
+  ATLAS_SYSTEMS) and the `atlas` package: store.py (HDF5 write/read, round-trippable, with
+  provenance) + build.py (multi-system libration + Earth-Moon graph + ranked routes). validate/
+  stage16.py, test_atlas.py (3 tests), viz.figure_atlas_systems. G_gen PASS: periodic L1 Lyapunov
+  orbits for all 6 systems (mu 1.66e-8 .. 6.93e-3, periodic to <1e-12; Didymos L1 at 0.150 km),
+  tracking the (mu/3)^(1/3) Hill scaling. G_atlas PASS: the atlas (7 systems, EM 8-node/53-edge
+  graph, 8 routes, provenance) round-trips exactly through HDF5. The Atlas (§12) now exists.
 - 2026-05-29 `v0.15` — Stage 15 (discovery engine + route verification, G12) complete. Added the
   `discovery` package: mining.py (Yen k-shortest loopless paths via constrained Dijkstra + ranked
   catalog + Delta-v-vs-robustness Pareto set) and verify.py (CR3BP continuity + energy bookkeeping

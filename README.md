@@ -167,8 +167,22 @@ lunar-distance over 8.7 days — midcourse-correction scale, not a chaotic escap
 > GMAT cross-validation above; a dedicated libration-to-libration ephemeris re-targeter is the one
 > remaining tool, and is noted rather than claimed.
 
+Finally, the whole engine **generalizes** and persists into an **atlas.** With only a change of
+constants it produces periodic libration orbits for systems spanning *six orders of magnitude in
+mass ratio* — from Mars–Phobos (μ ≈ 1.7×10⁻⁸, L1 just 16.6 km out) through the Saturnian moons and
+Sun–Mars up to the DART/Hera binary asteroid **Didymos–Dimorphos** (μ ≈ 7×10⁻³, L1 at **150 metres**)
+— and the L1 distances fall right on the (μ/3)^⅓ Hill-radius line, so the engine recovers the known
+scaling law everywhere.
+
+![Generalization across the mass-ratio spectrum](docs/figures/atlas_systems.png)
+
+All of it — system parameters, libration summaries, the Earth–Moon transport graph, and the ranked
+route catalog — is written to a single **HDF5 atlas** with provenance (when, what version, what
+config), and read back exactly. That is the durable, browsable deliverable: an atlas of low-energy
+structure you can reopen, diff, and extend.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage15` (and `stage1`–`stage14`). The SPICE
+`PYTHONPATH=src python -m ariadne.validate.stage16` (and `stage1`–`stage15`). The SPICE
 kernels download automatically on first use (DE440s ~33 MB).
 
 ## What this is (and is not)

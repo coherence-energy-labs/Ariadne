@@ -541,6 +541,41 @@ def figure_transport_graph():
     return path
 
 
+def figure_atlas_systems():
+    """The engine across the mass-ratio spectrum: L1 distance vs mu, with Hill scaling (Stage 16)."""
+    from ..data.constants import EARTH_MOON, ATLAS_SYSTEMS
+    from ..transfers.jovian import moon_libration
+
+    systems = [EARTH_MOON] + list(ATLAS_SYSTEMS)
+    mus, ratios, names = [], [], []
+    for S in systems:
+        m = moon_libration(S)
+        mus.append(S.mu)
+        ratios.append(m["L1_km"] / S.L_star)     # L1 distance from secondary / separation
+        names.append(S.name)
+    mus = np.array(mus); ratios = np.array(ratios)
+
+    fig, ax = plt.subplots(figsize=(9.0, 6.2))
+    mm = np.logspace(np.log10(mus.min()) - 0.3, np.log10(mus.max()) + 0.3, 200)
+    ax.loglog(mm, (mm / 3.0) ** (1.0 / 3.0), "--", color="0.5",
+              label=r"Hill radius $(\mu/3)^{1/3}$")
+    ax.loglog(mus, ratios, "o", color="tab:blue", ms=9, zorder=3)
+    for x, y, n in zip(mus, ratios, names):
+        ax.annotate(n, (x, y), textcoords="offset points", xytext=(7, 4), fontsize=8)
+    ax.set_xlabel(r"mass ratio $\mu = m_2/(m_1+m_2)$")
+    ax.set_ylabel(r"L1 distance from secondary  /  separation")
+    ax.set_title("Ariadne generalizes across 6 orders of magnitude in mass ratio\n"
+                 "(periodic L1 Lyapunov orbits; L1 tracks the Hill-radius scaling)")
+    ax.legend(fontsize=9)
+    ax.grid(True, which="both", alpha=0.2)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "atlas_systems.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def main():
     print("Rendering L1 Lyapunov family ...")
     print("  ->", figure_family())
@@ -564,6 +599,10 @@ def main():
     print("  ->", figure_coherence_frontier())
     print("Rendering low-thrust spiral ...")
     print("  ->", figure_low_thrust_spiral())
+    print("Rendering transport graph + route ...")
+    print("  ->", figure_transport_graph())
+    print("Rendering atlas systems (mass-ratio spectrum) ...")
+    print("  ->", figure_atlas_systems())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
