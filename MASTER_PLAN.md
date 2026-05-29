@@ -570,15 +570,19 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 26 — Solar-system coherence atlas + self-correction **COMPLETE**. The
-engine generalizes to ALL 23 major solar-system systems (7 orders of magnitude in mass ratio). The
-FAIR region-matched test OVERTURNED the Stage-25 "coherence skeleton" claim (it was a region-sampling
-artifact; manifolds are ordinary separatrices) -- reported loudly as a self-correction. Original
-roadmap (0-17), enhancement arc (18-24), interplanetary + coherence experiments (21-26) all done.
-**Next action:** Stage 27 (proposed, pending user go) -- a complete-known-mass hidden-body (Planet X)
-forward-model + residual/coherence-anomaly detector, with the unmodeled-small-body NOISE FLOOR front
-and centre (the honest limit). Plus a standing review of whether the user's tau/coherence-field
-theory docs offer a more principled, computable coherence definition usable as a scoring layer.
+**Current stage:** Stage 27 — Principled coherence field + trajectory-residual hidden-mass detector
+**COMPLETE**. Made the user's S_One coherence field rigorous (tau_c = 1 + Phi/c^2 from all masses;
+Newton recovery to 1.004e-8 at Earth, reproducing the framework's own result), then built it into a
+GENERAL gravitational-anomaly detector: a path pulled by an unmodeled mass leaves a residual that
+points to the body (Neptune/Cassini method). A hypothesized Planet 9 stands 57-118x above the
+Kuiper noise floor at the 6 real clustered eTNOs but is ~1e-5 of the solar pull; the detector
+generalizes to comets/asteroids/dwarf planets via a (mass,distance) detectability map.
+**Next action:** none required. HONEST bottom line unchanged: a complete, validated, open engine
+spanning CR3BP -> ephemeris -> GMAT -> search/discovery -> interplanetary -> a principled coherence
+field + hidden-mass detector, all on real data with the firewall intact. No new physics, no body
+actually detected. The one genuine next tool for an actual hidden-body search is a long-term
+(secular, Myr) symplectic integrator + the live eTNO catalog + statistical inference -- a serious
+specialist effort, noted not overclaimed.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -995,6 +999,32 @@ to the WHOLE solar system and, in doing so, overturned Stage 25.
 - **Built:** `fields/solar_atlas.py` (whole-system catalog + the fair, region-matched skeleton test
   with both one-sided p-values), validate/stage26.py, viz.figure_solar_atlas. Run: `... stage26`.
 
+**Stage 27 results (principled coherence field + trajectory-residual hidden-mass detector):** took
+the user's own S_One framework seriously and made the coherence field rigorous, then turned it into
+a general gravitational-anomaly detector. Real data throughout (DE440 planet positions, DE440 GM
+constants, the published clustered-eTNO elements, the published Planet 9 hypothesis).
+- **Principled field + Newton recovery (G27a):** `fields/tau_c.py` implements the framework's central
+  identity tau_c = 1 + Phi/c^2 from the TOTAL potential of all masses, and g_coh = -c^2 grad ln(tau_c).
+  It reduces to Newtonian gravity to exactly |Phi|/c^2 (**1.004e-8 at Earth, matching to all digits**)
+  -- the framework's own "Newton recovery", reproduced inside Ariadne; the -c^2 grad ln form verified
+  to 5e-11 in strong field. This makes the coherence field rigorous (it IS the potential diagnostic)
+  and keeps the firewall -- now DERIVED, not asserted. (The galactic dark-matter modification provably
+  does not apply here: solar-system accelerations are 5-10 orders above the g~1e-10 m/s^2 turnover.)
+- **Trajectory-residual detector (G27b/c):** `fields/hidden_mass.py` -- a path pulled by an unmodeled
+  mass leaves a residual a = a_observed - a_known_model that points to the body (the Neptune/Cassini
+  method). Self-consistent (residual = model_with - model_without). Evaluated at the SIX real clustered
+  eTNOs (Sedna, 2012 VP113, 2004 VN112, 2007 TG422, 2010 GB174, 2013 RF98), a hypothesized Planet 9
+  (6 M_earth @ 500 AU) imparts a residual **57-118x above the unmodeled-Kuiper-belt noise floor** --
+  distinguishable from small-body noise -- yet only **~1e-5 of the solar pull**.
+- **GENERAL (not just Planet 9):** the detector is body-agnostic -- a detectability map over the
+  (mass, distance) plane covers comets, asteroids, dwarf planets, and a hidden planet (figure:
+  detectability_map.png). This is how asteroid masses and comet forces are actually measured.
+- **HONEST:** the residual is real and rigorous, but a true Planet 9 detection needs SECULAR (Myr)
+  accumulation over many objects (the eTNO clustering), not an instantaneous snapshot -- beyond this
+  short-arc engine (a long-term symplectic integrator is the noted next tool). Real precedent: Cassini
+  range tracking already constrains Planet 9 by this exact method. Figures: planet9_residual.png,
+  detectability_map.png. Run: `PYTHONPATH=src python -m ariadne.validate.stage27`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1003,6 +1033,16 @@ to the WHOLE solar system and, in doing so, overturned Stage 25.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.27` — Stage 27 (principled coherence field + trajectory-residual hidden-mass
+  detector) complete. Added fields/tau_c.py (tau_c = 1 + Phi/c^2 from the total potential of all
+  masses; g_coh = -c^2 grad ln(tau_c)) and fields/hidden_mass.py (residual detector + real clustered
+  eTNO elements + published Planet 9 params + Kuiper noise floor + a (mass,distance) detectability
+  map generalizing to any body), validate/stage27.py, test_hidden_mass.py (6 tests),
+  viz.figure_planet9 + figure_detectability. G27 PASS: Newton recovery to |Phi|/c^2 = 1.004e-8 at
+  Earth (the framework's own result, reproduced); a hypothesized Planet 9 rises 57-118x above the
+  unmodeled-Kuiper floor at all 6 real eTNOs but is ~1e-5 of the solar pull (needs secular baselines).
+  Real data throughout (DE440 + published eTNO/Planet-9 values). Honest: rigorous detector, not a
+  detection -- the secular Myr inference is the noted next tool; Cassini ranging is the real precedent.
 - 2026-05-29 `v0.26` — Stage 26 (solar-system coherence atlas + self-correction) complete. Added the
   whole-solar-system registry (23 systems: Sun-planet x8, giant-planet major moons, Pluto-Charon
   binary) to constants.py, fields/solar_atlas.py (catalog + a FAIR region-matched coherence test),

@@ -541,6 +541,79 @@ def figure_transport_graph():
     return path
 
 
+def figure_detectability():
+    """The hidden-mass detector generalizes: detectable (mass, distance) plane for ANY body (Stage 27)."""
+    import numpy as np
+    from ..fields.hidden_mass import detectability_map, residual_magnitude, REFERENCE_BODIES
+    masses = np.logspace(-11, 1.0, 120)          # 1e-11 .. 10 Earth masses (asteroid -> planet)
+    dists = np.logspace(0, 3.2, 120)             # 1 .. ~1600 AU
+    floor, thresh = 1e-15, 1e-13                  # small-body floor + a long-baseline tracking threshold
+    dm = detectability_map(masses, dists, floor, thresh)
+
+    fig, ax = plt.subplots(figsize=(9.6, 6.6))
+    levels = np.linspace(np.log10(dm["residual_ms2"]).min(), np.log10(dm["residual_ms2"]).max(), 25)
+    cs = ax.contourf(masses, dists, np.log10(dm["residual_ms2"]), levels=levels, cmap="magma")
+    fig.colorbar(cs, label=r"log$_{10}$ residual acceleration GM/d$^2$ (m/s$^2$)")
+    # detectability boundary: residual = max(floor, threshold)
+    ax.contour(masses, dists, np.log10(dm["residual_ms2"]),
+               levels=[np.log10(max(floor, thresh))], colors="cyan", linewidths=2)
+    ax.plot([], [], color="cyan", lw=2, label=f"detectable boundary ({max(floor,thresh):.0e} m/s$^2$)")
+    for b in REFERENCE_BODIES:
+        ax.plot(b["m_earth"], b["d_au"], "o", color="white", ms=8, mec="k")
+        ax.annotate(b["name"], (b["m_earth"], b["d_au"]), textcoords="offset points",
+                    xytext=(6, 4), fontsize=8, color="white")
+    ax.set_xscale("log"); ax.set_yscale("log")
+    ax.set_xlabel(r"body mass (Earth masses)"); ax.set_ylabel("distance from tracked body (AU)")
+    ax.set_title("Trajectory-residual detector generalizes to ANY gravitating body\n"
+                 "(asteroids, comets, dwarf planets, a hidden planet) -- left/up of the boundary = detectable")
+    ax.legend(loc="lower right", fontsize=9)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "detectability_map.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
+def figure_planet9():
+    """Trajectory-residual hidden-mass detector: Planet 9's tug at the real clustered eTNOs (Stage 27)."""
+    import numpy as np
+    from ..data.constants import GM_SUN
+    from ..fields.tau_c import newtonian_accel
+    from ..fields.hidden_mass import (CLUSTERED_ETNOS, PLANET9, elements_to_position,
+                                      residual_accel, kuiper_noise_floor, GM_EARTH as GME)
+    gm_x = PLANET9["m_earth"] * GME
+    pos_x = elements_to_position(PLANET9["a_au"], PLANET9["e"], PLANET9["i"],
+                                 PLANET9["Omega"], PLANET9["omega"], 180.0)
+    names, sig, floor, solar = [], [], [], []
+    for o in CLUSTERED_ETNOS:
+        x = elements_to_position(o["a_au"], o["e"], o["i"], o["Omega"], o["omega"], 180.0)
+        names.append(o["name"])
+        sig.append(np.linalg.norm(residual_accel(x, gm_x, pos_x)) * 1000.0)
+        floor.append(kuiper_noise_floor(x) * 1000.0)
+        solar.append(np.linalg.norm(newtonian_accel(x, [(GM_SUN, np.zeros(3))])) * 1000.0)
+    xpos = np.arange(len(names))
+    fig, ax = plt.subplots(figsize=(10.5, 6.0))
+    ax.semilogy(xpos, solar, "s", color="gold", ms=11, label="solar pull (dominant)")
+    ax.semilogy(xpos, sig, "o", color="tab:red", ms=11, label=f"Planet 9 residual ({PLANET9['m_earth']} M$_\\oplus$)")
+    ax.semilogy(xpos, floor, "v", color="tab:blue", ms=10, label="unmodeled Kuiper-belt floor")
+    for k in xpos:
+        ax.plot([k, k], [floor[k], sig[k]], color="0.7", lw=0.8, zorder=0)
+    ax.set_xticks(xpos); ax.set_xticklabels(names, rotation=20, ha="right", fontsize=8)
+    ax.set_ylabel("acceleration at the eTNO (m/s$^2$)")
+    ax.set_title("Trajectory-residual hidden-mass detector -- Planet 9 at the real clustered eTNOs\n"
+                 "P9's tug rises above the small-body noise floor, but is ~1e-5 of the solar pull "
+                 "(needs secular baselines)")
+    ax.legend(fontsize=9)
+    ax.grid(True, which="both", alpha=0.2)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "planet9_residual.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_coherence_field():
     """The coherence (FLI) field of the Earth-Moon rotating frame with the manifold tubes overlaid."""
     from ..data.constants import EARTH_MOON
@@ -929,6 +1002,10 @@ def main():
     print("  ->", figure_grand_tradeoff())
     print("Rendering coherence (FLI) field + manifold tubes ...")
     print("  ->", figure_coherence_field())
+    print("Rendering Planet 9 residual at the real clustered eTNOs ...")
+    print("  ->", figure_planet9())
+    print("Rendering hidden-mass detectability map (any body) ...")
+    print("  ->", figure_detectability())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
