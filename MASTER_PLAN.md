@@ -452,8 +452,10 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
   orders of magnitude in mass ratio (tracking the Hill scaling); `atlas/store.py` + `build.py`
   persist multi-system libration + the Earth-Moon graph + ranked routes to a round-trippable HDF5
   atlas with provenance. *DoD:* **G_gen, G_atlas**.
-- **Stage 17 — Deliverables** *(planned)*: white paper (methods + validation + the efficiency
-  result + any verified novel route), open atlas release, and GMAT-validated reference routes.
+- **Stage 17 — Deliverables** *(done)*: `docs/WHITE_PAPER.md` (capstone paper), `atlas/release.py`
+  (open release bundle: HDF5 atlas + INDEX.md + reference_routes.csv), and an honestly-tagged
+  reference route table (the direct trans-lunar transfer is the GMAT-validated one). *DoD:*
+  **G_deliver**. **Roadmap closed end-to-end (Stages 0-17).**
 
 ---
 
@@ -538,14 +540,14 @@ No capability is "done" until its gate passes. No route is "real" until §7.4 pa
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 16 — Generalization + HDF5 atlas **COMPLETE** (gates G_gen, G_atlas). The
-engine produces periodic libration orbits for 6 new systems spanning ~6 orders of magnitude in mass
-ratio (Mars-Phobos to the DART binary asteroid), tracking the Hill scaling; the Atlas persists the
-multi-system libration data + the Earth-Moon transport graph + ranked routes to HDF5 with provenance,
-round-tripping exactly. The Atlas (§12) deliverable now exists.
-**Next action:** Stage 17 — the deliverables: a white paper (methods + validation + the efficiency
-result + the discovered multi-hop route), the open atlas release, and GMAT-validated reference routes.
-That closes the original roadmap end-to-end.
+**Current stage:** Stage 17 — Deliverables **COMPLETE** (gate G_deliver). The white paper
+(docs/WHITE_PAPER.md), the open release bundle (atlas/release.py -> HDF5 + INDEX.md + reference
+routes CSV), and the honestly-tagged GMAT-validated reference route table all exist and validate.
+**The original roadmap is now closed end-to-end (Stages 0-17).** Every capability is gated, every
+result reproduced by a validate script + tests, every caveat stated.
+**Next action:** none required — the roadmap is complete. Optional future work: build the
+libration-to-libration full-ephemeris re-targeter (the one remaining fidelity rung), mine routes on
+the non-Earth-Moon systems, or wire FMM/HJB continuous-field reachability for the low-thrust regime.
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -810,6 +812,23 @@ on top of the transport graph.
   other six carry their libration summaries -- enough to demonstrate a real multi-system atlas. The
   atlas .h5 is a regenerable artifact (git-ignored); the build/store CODE is the committed deliverable.
 
+**Stage 17 results (deliverables — white paper + open release, G_deliver):**
+- **White paper:** `docs/WHITE_PAPER.md` -- the capstone, synthesizing all 17 stages for a
+  mission-design audience: motivation (Coimbra), the credibility firewall, the 10-rung fidelity
+  ladder, the full validation-gate table with results, the key results (Coimbra bracketed + WSB
+  3,907; GMAT 149 m; transport-graph ~42x; the discovered 3-hop ~17 m/s route; generalization +
+  Hill scaling + atlas), and an explicit honest-limitations section.
+- **Open release:** `atlas/release.py` bundles a shareable release directory -- the HDF5 atlas, a
+  human-readable `INDEX.md` (systems table + ranked route catalog + reference routes), and
+  `reference_routes.csv`. Built via `PYTHONPATH=src python -m ariadne.atlas.release`.
+- **Reference routes (honest fidelity tags):** a curated table where each route carries the highest
+  rung it ACTUALLY reached -- the direct trans-lunar transfer is the only one labelled
+  "GMAT-validated" (149 m, Stage 9); the WSB (DE440-converged) and ballistic-capture routes are
+  Earth->Moon transfers; the 3-hop ~17 m/s route is a separate "libration-network" class
+  (CR3BP-verified). The two classes are kept apart so their Delta-v scales are never conflated.
+- **G_deliver PASS.** This CLOSES the original roadmap end-to-end (Stages 0-17). Run:
+  `PYTHONPATH=src python -m ariadne.validate.stage17`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -818,6 +837,13 @@ on top of the transport graph.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.17` — Stage 17 (deliverables) complete; the original roadmap is now closed
+  end-to-end (Stages 0-17). Added docs/WHITE_PAPER.md (capstone paper), atlas/release.py (open
+  release bundle: HDF5 atlas + INDEX.md + reference_routes.csv, with an honestly-tagged reference
+  route table), validate/stage17.py, test_release.py (2 tests). G_deliver PASS: paper present with
+  all key sections + headline numbers; release exports + round-trips; reference table carries a
+  genuinely GMAT-validated route and keeps Earth->Moon transfers separate from libration-network
+  routes. Standard gravity throughout; nothing claimed as new physics.
 - 2026-05-29 `v0.16` — Stage 16 (generalization + HDF5 atlas) complete. Added 6 new systems to
   constants.py (Mars-Phobos, Saturn-Enceladus/Rhea/Titan, Sun-Mars, DART/Hera Didymos-Dimorphos;
   ATLAS_SYSTEMS) and the `atlas` package: store.py (HDF5 write/read, round-trippable, with

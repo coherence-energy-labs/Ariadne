@@ -16,6 +16,9 @@ validation gates, and the staged roadmap. Read it before writing code.
 
 **Current status & next action:** see `MASTER_PLAN.md` §16 (Status & Changelog).
 
+**The capstone write-up** is [`docs/WHITE_PAPER.md`](docs/WHITE_PAPER.md) — methods, the full
+validation-gate table, the headline results, and an explicit honest-limitations section.
+
 ## Where we are (Stages 1–3 complete, validated)
 
 The CR3BP core, libration-point orbit families, and invariant-manifold transport tubes are
@@ -181,9 +184,16 @@ route catalog — is written to a single **HDF5 atlas** with provenance (when, w
 config), and read back exactly. That is the durable, browsable deliverable: an atlas of low-energy
 structure you can reopen, diff, and extend.
 
+Finally, everything is bundled into an **open release** and written up. `ariadne.atlas.release`
+produces a shareable directory — the HDF5 atlas, a human-readable `INDEX.md` (systems + ranked route
+catalog + reference routes), and `reference_routes.csv` — and [`docs/WHITE_PAPER.md`](docs/WHITE_PAPER.md)
+is the capstone paper. The reference-route table is honestly tagged: only the direct trans-lunar
+transfer is labelled *GMAT-validated* (149 m), and Earth→Moon transfers are kept in a separate class
+from libration-network reconfigurations so their very different Δv scales are never conflated.
+
 Regenerate: `PYTHONPATH=src python -m ariadne.viz.figures`. Validate:
-`PYTHONPATH=src python -m ariadne.validate.stage16` (and `stage1`–`stage15`). The SPICE
-kernels download automatically on first use (DE440s ~33 MB).
+`PYTHONPATH=src python -m ariadne.validate.stage17` (and `stage1`–`stage16`). Build the release:
+`PYTHONPATH=src python -m ariadne.atlas.release`. SPICE kernels download on first use (DE440s ~33 MB).
 
 ## What this is (and is not)
 - It **is**: an open, high-fidelity, validated engine + atlas for low-energy spaceflight,
