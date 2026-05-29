@@ -570,14 +570,15 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 24 — Packaging + open-source **COMPLETE** (gate G_pkg). Ariadne is now a
-real installable package (pyproject, MIT license, GitHub Actions CI, `pip install -e .`, wheel
-builds). **The user-requested enhancement arc (Stages 18-24) is closed**, on top of the original
-roadmap (Stages 0-17). The engine now spans CR3BP -> ephemeris -> GMAT, manifolds + transport-graph
-search + discovery, NRHO, gravity-assist tours, and a unified epoch-swept multi-objective
-interplanetary optimizer -- all validated, all with PNG + GMAT visual output.
-**Next action:** none required -- both the original roadmap and the enhancement arc are complete.
-Optional: a real low-thrust optimal-control solver, a 3D-Poincare halo transport graph, or PyPI release.
+**Current stage:** Stage 25 — Falsifiable coherence-field test **COMPLETE**. The genuinely
+project-original experiment: made "coherence" a concrete local field (-FLI) and tested it against
+the global transport structure. Statistically-significant result (p=0.009): the invariant-manifold
+tubes are MORE coherent than the chaotic background -- the transport network is the coherence
+SKELETON of phase space. HONEST: significant + elegant, not a breakthrough (consistent with known
+dynamics). On top of the original roadmap (0-17) + the enhancement arc (18-24), now all closed.
+**Next action:** none required. The honest bottom line stands: a complete, validated, open engine;
+no new physics and no route unknown to science were found. Optional deepenings remain (a real
+low-thrust optimal-control solver, a 3D-Poincare halo graph, a large-scale discovery run, PyPI).
 **Repo:** https://github.com/Jphilbrick10/Ariadne (private).
 **GMAT:** R2026a extracted to `tools/gmat-R2026a/` (git-ignored, ~1 GB); GmatConsole runs our
 exported scripts headless. `ariadne.io.gmat_export.run_with_gmat()` drives it (validated to 149 m).
@@ -963,6 +964,23 @@ builds (`ariadne_astro-0.24.0-py3-none-any.whl`). G_pkg PASS: pyproject version 
 `ariadne.__version__` (0.24.0), license + CI present, all 8 key subsystems import.
 Run: `PYTHONPATH=src python -m ariadne.validate.stage24`.
 
+**Stage 25 results (falsifiable test: coherence field vs the transport network):** the one
+genuinely project-original investigation -- does the "coherence" idea, made concrete as a local
+field, have predictive value for the global transport structure? Built `fields/coherence_field.py`
+(coherence operationalized as -FLI, the Fast Lyapunov Indicator from the STM) and ran a falsifiable
+test at C=3.15: the FLI of states ON the L1 unstable-manifold tube vs matched random accessible states.
+- **Result (statistically significant, n=60):** manifold-tube FLI mean **2.38** vs random **2.82**;
+  Mann-Whitney **p = 0.009** that tube states are LOWER-FLI. The naive "tubes are chaos ridges"
+  hypothesis is **REFUTED**; the data support the opposite, more elegant claim: **the invariant-
+  manifold transport network is the COHERENCE SKELETON of phase space** -- the natural low-energy
+  highways are significantly MORE coherent (more regular) than the surrounding chaos.
+- **HONEST verdict:** a clean, falsifiable, original-to-this-project result with a nice framing, BUT
+  **not a breakthrough and not unknown to specialists** -- it is consistent with the textbook fact
+  that manifolds are asymptotic, organized trajectories. No new physics, no route unknown to science.
+  The honest answer to "find something amazing": a rigorous, significant, somewhat-elegant structural
+  finding -- not a scientist-stopping discovery. Figure: coherence_field.png.
+  Run: `PYTHONPATH=src python -m ariadne.validate.stage25`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -971,6 +989,13 @@ Run: `PYTHONPATH=src python -m ariadne.validate.stage24`.
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
 
 **Changelog:**
+- 2026-05-29 `v0.25` — Stage 25 (falsifiable coherence-field test) complete. Added
+  fields/coherence_field.py (FLI-based coherence field over CR3BP phase space), validate/stage25.py,
+  test_coherence_field.py (3 tests), viz.figure_coherence_field. Falsifiable result (C=3.15, n=60,
+  Mann-Whitney p=0.009): the invariant-manifold transport tubes are significantly MORE coherent
+  (lower FLI) than generic states -- the naive "chaos ridge" hypothesis is refuted; the transport
+  network is the coherence SKELETON of phase space. HONEST: significant + elegant, but not a
+  breakthrough and consistent with known dynamics (manifolds are organized asymptotic trajectories).
 - 2026-05-29 `v0.24` — Stage 24 (packaging + open-source) complete; the user-requested enhancement
   arc (Stages 18-24) is closed. Added pyproject.toml (setuptools src-layout, runtime deps, console
   entry points ariadne-atlas/ariadne-figures), MIT LICENSE, .github/workflows/ci.yml (fast-test CI

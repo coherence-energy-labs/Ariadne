@@ -541,6 +541,42 @@ def figure_transport_graph():
     return path
 
 
+def figure_coherence_field():
+    """The coherence (FLI) field of the Earth-Moon rotating frame with the manifold tubes overlaid."""
+    from ..data.constants import EARTH_MOON
+    from ..fields.coherence_field import coherence_map
+    from ..orbits.families import lyapunov_orbit_at_jacobi
+    from ..manifolds.manifold import manifold_seeds, manifold_trajectory
+    mu = EARTH_MOON.mu; C = 3.15
+    xs, ys, F = coherence_map(mu, C, (0.78, 1.18), (-0.3, 0.3), n=44, t_max=3.0)
+
+    fig, ax = plt.subplots(figsize=(9.2, 6.6))
+    im = ax.pcolormesh(xs, ys, F, shading="auto", cmap="viridis")
+    fig.colorbar(im, label="FLI  (high = chaotic / low coherence;  low = regular / coherent)")
+    for pt, col in (("L1", "white"), ("L2", "magenta")):
+        orb = lyapunov_orbit_at_jacobi(mu, pt, C)
+        for br in (+1, -1):
+            seeds, _ = manifold_seeds(mu, orb, n_seeds=40, stable=False, branch=br)
+            for s in seeds[::3]:
+                _, Y = manifold_trajectory(mu, s, stable=False, t_max=3.0, n=200)
+                m = (np.abs(Y[1]) < 0.3) & (Y[0] > 0.78) & (Y[0] < 1.18)
+                ax.plot(Y[0][m], Y[1][m], color=col, lw=0.4, alpha=0.5)
+        ax.plot([], [], color=col, lw=1.5, label=f"{pt} unstable tube")
+    ax.plot(1 - mu, 0, "o", color="0.7", ms=6)
+    ax.set_xlabel("x (rotating frame, nondim)"); ax.set_ylabel("y")
+    ax.set_title("Coherence (FLI) field at C=3.15 with invariant-manifold tubes\n"
+                 "test: are the transport tubes the field's chaos ridges?  (NO -- they are the "
+                 "orderly skeleton)")
+    ax.legend(loc="upper right", fontsize=8)
+    ax.set_xlim(0.78, 1.18); ax.set_ylim(-0.3, 0.3)
+    fig.tight_layout()
+    os.makedirs(_OUT, exist_ok=True)
+    path = os.path.join(_OUT, "coherence_field.png")
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return path
+
+
 def figure_grand_tradeoff():
     """The unified time/energy/robustness trade space with coherence-balanced picks (Stage 23)."""
     from ..data.ephemeris import et
@@ -851,6 +887,8 @@ def main():
     print("  ->", figure_veega())
     print("Rendering grand multi-objective trade space ...")
     print("  ->", figure_grand_tradeoff())
+    print("Rendering coherence (FLI) field + manifold tubes ...")
+    print("  ->", figure_coherence_field())
     print("Rendering L1<->L2 heteroclinic tubes ...")
     print("  ->", figure_heteroclinic())
 
