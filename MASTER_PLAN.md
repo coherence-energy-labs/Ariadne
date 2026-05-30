@@ -545,6 +545,25 @@ these add depth where real value remained.
   validated on a real bin; 25/25 spot-checked candidates cross-match to KNOWN objects (correct skeptical
   outcome -- no new find on the public archive). Discovery-capable end-to-end on the real unlinked
   archive. *DoD:* **G43a/b/c**.
+- **Stage 44 — IOD + orbit-fit (the trustworthy filter)** *(done)*: full ITF + vslow sweep ran 863
+  candidates -> 515 re-link to KNOWN catalogued objects via SkyBoT (pipeline works on real data); the
+  348 unmatched run through a rebuilt orbit-fit (linker-(r,rdot)-hypothesis IOD seed + LM differential
+  correction with light-time correction and pos-AU/vel-km/s rescaling). Validated against 5 real TNO
+  orbits: Sedna 3.94", Eris 5.79", Makemake 8.68", Quaoar 3.79", 2001 FP185 1.39" (a-error 0.1-13%).
+  Discrimination test: Sedna-alone accepted at 3.94", Sedna+Eris-mixed rejected at inf -- a sharp two-
+  state filter. Final verdict on the 348 unmatched: 0 low-RMS leads (median 999 arcsec). The honest
+  scientific outcome -- residual unlinked tracklets are mixed-object false-positive clusters, never a
+  new discovery from a single pipeline run on the public archive. *DoD:* **G44a (validated IOD on real
+  TNOs)**, **G44b (discrimination clean vs mixed)**, **G44c (0/348 verified unmatched leads with sound
+  filter)**.
+- **Stage 45 — Coherence-HJB (sampled-graph Helmholtz value function)** *(done)*: the Forge-Doctrine HJB
+  substitute -- replace 6D grids with N=5-30k quasirandom samples + dynamics-derived k-NN edges, solve
+  ONE sparse (Gamma*I + D*L)*V = source CG, apply Equation-of-One log-cost W = -ln(V/V_max). Validated
+  on (a) 2D analytic eikonal V=||x|| (Spearman rho=+0.9990, 100% greedy reach), (b) dimension scaling
+  through 6D synthetic (100% greedy reach at N=30k, k=8*dim), (c) planar CR3BP with dynamics-aware
+  graph (Earth-Moon, 5000 samples, 127k edges, Helmholtz CG 17 iters, 29/29 greedy starts reach a
+  lunar-vicinity goal sample in 3-5 steps). Real-dynamics value field, sub-second compute, no curse-
+  of-dimensionality on the dynamics-derived graph. *DoD:* **G45a/b/c**.
 
 ---
 
