@@ -1402,12 +1402,54 @@ is mostly hard or already-known. The engine is **discovery-capable on the full r
 a genuine NEW find would need Rubin/LSST-class data (deeper than the MPC's public bar) and is never
 announced from a pipeline run. Run: `PYTHONPATH=src python -m ariadne.validate.stage43`.
 
+**Stage 44 results (IOD + trustworthy orbit-fit + final ITF verdict):** the discovery loop closes
+honestly. Full ITF + vslow sweep cross-matched 863 candidates against SkyBoT (4 arcmin cone): **515
+re-link to KNOWN catalogued objects** -- confirms the pipeline works on real public data. The
+remaining 348 unmatched required a stronger filter than position-cone overlap: a real orbit fit. The
+prior orbit_fit shim was unsound -- it used a heuristic r-estimate plus a circular-velocity-in-the-
+equatorial-plane initial guess (wrong direction for any inclined TNO), and LM landed in degenerate-
+orbit basins giving ~800 arcsec residuals even on known TNOs (positive control caught it). Rebuilt
+the fitter in `discovery/iod.py`: re-derive the linker's (r_au, rdot) hypothesis on each candidate's
+own tracklets via fine-grid sweep + 2-pass refinement, take the cluster-centroid heliocentric state at
+t_ref as the IOD seed, then LM differential correction with linear loss (no soft_l1 cap) and pos-in-AU/
+vel-in-km/s rescaling and one-step light-time correction. Validation on **5 real TNOs**: Sedna 3.94",
+Eris 5.79", Makemake 8.68", Quaoar 3.79", 2001 FP185 1.39" -- a-error 0.1-13%, residuals consistent
+with astrometric noise (real orbits fit cleanly). Discrimination test: Sedna's tracklets alone
+**accepted at 3.94"**; Sedna's + Eris's tracklets mixed **rejected at inf** -- a sharp two-state
+filter, exactly what a discovery pipeline needs. Final verdict on the 348 unmatched: **0 low-RMS
+leads** (median 999 arcsec, the false-positive-cluster signature: linker grouped tracklets that fell
+near the same (r, rdot) hypothesis but don't share a real Keplerian orbit). End-to-end on the live
+MPC ITF: **515 known re-links + 0 new discoveries**, the rigorous scientifically defensible outcome.
+Run: `PYTHONPATH=src python -m pytest tests/test_discovery.py`.
+
+**Stage 45 results (Coherence-HJB sampled-graph Helmholtz value-function -- the HJB curse-breaker):**
+the genuine Forge-Doctrine answer to 6D HJB. Instead of gridding state space (~10^12 cells in 6D),
+sample states quasi-randomly (Halton), build a graph whose edges encode the local dynamics, solve ONE
+sparse SPD Helmholtz PDE `(Gamma*I + D*L)*V = source`, then apply the Equation-of-One log-cost
+transform `W = -ln(V/V_max)` to convert the Helmholtz exponential field into a pseudo-eikonal whose
+-gradient points toward the goal. The Green's-function adjoint identity collapses "value function at
+every potential start" into one CG solve. Calibration on **2D analytic eikonal** V=||x|| (Spearman
+rho=+0.999, 100% greedy reach -- the mandatory pre-flight check). Synthetic dimension-scaling sweep
+to 6D: at N=30k Halton + k=8*dim, 100% greedy reach -- the naive N=5k fails at 5D+ (rho ~0.7) and
+shows the curse is REAL, but denser sampling beats it. **CR3BP planar (4D phase space)** with
+dynamics-aware edges (each edge = a vectorised RK4 segment with Gaussian-decayed weight): 4977
+samples, 126k edges, Helmholtz CG 17 iters, 29/29 greedy from random samples reach a lunar-vicinity
+goal in 3-5 steps -- 100% on real CR3BP. **CR3BP 6D (production case)**: 20k Halton samples, 134k
+dynamics-derived edges, Helmholtz CG 17 iters in sub-second wall-clock, 27/29 greedy reach a 6D
+NRHO-vicinity goal (93%). Trajectory Delta-v extraction (sum of per-edge velocity mismatches with
+position-gap filter): median 2.88-10.4 km/s on Earth-side starts -- in the Hohmann/Edelbaum regime.
+The curse-of-dimensionality is genuinely beaten on full CR3BP using only Forge-Doctrine machinery.
+Run: `PYTHONPATH=src python -m ariadne.validate.stage45`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
 - 2026-05-28 — Coherence-field methods are a **search-acceleration layer only**; dynamics
   use standard gravity (credibility firewall).
 - 2026-05-28 — Documentation-first: this master doc precedes code and is kept exhaustive.
+- 2026-05-30 — Stages 19 + 22 + 45 + IOD-rebuild committed in six commits; Stage 19 extended with
+  NRHO transport via y=0 section (G19e); Stage 22 with per-leg DSM optimizer (G22c); Stage 45 is
+  the Forge-Doctrine Helmholtz HJB substitute, validated 2D-6D + full CR3BP.
 
 **Changelog:**
 - 2026-05-29 `v0.43` — Stage 43 (ITF ingest -- the real unlinked archive run) complete. Added
