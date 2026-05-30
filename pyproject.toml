@@ -4,20 +4,32 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ariadne-astro"
-version = "0.24.0"
-description = "Low-energy trajectory design & discovery of the solar system's natural transport network"
+version = "1.0.0rc2"
+description = "Python-native cislunar mission design + TNO discovery toolkit (CR3BP, manifolds, NRHO, HelioLinC, Coherence-HJB)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Ariadne project contributors" }]
-keywords = ["astrodynamics", "CR3BP", "trajectory-optimization", "low-energy-transfer",
-            "invariant-manifolds", "interplanetary", "gravity-assist", "ephemeris"]
+keywords = [
+    "astrodynamics", "CR3BP", "cislunar", "Gateway", "NRHO",
+    "trajectory-optimization", "low-energy-transfer", "invariant-manifolds",
+    "heteroclinic", "interplanetary", "gravity-assist", "VEEGA",
+    "Lambert", "porkchop", "Hamilton-Jacobi-Bellman", "Helmholtz",
+    "discovery", "HelioLinC", "TNO", "ephemeris", "DE440", "SPICE", "GMAT",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Operating System :: OS Independent",
 ]
 dependencies = [
     "numpy>=2.0",
@@ -25,11 +37,14 @@ dependencies = [
     "matplotlib>=3.8",
     "spiceypy>=6.0",
     "h5py>=3.10",
+    "astroquery>=0.4",                # for MPC + SkyBoT in the discovery pipeline
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
-crosscheck = ["jplephem>=2.21"]
+dev = ["pytest>=8.0", "pytest-xdist>=3.5"]
+crosscheck = ["jplephem>=2.21", "rebound>=4.0"]
+autodiff = ["jax>=0.4", "jaxlib>=0.4"]      # autodiff trajectory optimization (Stage 41)
+gpu = ["numba>=0.59"]                       # numba.cuda accelerated rollouts
 
 [project.urls]
 Homepage = "https://github.com/Jphilbrick10/Ariadne"
