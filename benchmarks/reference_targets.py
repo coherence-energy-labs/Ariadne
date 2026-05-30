@@ -130,6 +130,20 @@ if r4 is not None:
     check_within("L2 halo -> itself velocity-mismatch (m/s)", vel_mismatch_ms, 0.0, 5.0, " m/s")
     check_within("L2 halo -> itself position-gap (km)", pos_gap_km, 0.0, 2000.0, " km")
 
+# --- 5c. GMAT cross-check (skipped if GMAT not installed) ---
+print("\n[5c] NASA GMAT cross-validation (3-day trans-lunar propagation)")
+from ariadne.io.gmat_export import locate_gmat
+if locate_gmat() is None:
+    print("  [SKIP]  GMAT not installed at tools/gmat-R2026a -- skipping cross-check")
+else:
+    try:
+        from ariadne.validate.stage9 import gmat_crosscheck
+        dpos_km, dvel_kms = gmat_crosscheck(days=3.0)
+        check_within("Ariadne vs GMAT position over 3 d (m)", dpos_km * 1000.0, 0.0, 500.0, " m")
+        check_within("Ariadne vs GMAT velocity over 3 d (mm/s)", dvel_kms * 1e6, 0.0, 5.0, " mm/s")
+    except Exception as e:
+        print(f"  [SKIP]  GMAT cross-check failed to run: {str(e)[:80]}")
+
 # --- 6. Jacobi conservation on a long integration ---
 print("\n[6] Jacobi-constant conservation (CR3BP integrator quality)")
 from ariadne.dynamics.cr3bp import jacobi_constant

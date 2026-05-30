@@ -61,8 +61,8 @@ def main() -> int:
         print(f"      {r['system']:<18s} L1={r['L1_km']:7.0f} km  "
               f"Lyapunov period={r['lyap_period_d']:.3f} d  "
               f"(periodic to {r['orbit'].half_period_residual:.1e})")
-    print(f"      moon tour (Hohmann baseline): "
-          f"{' + '.join(f'{l['from'][:3]}->{l['to'][:3]} {l['dv_ms']:.0f}' for l in ij['tour'])}"
+    tour_legs = [f"{l['from'][:3]}->{l['to'][:3]} {l['dv_ms']:.0f}" for l in ij["tour"]]
+    print(f"      moon tour (Hohmann baseline): {' + '.join(tour_legs)}"
           f"  = {ij['tour_total']:.0f} m/s")
     print(f"      -> {'PASS' if okj else 'FAIL'}\n")
 
