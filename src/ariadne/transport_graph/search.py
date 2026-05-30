@@ -75,10 +75,10 @@ def reconstruct_path(prev, source, target):
 
 
 def calibrate_energy_heuristic(graph, target, weight="dv", w_robust=0.0, safety=0.9):
-    """Largest admissible slope k for h(n) = k * |C_n - C_target|.
+    """Largest admissible slope k for ``h(n) = k * |C_n - C_target|``.
 
-    Admissible means h(n) <= h*(n) for all n. We take k = safety * min over reachable,
-    different-energy nodes of h*(n)/|C_n - C_target|, guaranteeing admissibility by
+    Admissible means ``h(n) <= h*(n)`` for all n. We take ``k = safety * min`` over reachable,
+    different-energy nodes of ``h*(n)/|C_n - C_target|``, guaranteeing admissibility by
     construction (safety < 1 keeps a margin against floating point).
     """
     hstar = dist_to_target(graph, target, weight, w_robust)

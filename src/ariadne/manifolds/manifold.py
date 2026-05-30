@@ -73,7 +73,7 @@ def manifold_trajectory(mu: float, seed, stable: bool = False,
 
 
 def jacobi_drift(mu: float, seed, stable: bool = False, t_max: float = 8.0) -> float:
-    """Max |dC| along a manifold trajectory (integration quality check)."""
+    r"""Max ``|dC|`` along a manifold trajectory (integration quality check)."""
     _, Y = manifold_trajectory(mu, seed, stable, t_max, n=200)
     c0 = jacobi_constant(Y[:, 0], mu)
     return float(np.max([abs(jacobi_constant(Y[:, i], mu) - c0)

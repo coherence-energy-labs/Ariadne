@@ -46,7 +46,16 @@ _SYSTEMS = {
 
 
 def system(name: str):
-    """Return the named CR3BP `System` (e.g. "EARTH_MOON", "SUN_EARTH", "JUPITER_EUROPA")."""
+    """Return the named CR3BP `System` (e.g. "EARTH_MOON", "SUN_EARTH", "JUPITER_EUROPA").
+
+    Examples
+    --------
+    >>> em = system("EARTH_MOON")
+    >>> round(em.mu, 8)
+    0.01215058
+    >>> em.L_star
+    384400.0
+    """
     if name not in _SYSTEMS:
         raise KeyError(f"Unknown system {name!r}. Known: {list(_SYSTEMS)}")
     return _SYSTEMS[name]
@@ -75,7 +84,20 @@ def halo_family(point: str = "L1", system_name: str = "EARTH_MOON", n: int = 20)
 
 
 def gateway_nrho():
-    """Return the Gateway-class 9:2 L2 Near-Rectilinear Halo Orbit (Earth-Moon)."""
+    """Return the Gateway-class 9:2 L2 Near-Rectilinear Halo Orbit (Earth-Moon).
+
+    The 6.56-day NRHO that NASA Gateway flies. Built from scratch by pseudo-arclength
+    continuation along the L2 halo family.
+
+    Examples
+    --------
+    >>> nrho = gateway_nrho()
+    >>> period_d = nrho.period * EARTH_MOON.T_star / 86400.0
+    >>> 6.5 < period_d < 6.6   # Gateway spec ~6.56 d
+    True
+    >>> nrho.s0.shape          # 6D state (x, y, z, vx, vy, vz)
+    (6,)
+    """
     from .orbits.nrho import nrho_family as _nf
     s = EARTH_MOON
     nrho, _ = _nf(s.mu, "L2", t_star_days=s.T_star / 86400.0, l_star=s.L_star,

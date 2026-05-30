@@ -12,7 +12,7 @@ Cross-validation matrix
 Validation                        Result
 ================================  ========================================================
 Lagrange points (L1–L5)           Residual < 1e-11 nondim, all 7 systems
-Jacobi constant conservation      |C(t) − C(0)| < 1e-12 over many orbital periods
+Jacobi constant conservation      ``|C(t) - C(0)|`` < 1e-12 over many orbital periods
 SPICE DE440 ephemeris             spiceypy vs jplephem agree to **6 mm**
 Integrator                        DOP853 vs Radau on the same problem agree to **0.26 m**
 Earth–Moon transfer               Ariadne vs NASA GMAT agree to **149 m / 0.89 mm·s⁻¹**
@@ -20,8 +20,11 @@ TNO orbit fit (Sedna)             a-error **2.0%**, RMS **3.94"** on real MPC da
 NRHO geometry                     period **6.558 d**, perilune **3,238 km**, apolune **71,198 km**
 NRHO near-stability               Floquet **2.18** (vs L1 Lyapunov **1,841** — 843× more stable)
 6D Coherence-HJB                  **84%** greedy reach to lunar goal, sub-second compute
-Heteroclinic L1↔L2                **112 m/s** patch (energy-consistent, machine-precise)
-NRHO ↔ L2 halo                    **119 m/s** patch on y=0 section (Gateway transfer)
+Heteroclinic L1↔L2                **162 m/s** honest total (112 m/s velocity + 50 m/s 1-day rendezvous)
+NRHO ↔ L2 halo                    **646 m/s** honest total (119 m/s velocity + 527 m/s 1-day rendezvous)
+Same-orbit sanity check           **6.7 m/s** L2 halo → itself (essentially ballistic — float-level)
+Discovery synthetic injection     **100% pure** Sedna recovery from 200-interloper haystack
+HJB greedy trajectory             p50 = **7.3 km/s** honest total (in Hohmann-to-Edelbaum band)
 ================================  ========================================================
 
 Discovery pipeline ground truth
@@ -30,7 +33,7 @@ Discovery pipeline ground truth
 The HelioLinC linker + IOD orbit fit was validated on real MPC astrometry of five known TNOs:
 
 ============  ==========  ===============  =================
-Object        a (AU)      RMS residual     |Δa| / a
+Object        a (AU)      RMS residual     a-error
 ============  ==========  ===============  =================
 Sedna         506.0       3.94"            2.0%
 Eris          67.7        5.79"            12.7%

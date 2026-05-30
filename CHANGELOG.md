@@ -7,7 +7,48 @@ suffixes for `rc` / `a` / `b`).
 
 ## Unreleased
 
-_(nothing yet)_
+### Hardening sprint — verification, honesty, polish
+
+What was *claimed* to work; this sprint actually exercised everything end-to-end and
+corrected loose numbers.
+
+- **Fresh-venv install verified**: built the wheel, installed in a clean venv, ran
+  `import ariadne` + `ariadne.lyapunov_family('L1', n=3)` cleanly.
+- **Sphinx `-W` build clean**: fixed 9 docutils warnings (the `|...|` substitution-
+  reference issue in module docstrings + RST). CI can now use `-W --keep-going`.
+- **Notebooks execute end-to-end**: ran all 5 `.ipynb` via `jupyter nbconvert --execute`;
+  added missing cell IDs (nbformat 5+ requirement) via `scripts/fix_notebook_ids.py`.
+- **CLI sweep**: `ariadne {info, systems, lyapunov, nrho, benchmark}` all clean.
+- **Heteroclinic Δv honesty correction**: the earlier "112 m/s L1↔L2" and "119 m/s
+  NRHO↔L2" were velocity-mismatch ONLY. Honest totals (with 1-day correction window)
+  are **L1↔L2 = 162 m/s** (112 vel + 50 rendezvous) and **NRHO↔L2 = 646 m/s** (119 vel
+  + 527 rendezvous). Sanity: same-orbit-to-itself = 6.7 m/s (essentially ballistic).
+  See `benchmarks/heteroclinic_honest_dv.py`.
+- **Coherence-HJB Δv honesty correction**: the earlier "p50 = 2.88 km/s" was velocity-
+  mismatch ONLY (suspiciously below Hohmann). Honest total is **p50 = 7.32 km/s** —
+  in the Hohmann-to-Edelbaum band. See `benchmarks/stage45_honest_dv.py`.
+- **Discovery synthetic-injection positive control**: planted 33 real Sedna tracklets in
+  a 200-interloper haystack. **100% pure recovery** (29/29 Sedna, zero interlopers in
+  the best cluster); orbit fit a=527 AU (JPL 506, 4% err), e=0.854 (JPL 0.85), RMS
+  3.80″. Validates the positive direction; combined with the 0/348 negative on live ITF
+  the pipeline is end-to-end-validated in both directions.
+  See `benchmarks/discovery_synthetic_injection.py`.
+- **Reference benchmark tolerances tightened**: NRHO period 0.05d→0.01d, perilune
+  600km→100km, apolune 5000km→500km; Sedna/Quaoar a-error 15%→5%. Plus 2 new
+  L2-halo-self-heteroclinic sanity checks. The loose old tolerances were hiding
+  regressions.
+- **README + Sphinx validation table** corrected to quote honest patch Δv totals.
+- **Stage 22 DSM benefit correction (BIG honesty fix)**: the earlier "16% reduction"
+  claim (5392 m/s with DSMs vs 6449 m/s stored Galileo reference) was a **seed/topology
+  artefact, NOT a real DSM benefit**. The 6449 stored reference is from an older,
+  less-converged DE; a matched-conditions DE (same seed, same maxiter, same popsize)
+  with no DSMs finds **6207 m/s median** (5 seeds) — that's the 4% "improvement"
+  from re-running the optimizer better. With DSMs allowed (9 dims): **6220 m/s median**
+  — DSMs make it **0.2% WORSE**. The DSM mechanism is implemented correctly (regression-
+  clean) but doesn't help on this specific trajectory geometry. See
+  `benchmarks/stage22_dsm_isolation.py`. The 1-DOF DSM remains valid for *other*
+  trajectories where directional kicks help; the Galileo VEEGA at this epoch is just
+  not one of them.
 
 ## 1.0.0rc2 — 2026-05-30
 

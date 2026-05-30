@@ -3,8 +3,8 @@
 A direct Earth->Jupiter transfer needs a launch C3 ~ 85 km^2/s^2 -- beyond most launchers. A
 gravity-assist chain (e.g. Galileo's Venus-Earth-Earth-Jupiter, "VEEGA") borrows momentum from
 the planets and slashes the launch energy. We model the chain with patched conics: a Lambert arc
-on each leg, and at each intermediate planet a flyby that ROTATES v_inf but cannot change |v_inf|
-(any |v_inf| mismatch is a powered-flyby Delta-v; the required turn must be within the flyby's
+on each leg, and at each intermediate planet a flyby that ROTATES v_inf but cannot change ``|v_inf|``
+(any ``|v_inf|`` mismatch is a powered-flyby Delta-v; the required turn must be within the flyby's
 turn authority). A global optimizer (differential evolution) searches the launch epoch and the
 leg times of flight.
 

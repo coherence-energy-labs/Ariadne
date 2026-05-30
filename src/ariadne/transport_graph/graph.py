@@ -8,7 +8,7 @@ out to the section and join B's STABLE tube, which then coasts into B.
 The patch is a TRUE section crossing, found exactly the way heteroclinic connections
 are found: intersect the two tube cuts as curves in the (y, v_y) plane. At such a
 crossing the position (x = 1-mu fixed, y matched) and v_y are identical, so the only
-velocity that can differ is v_x -- and the patch Delta-v is |v_x^A - v_x^B|. At MATCHED
+velocity that can differ is v_x -- and the patch Delta-v is ``|v_x^A - v_x^B|``. At MATCHED
 energy this is ~0 (the known ballistic heteroclinic); changing energy forces a real burn
 because v^2 = 2*Omega - C differs. No position gap is ever tolerated: if the cuts do not
 cross, there is no edge.

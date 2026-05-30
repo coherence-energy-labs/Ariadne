@@ -79,7 +79,7 @@ Validation philosophy
 Every claim is cross-checked against an independent tool:
 
 - Periodicity: each orbit is propagated for its period; residual is reported.
-- Jacobi conservation: |C(t) - C(0)| measured along the orbit, must be < 1e-12.
+- Jacobi conservation: ``|C(t) - C(0)|`` measured along the orbit, must be < 1e-12.
 - Ephemeris: two independent libraries (spiceypy, jplephem) must agree to mm.
 - Integrators: DOP853 vs Radau on the same problem must agree to m.
 - Transfer Δv: every computed transfer is compared to GMAT propagating the same state.

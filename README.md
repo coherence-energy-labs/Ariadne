@@ -55,7 +55,7 @@ look at and a few lines of summary you can read.
 |---|---|---|
 | [`01_lyapunov_family.py`](examples/01_lyapunov_family.py) | Build the Earth-Moon L1 Lyapunov family by amplitude continuation; plot family colored by Jacobi constant | [`01_lyapunov_family.png`](examples_out/01_lyapunov_family.png) |
 | [`02_gateway_nrho.py`](examples/02_gateway_nrho.py) | Construct NASA's Gateway 9:2 NRHO via pseudo-arclength continuation; verify period 6.56 d, perilune 3,238 km, apolune 71,198 km, Floquet 2.18 (843× more stable than a deep L1 Lyapunov) | [`02_gateway_nrho.png`](examples_out/02_gateway_nrho.png) |
-| [`03_manifold_transport.py`](examples/03_manifold_transport.py) | Cislunar transport graph: L1↔L2 halo heteroclinic at 112 m/s (x=1-μ section); NRHO↔L2 halo at 119 m/s (y=0 section) — real Gateway-class cislunar transfers | [`03_manifold_transport.png`](examples_out/03_manifold_transport.png) |
+| [`03_manifold_transport.py`](examples/03_manifold_transport.py) | Cislunar transport graph: L1↔L2 halo + NRHO↔L2 halo Poincaré patches. Velocity-mismatch alone: 112 / 119 m/s. **Honest total with position-gap correction over a 1-day window: 162 / 646 m/s** (see [`benchmarks/heteroclinic_honest_dv.py`](benchmarks/heteroclinic_honest_dv.py)) | [`03_manifold_transport.png`](examples_out/03_manifold_transport.png) |
 | [`04_tno_orbit_fit.py`](examples/04_tno_orbit_fit.py) | Discovery-engine filter: pull real MPC astrometry for Sedna / Eris / Quaoar, fit orbits to a few arcseconds RMS, recover (a, e, i) within a few percent | [`04_tno_orbit_fit.png`](examples_out/04_tno_orbit_fit.png) |
 | [`05_helmholtz_hjb.py`](examples/05_helmholtz_hjb.py) | Coherence-HJB: sampled-graph Helmholtz value function on full 6D CR3BP — 84% greedy reach to lunar goal in sub-second compute, no grid, no curse of dimensionality | [`05_helmholtz_hjb.png`](examples_out/05_helmholtz_hjb.png) |
 | [`06_veega_jupiter.py`](examples/06_veega_jupiter.py) | Galileo-class Venus-Earth-Earth gravity assist to Jupiter on real DE440 ephemeris; C3 = 16.79 km²/s² (4.6× energy reduction vs direct transfer) | [`06_veega_jupiter.png`](examples_out/06_veega_jupiter.png) |
@@ -114,7 +114,7 @@ $ ariadne tutorial 5                 # run example #5 (Coherence-HJB) end-to-end
 | Lyapunov / halo / NRHO | Continuation families, periodicity to 1e-12 | NASA Gateway 9:2 NRHO (6.56 d, 3.2 / 71 Mm) |
 | Manifold tubes | Eigenvector-seeded, STM-transported, branched | Jacobi-conserved to 1e-12 |
 | Heteroclinic | Energy-consistent Poincaré-section crossings | 0.0 m/s same-energy ballistic |
-| Transport graph | Planar (y, vy) + 3D (y, z, vy, vz) + NRHO via y=0 | L1↔L2 112 m/s, NRHO↔L2 119 m/s |
+| Transport graph | Planar (y, vy) + 3D (y, z, vy, vz) + NRHO via y=0 | L1↔L2 162 m/s, NRHO↔L2 646 m/s *(honest total, 1-day correction window — see [`benchmarks/heteroclinic_honest_dv.py`](benchmarks/heteroclinic_honest_dv.py))* |
 | Interplanetary | Lambert porkchop, VEEGA + per-leg DSMs (1-DOF + 4-DOF) | Galileo C3 16.8, Earth→Mars 5.63 km/s |
 | Coherence-HJB | Sampled-graph Helmholtz value function | 6D CR3BP: ~84% greedy reach in sub-second |
 | TNO discovery | HelioLinC linker + (r, rdot)-hypothesis IOD + LM | Sedna/Eris/Makemake/Quaoar/2001 FP185 fit 1.4–8.7″ |
