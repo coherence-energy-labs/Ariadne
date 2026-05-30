@@ -107,6 +107,50 @@ print(f"  -> velocity return < 1e-9 km/s (1 micro-m/s): {'PASS' if ok_vel else '
 results.append(("Circular-orbit position return", ok_pos, pos_return_err))
 results.append(("Circular-orbit velocity return", ok_vel, vel_return_err))
 
+# --- 4. Hohmann LEO -> GEO transfer Delta-v (closed-form) vs Lambert ---
+print("\n[4] Hohmann LEO -> GEO transfer (closed-form Delta-v vs Lambert)")
+r_leo, r_geo = 6678.0, 42164.0
+a_hoh = 0.5 * (r_leo + r_geo)
+v_leo = math.sqrt(mu / r_leo)
+v_geo = math.sqrt(mu / r_geo)
+v_p_hoh = math.sqrt(mu * (2 / r_leo - 1 / a_hoh))
+v_a_hoh = math.sqrt(mu * (2 / r_geo - 1 / a_hoh))
+dv1_closed = v_p_hoh - v_leo
+dv2_closed = v_geo - v_a_hoh
+dv_total_closed = dv1_closed + dv2_closed
+print(f"  closed-form Hohmann: dv1 = {dv1_closed:.4f}, dv2 = {dv2_closed:.4f}, total = {dv_total_closed:.4f} km/s")
+
+tof_hoh = math.pi * math.sqrt(a_hoh**3 / mu)
+# Lambert at exactly 180 deg is degenerate (A=0 in BMW formulation); use 175 deg
+theta = math.radians(175.0)
+r2_vec = np.array([r_geo * math.cos(theta), r_geo * math.sin(theta), 0.0])
+v1_l, v2_l = lambert(np.array([r_leo, 0.0, 0.0]), r2_vec, tof_hoh, mu)
+dv1_lam = float(np.linalg.norm(v1_l)) - v_leo
+dv2_lam = v_geo - float(np.linalg.norm(v2_l))
+dv_total_lam = dv1_lam + dv2_lam
+print(f"  Lambert 175 deg:     dv1 = {dv1_lam:.4f}, dv2 = {dv2_lam:.4f}, total = {dv_total_lam:.4f} km/s")
+# 5 deg short of 180 -> slightly higher Delta-v than exact Hohmann; allow 10%
+check("Hohmann-like LEO->GEO (175 deg) total Delta-v (km/s)", dv_total_lam, dv_total_closed, 10.0)
+
+# --- 5. Kepler's 3rd law closure across orbit altitudes ---
+print("\n[5] Kepler's 3rd law closure (LEO, MEO, GPS, GEO)")
+
+
+def _abs_check(name, val, tol_abs, units=""):
+    passed = val <= tol_abs
+    flag = "PASS" if passed else "FAIL"
+    print(f"  [{flag}]  {name:<55s}  val={val:11.6f}{units}  tol={tol_abs}{units}")
+    results.append((name, passed, val))
+    return passed
+
+
+for r in [7000.0, 12000.0, 26600.0, 42164.0]:
+    T_kepler = 2 * math.pi * math.sqrt(r**3 / mu)
+    v = math.sqrt(mu / r)
+    rT, vT = kepler_step(np.array([r, 0.0, 0.0]), np.array([0.0, v, 0.0]), mu, T_kepler)
+    pos_err_m = float(np.linalg.norm(rT - np.array([r, 0.0, 0.0]))) * 1000.0
+    _abs_check(f"Kepler-3 closure at r={r:.0f} km", pos_err_m, 1.0, " m")
+
 print("\n" + "=" * 76)
 n_pass = sum(1 for _, ok, _ in results if ok)
 n_total = len(results)

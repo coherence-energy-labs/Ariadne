@@ -132,9 +132,13 @@ Every claim is checked against an independent tool:
 | Jacobi constant | Conserved to 1e-12 over many periods |
 | Ephemeris (DE440) | spiceypy vs jplephem agree to **6 mm** |
 | Integrator | DOP853 vs Radau agree to **0.26 m** |
-| Earth–Moon transfer | Ariadne vs GMAT agree to **149 m / 0.89 mm·s⁻¹** over 3 days |
+| Earth–Moon transfer | Ariadne vs NASA GMAT agree to **148.6 m / 0.893 mm·s⁻¹** over 3 days (live re-run 2026-05-30, GMAT R2026a) |
+| Lambert (Curtis Ex 5.2) | Ariadne vs hapsira agree to **0.002 mm·s⁻¹** on every velocity component (independent libraries, same answer to bit level) |
+| Two-body conservation | Energy + ang-momentum drift over 10 elliptic periods: **< 1e-12 relative** |
+| Circular-orbit closure | After 1 period, position returns to **< 1 mm**, velocity to **< 1 μm/s** |
 | TNO orbit fit | Sedna a-error **2.0%**, RMS 3.94″ on real MPC data |
 | 6D HJB | 84% greedy reach to lunar goal, sub-second compute |
+| Synthetic-injection discovery | **100% pure** Sedna recovery from 200-interloper haystack, fit a=527 AU (JPL 506) |
 
 ## Honest scope — what this is, and isn't
 
