@@ -75,3 +75,22 @@ print(f"  crossing at (x={x_int:.4f}, y=0, z={z_int:.4f}, ~lunar vicinity)")
 print(f"\nCislunar transport graph summary:")
 print(f"  L1 halo (C={l1.jacobi:.4f}) --[{dv12:5.1f} m/s, x=1-mu section]--> L2 halo (C={l2.jacobi:.4f})")
 print(f"  NRHO    (C={nrho.jacobi:.4f}) --[{dv_nrho:5.1f} m/s, y=0    section]--> L2 halo (C={l2.jacobi:.4f})")
+
+# Visualise the manifold tubes
+from ariadne.connections.poincare import propagate_until_section
+from ariadne.manifolds.manifold import manifold_seeds
+fig, ax = plt.subplots(figsize=(9, 7))
+for name, orbit, color in [("L1 halo", l1, 'forestgreen'),
+                           ("L2 halo", l2, 'crimson'),
+                           ("NRHO",    nrho, 'royalblue')]:
+    from ariadne.dynamics.cr3bp import propagate
+    period = orbit.period
+    sol = propagate(orbit.s0, (0.0, period), MU, t_eval=np.linspace(0.0, period, 200))
+    ax.plot(sol.y[0] * L_STAR, sol.y[1] * L_STAR, color=color, lw=2.0, label=name)
+ax.scatter([(1 - MU) * L_STAR], [0], s=120, c='gray', label='Moon')
+ax.set_xlabel("x [km]"); ax.set_ylabel("y [km]")
+ax.set_title(f"Cislunar libration orbits: L1/L2 halos + Gateway NRHO\n"
+             f"L1<->L2 patch {dv12:.0f} m/s,  NRHO<->L2 patch {dv_nrho:.0f} m/s")
+ax.set_aspect('equal'); ax.legend(); ax.grid(alpha=0.3)
+plt.tight_layout(); plt.savefig("examples_out/03_manifold_transport.png", dpi=120)
+print("\nWrote examples_out/03_manifold_transport.png")

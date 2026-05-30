@@ -44,13 +44,27 @@ Requires Python ≥ 3.10. NASA SPICE kernels (DE440) auto-download on first use.
 Five tight, runnable scripts in [`examples/`](examples/) — each ends with a PNG you can
 look at and a few lines of summary you can read.
 
-| Tutorial | What it demonstrates |
-|---|---|
-| [`01_lyapunov_family.py`](examples/01_lyapunov_family.py) | Build the Earth-Moon L1 Lyapunov family by amplitude continuation; plot family colored by Jacobi constant |
-| [`02_gateway_nrho.py`](examples/02_gateway_nrho.py) | Construct NASA's Gateway 9:2 NRHO via pseudo-arclength continuation; verify period 6.56 d, perilune 3,238 km, apolune 71,198 km, Floquet 2.18 (843× more stable than a deep L1 Lyapunov) |
-| [`03_manifold_transport.py`](examples/03_manifold_transport.py) | Cislunar transport graph: L1↔L2 halo heteroclinic at 112 m/s (x=1-μ section); NRHO↔L2 halo at 119 m/s (y=0 section) — real Gateway-class cislunar transfers |
-| [`04_tno_orbit_fit.py`](examples/04_tno_orbit_fit.py) | Discovery-engine filter: pull real MPC astrometry for Sedna / Eris / Quaoar, fit orbits to a few arcseconds RMS, recover (a, e, i) within a few percent |
-| [`05_helmholtz_hjb.py`](examples/05_helmholtz_hjb.py) | Coherence-HJB: sampled-graph Helmholtz value function on full 6D CR3BP — 84% greedy reach to lunar goal in sub-second compute, no grid, no curse of dimensionality |
+| Tutorial | What it demonstrates | Output |
+|---|---|---|
+| [`01_lyapunov_family.py`](examples/01_lyapunov_family.py) | Build the Earth-Moon L1 Lyapunov family by amplitude continuation; plot family colored by Jacobi constant | [`01_lyapunov_family.png`](examples_out/01_lyapunov_family.png) |
+| [`02_gateway_nrho.py`](examples/02_gateway_nrho.py) | Construct NASA's Gateway 9:2 NRHO via pseudo-arclength continuation; verify period 6.56 d, perilune 3,238 km, apolune 71,198 km, Floquet 2.18 (843× more stable than a deep L1 Lyapunov) | [`02_gateway_nrho.png`](examples_out/02_gateway_nrho.png) |
+| [`03_manifold_transport.py`](examples/03_manifold_transport.py) | Cislunar transport graph: L1↔L2 halo heteroclinic at 112 m/s (x=1-μ section); NRHO↔L2 halo at 119 m/s (y=0 section) — real Gateway-class cislunar transfers | [`03_manifold_transport.png`](examples_out/03_manifold_transport.png) |
+| [`04_tno_orbit_fit.py`](examples/04_tno_orbit_fit.py) | Discovery-engine filter: pull real MPC astrometry for Sedna / Eris / Quaoar, fit orbits to a few arcseconds RMS, recover (a, e, i) within a few percent | [`04_tno_orbit_fit.png`](examples_out/04_tno_orbit_fit.png) |
+| [`05_helmholtz_hjb.py`](examples/05_helmholtz_hjb.py) | Coherence-HJB: sampled-graph Helmholtz value function on full 6D CR3BP — 84% greedy reach to lunar goal in sub-second compute, no grid, no curse of dimensionality | [`05_helmholtz_hjb.png`](examples_out/05_helmholtz_hjb.png) |
+
+### Gallery
+
+L1 Lyapunov family (Tutorial 01) | Gateway NRHO 3D + Moon-distance (Tutorial 02)
+:---:|:---:
+![](examples_out/01_lyapunov_family.png) | ![](examples_out/02_gateway_nrho.png)
+
+Cislunar manifold transport graph (Tutorial 03) | TNO orbit recovery (Tutorial 04)
+:---:|:---:
+![](examples_out/03_manifold_transport.png) | ![](examples_out/04_tno_orbit_fit.png)
+
+Coherence-HJB value field + Δv distribution (Tutorial 05)
+:---:
+![](examples_out/05_helmholtz_hjb.png)
 
 ## Where Ariadne sits
 

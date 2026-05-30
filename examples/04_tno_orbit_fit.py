@@ -17,6 +17,7 @@ Run:  PYTHONPATH=src python examples/04_tno_orbit_fit.py
 import math, warnings
 warnings.filterwarnings("ignore")
 import numpy as np
+import matplotlib.pyplot as plt
 
 from ariadne.discovery import linkage as L, iod as IOD
 from ariadne.data.constants import GM_SUN, AU_KM
@@ -29,6 +30,7 @@ TARGETS = [
 ]
 
 print("Fitting real TNO orbits from MPC astrometry\n")
+results = []
 for label, desig, jpl in TARGETS:
     print(f"--- {label} (JPL: a={jpl['a']} AU, e={jpl['e']}, i={jpl['i']} deg)")
     tracks, e0 = L.tracklets_from_mpc(desig, window_days=720, min_per_night=2)
@@ -51,3 +53,27 @@ for label, desig, jpl in TARGETS:
     print(f"  IOD seed: r={fit['iod']['r_au']:.1f} AU, rdot={fit['iod']['rdot']:+.2f} km/s")
     print(f"  FIT: a={a_au:.1f} AU (err {a_err:.1f}%), e={ecc:.3f}, i={inc:.2f} deg, "
           f"RMS={fit['rms_arcsec']:.2f}\"  [{grade}]\n")
+    results.append((label, jpl, a_au, ecc, inc, fit["rms_arcsec"], a_err))
+
+# Visualise fit-vs-JPL recovery
+fig, ax = plt.subplots(1, 3, figsize=(13, 4.5))
+labels = [r[0] for r in results]
+ax[0].bar(labels, [r[6] for r in results], color='steelblue')
+ax[0].set_ylabel("|a_fit - a_JPL| / a_JPL  (%)")
+ax[0].set_title("Semi-major-axis recovery error")
+ax[0].grid(axis='y', alpha=0.3)
+ax[1].bar(labels, [r[5] for r in results], color='crimson')
+ax[1].set_ylabel("RMS residual (arcsec)")
+ax[1].set_title("Sky-position fit residual (real MPC data)")
+ax[1].axhline(10, color='gray', ls='--', label='10\" filter threshold')
+ax[1].grid(axis='y', alpha=0.3); ax[1].legend()
+xs_jpl = [r[1]["a"] for r in results]; xs_fit = [r[2] for r in results]
+ax[2].loglog(xs_jpl, xs_fit, 'o', markersize=12, color='forestgreen')
+for r in results:
+    ax[2].annotate(r[0], (r[1]["a"], r[2]), xytext=(8, -5), textcoords='offset points')
+lo, hi = min(xs_jpl + xs_fit) * 0.5, max(xs_jpl + xs_fit) * 2
+ax[2].plot([lo, hi], [lo, hi], '--', color='gray', label='ideal: a_fit = a_JPL')
+ax[2].set_xlabel("JPL a (AU)"); ax[2].set_ylabel("Fit a (AU)")
+ax[2].set_title("Recovered semi-major axis"); ax[2].legend(); ax[2].grid(alpha=0.3)
+plt.tight_layout(); plt.savefig("examples_out/04_tno_orbit_fit.png", dpi=120)
+print("Wrote examples_out/04_tno_orbit_fit.png")

@@ -16,6 +16,7 @@ Run:  PYTHONPATH=src python examples/05_helmholtz_hjb.py
 import time, warnings
 warnings.filterwarnings("ignore")
 import numpy as np
+import matplotlib.pyplot as plt
 import scipy.sparse as sp
 from scipy.spatial import cKDTree
 
@@ -90,3 +91,31 @@ if total_dv:
           f"p50={dvs_s[len(dvs_s)//2]:.1f}  p75={dvs_s[3*len(dvs_s)//4]:.1f} km/s")
 print(f"\nReference: Hohmann LEO->Moon ~3.9 km/s; Edelbaum low-thrust ~7-10 km/s")
 print(f"This is what 6D HJB on the production case looks like, in sub-second compute.")
+
+# Visualise the W field projected onto the (x, y) position plane
+fig, ax = plt.subplots(1, 2, figsize=(13, 5.5))
+goal_x = samples[goal_idx]
+finite = np.isfinite(W_field) & (W_field < 50)
+sc = ax[0].scatter(samples[finite, 0] * L_STAR, samples[finite, 1] * L_STAR,
+                   c=W_field[finite], cmap='viridis_r', s=4, alpha=0.7)
+ax[0].scatter([goal_x[0] * L_STAR], [goal_x[1] * L_STAR], s=200, marker='*',
+              edgecolor='red', facecolor='yellow', linewidth=2, label='goal', zorder=5)
+ax[0].scatter([(1 - MU) * L_STAR], [0], s=120, c='gray', label='Moon')
+ax[0].scatter([-MU * L_STAR], [0], s=300, c='royalblue', label='Earth')
+ax[0].set_xlabel("x [km]"); ax[0].set_ylabel("y [km]")
+ax[0].set_title("Coherence-HJB value field W = -ln(V/V_max)\n(projected onto (x, y); blue = closer to goal)")
+ax[0].set_aspect('equal'); ax[0].legend(loc='upper right')
+plt.colorbar(sc, ax=ax[0], label="W (surprise / pseudo-eikonal)")
+if total_dv:
+    dvs_arr = np.array(sorted(total_dv))
+    ax[1].hist(dvs_arr, bins=12, color='steelblue', edgecolor='black')
+    ax[1].axvline(3.9, color='red', ls='--', lw=2, label='Hohmann LEO->Moon (3.9 km/s)')
+    ax[1].axvline(np.median(dvs_arr), color='black', ls='-', lw=1.5,
+                  label=f'median {np.median(dvs_arr):.1f} km/s')
+    ax[1].set_xlabel("trajectory total Delta-v (km/s)")
+    ax[1].set_ylabel("count")
+    ax[1].set_title(f"Greedy-policy Delta-v from {len(starts)-1} random starts\n"
+                    f"({reach}/{len(starts)-1} reach lunar goal, sub-second compute)")
+    ax[1].legend(); ax[1].grid(axis='y', alpha=0.3)
+plt.tight_layout(); plt.savefig("examples_out/05_helmholtz_hjb.png", dpi=120)
+print("Wrote examples_out/05_helmholtz_hjb.png")

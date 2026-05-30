@@ -42,9 +42,16 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-xdist>=3.5"]
+docs = [
+    "sphinx>=7.0",
+    "furo>=2024.0",
+    "myst-parser>=2.0",
+    "sphinx-copybutton>=0.5",
+]
 crosscheck = ["jplephem>=2.21", "rebound>=4.0"]
 autodiff = ["jax>=0.4", "jaxlib>=0.4"]      # autodiff trajectory optimization (Stage 41)
 gpu = ["numba>=0.59"]                       # numba.cuda accelerated rollouts
+notebooks = ["jupyter>=1.0", "ipykernel>=6.0", "ipywidgets>=8.0"]
 
 [project.urls]
 Homepage = "https://github.com/Jphilbrick10/Ariadne"
