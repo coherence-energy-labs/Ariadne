@@ -37,7 +37,7 @@ Thumbs.db
 # Generated tutorial outputs (regenerate via `python examples/*.py`)
 # The 5 committed PNGs make the README render on GitHub without running the tutorials.
 examples_out/*
-!examples_out/0[1-5]_*.png
+!examples_out/0[1-7]_*.png
 
 # Scratch benchmarks at repo root (not committed -- the committed ones live in benchmarks/)
 /bench_*.py

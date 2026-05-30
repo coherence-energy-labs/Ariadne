@@ -59,8 +59,49 @@ Homepage = "https://github.com/Jphilbrick10/Ariadne"
 "White paper" = "https://github.com/Jphilbrick10/Ariadne/blob/master/docs/WHITE_PAPER.md"
 
 [project.scripts]
+ariadne = "ariadne.cli:main"
 ariadne-atlas = "ariadne.atlas.release:main"
 ariadne-figures = "ariadne.viz.figures:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+ariadne = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes (undefined names, unused imports)
+    "I",     # isort (import order)
+    "B",     # flake8-bugbear (likely bugs)
+    "UP",    # pyupgrade (modernise syntax)
+    "SIM",   # flake8-simplify
+    "RUF",   # ruff-specific
+]
+ignore = [
+    "E501",   # line too long -- handled by formatter where it matters
+    "E731",   # lambda assignment -- common in numerical code
+    "B008",   # function calls in argument defaults -- intentional for cache
+    "B028",   # warnings.warn without stacklevel -- noise
+]
+unfixable = [
+    "F401",  # don't auto-remove unused imports (we re-export them in __init__.py)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"examples/*.py" = ["E402", "F401"]
+"benchmarks/*.py" = ["E402"]
+"tests/*.py" = ["E402", "F401"]
+"src/ariadne/__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "network: marks tests that need network access (MPC, JPL, SkyBoT)",
+]

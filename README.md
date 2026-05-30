@@ -1,5 +1,12 @@
 # Ariadne
 
+[![CI](https://github.com/Jphilbrick10/Ariadne/actions/workflows/ci.yml/badge.svg)](https://github.com/Jphilbrick10/Ariadne/actions/workflows/ci.yml)
+[![Python 3.10–3.13](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Validation gates: 45+](https://img.shields.io/badge/validation%20gates-45%2B-brightgreen.svg)](MASTER_PLAN.md)
+[![Reference benchmarks: 16/16](https://img.shields.io/badge/reference%20benchmarks-16%2F16-brightgreen.svg)](benchmarks/reference_targets.py)
+[![Docs: Sphinx + ReadTheDocs](https://img.shields.io/badge/docs-Sphinx-orange.svg)](docs/sphinx/)
+
 **Python-native cislunar mission design + TNO discovery — validated, tutorial-driven, open source.**
 
 The thread through the interplanetary labyrinth: a working, validated astrodynamics toolkit
@@ -51,6 +58,8 @@ look at and a few lines of summary you can read.
 | [`03_manifold_transport.py`](examples/03_manifold_transport.py) | Cislunar transport graph: L1↔L2 halo heteroclinic at 112 m/s (x=1-μ section); NRHO↔L2 halo at 119 m/s (y=0 section) — real Gateway-class cislunar transfers | [`03_manifold_transport.png`](examples_out/03_manifold_transport.png) |
 | [`04_tno_orbit_fit.py`](examples/04_tno_orbit_fit.py) | Discovery-engine filter: pull real MPC astrometry for Sedna / Eris / Quaoar, fit orbits to a few arcseconds RMS, recover (a, e, i) within a few percent | [`04_tno_orbit_fit.png`](examples_out/04_tno_orbit_fit.png) |
 | [`05_helmholtz_hjb.py`](examples/05_helmholtz_hjb.py) | Coherence-HJB: sampled-graph Helmholtz value function on full 6D CR3BP — 84% greedy reach to lunar goal in sub-second compute, no grid, no curse of dimensionality | [`05_helmholtz_hjb.png`](examples_out/05_helmholtz_hjb.png) |
+| [`06_veega_jupiter.py`](examples/06_veega_jupiter.py) | Galileo-class Venus-Earth-Earth gravity assist to Jupiter on real DE440 ephemeris; C3 = 16.79 km²/s² (4.6× energy reduction vs direct transfer) | [`06_veega_jupiter.png`](examples_out/06_veega_jupiter.png) |
+| [`07_lambert_porkchop.py`](examples/07_lambert_porkchop.py) | Earth→Mars Lambert porkchop over a 1.5-yr launch window × 120-360 d TOF grid; finds the Oct 2026 launch at C3 = 9.27 km²/s² (near Hohmann theoretical) | [`07_lambert_porkchop.png`](examples_out/07_lambert_porkchop.png) |
 
 ### Gallery
 
@@ -62,9 +71,27 @@ Cislunar manifold transport graph (Tutorial 03) | TNO orbit recovery (Tutorial 0
 :---:|:---:
 ![](examples_out/03_manifold_transport.png) | ![](examples_out/04_tno_orbit_fit.png)
 
-Coherence-HJB value field + Δv distribution (Tutorial 05)
+Coherence-HJB value field + Δv distribution (Tutorial 05) | Galileo VEEGA Jupiter (Tutorial 06)
+:---:|:---:
+![](examples_out/05_helmholtz_hjb.png) | ![](examples_out/06_veega_jupiter.png)
+
+Earth → Mars Lambert porkchop (Tutorial 07)
 :---:
-![](examples_out/05_helmholtz_hjb.png)
+![](examples_out/07_lambert_porkchop.png)
+
+## Command-line interface
+
+After `pip install -e .` you get an `ariadne` command:
+
+```
+$ ariadne info                       # version + 7 CR3BP systems + capability summary
+$ ariadne systems                    # list the systems with mu / L* / T* / V*
+$ ariadne lyapunov --point L1 --n 30 # build an L1 Lyapunov family
+$ ariadne nrho                       # construct Gateway NRHO + report period/peri/apo/Floquet
+$ ariadne discover 90377             # fit Sedna's orbit from real MPC astrometry
+$ ariadne benchmark                  # run the 16-check reference benchmark suite
+$ ariadne tutorial 5                 # run example #5 (Coherence-HJB) end-to-end
+```
 
 ## Where Ariadne sits
 
