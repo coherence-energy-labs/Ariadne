@@ -21,25 +21,39 @@ from .poincare import first_section_crossing
 
 def tube_section_cut_3d(mu: float, orbit, x_sec: float, stable: bool = False,
                         branch: int = +1, n_seeds: int = 200,
-                        displacement: float = 1e-4, t_max: float = 12.0):
-    """Cut a 3D-orbit manifold tube with the plane x = x_sec. Returns the 4D crossing curve.
+                        displacement: float = 1e-4, t_max: float = 12.0,
+                        axis: int = 0):
+    """Cut a 3D-orbit manifold tube with the plane axis_value = x_sec.
 
-    Same as `tube_section_cut` (planar) but each crossing keeps (y, z, vy, vz) -- vx is
-    energy-determined and the section x is fixed. Use this on NRHO / 3D halo orbits where
-    z, vz are non-trivial.
+    Default axis=0 (x = x_sec) reproduces the existing x-section behaviour. For NRHO
+    transport, axis=1 (y = x_sec, typically x_sec=0) is the right choice -- NRHO crosses
+    y=0 every period while its tube barely diverges from x=x_NRHO. Each crossing keeps the
+    4-tuple of (state components NOT on the section's axis OR matched to it). For axis=0:
+    (y, z, vy, vz). For axis=1: (x, z, vx, vz). For axis=2: (x, y, vx, vy).
     """
     seeds, lam = manifold_seeds(mu, orbit, n_seeds=n_seeds,
                                 displacement=displacement, stable=stable, branch=branch)
+    # which state components survive the section (the two positions + their conjugate vels)
+    pos_idxs = [j for j in (0, 1, 2) if j != axis]
+    vel_idxs = [j + 3 for j in pos_idxs]
+    # which axis is the "energy-determined" velocity? matches the section axis.
+    vel_axis = axis + 3
     crossings, states, idx = [], [], []
     for i, seed in enumerate(seeds):
         st = first_section_crossing(mu, seed, x_sec, stable, t_max=t_max,
-                                    require_vx_positive=True)
+                                    require_vx_positive=(axis == 0), axis=axis)
+        if st is None and axis != 0:
+            # for non-x sections, try the other sign convention too (vx negative branch)
+            st = first_section_crossing(mu, seed, x_sec, stable, t_max=t_max,
+                                        require_vx_positive=False, axis=axis)
         if st is not None:
-            crossings.append([st[1], st[2], st[4], st[5]])     # y, z, vy, vz
+            crossings.append([st[pos_idxs[0]], st[pos_idxs[1]],
+                              st[vel_idxs[0]], st[vel_idxs[1]]])
             states.append(st)
             idx.append(i)
     return {"yzvyvz": np.array(crossings), "states": np.array(states),
-            "seed_idx": np.array(idx), "lambda_u": float(lam)}
+            "seed_idx": np.array(idx), "lambda_u": float(lam), "axis": int(axis),
+            "vel_axis": int(vel_axis)}
 
 
 def _seg_seg_distance(p1, p2, q1, q2):

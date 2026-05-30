@@ -15,24 +15,33 @@ from ..manifolds.manifold import manifold_seeds
 _INT = dict(method="DOP853", rtol=1e-12, atol=1e-12)
 
 
-def _section_event(x_sec: float):
+def _section_event(x_sec: float, axis: int = 0):
+    """Event function for the plane axis_value = x_sec. Default axis=0 ⇒ x = x_sec.
+
+    axis indexes the position component: 0 → x, 1 → y, 2 → z. Used as the section
+    normal direction for generalised Poincaré cuts (NRHO needs y = 0, halos use
+    x = 1 − μ, etc.).
+    """
     def ev(t, s, mu):
-        return s[0] - x_sec
+        return s[axis] - x_sec
     ev.terminal = False
     ev.direction = 0.0
     return ev
 
 
 def first_section_crossing(mu: float, seed, x_sec: float, stable: bool,
-                           t_max: float = 10.0, require_vx_positive: bool = True):
-    """First crossing of the plane x = x_sec by a manifold trajectory.
+                           t_max: float = 10.0, require_vx_positive: bool = True,
+                           axis: int = 0):
+    """First crossing of the plane axis_value = x_sec by a manifold trajectory.
 
     Forward integration for unstable seeds, backward for stable seeds. Returns the
     crossing state (6,) or None. By default keeps only crossings with vx > 0 (the
-    branch consistent with an L1->secondary->L2 connection).
+    branch consistent with an L1->secondary->L2 connection on the x-section); set
+    require_vx_positive=False for sections (like y=0) where another sign convention
+    selects the branch.
     """
     tf = -t_max if stable else t_max
-    ev = _section_event(x_sec)
+    ev = _section_event(x_sec, axis=axis)
     sol = solve_ivp(eom, (0.0, tf), np.asarray(seed, float), args=(mu,),
                     events=ev, **_INT)
     tev, yev = sol.t_events[0], sol.y_events[0]
