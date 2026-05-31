@@ -1,0 +1,12 @@
+{
+  "action_counts": {},
+  "candidate_keys": [],
+  "created_utc": "2026-05-31T06:03:56.083337+00:00",
+  "ledger_path": "data\\benchmarks\\real_corpus_alerce_probe\\provenance.jsonl",
+  "n_alerts": 2,
+  "n_batches": 1,
+  "n_outputs": 0,
+  "output_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "schema": "ariadne.discovery.replay_manifest.v1",
+  "status_counts": {}
+}

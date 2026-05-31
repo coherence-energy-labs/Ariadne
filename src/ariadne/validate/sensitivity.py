@@ -68,7 +68,9 @@ def inject_synthetic_objects(orbits: list[dict], epoch: str,
                               n_nights: int = 5,
                               n_per_night: int = 4,
                               noise_arcsec: float = 0.5,
-                              seed: int = 42) -> tuple[list[Alert], list[InjectionRecord]]:
+                              seed: int = 42,
+                              within_night_spread_hours: float = 4.0
+                              ) -> tuple[list[Alert], list[InjectionRecord]]:
     """Generate a set of synthetic Alerts for a list of orbits.
 
     Args:
@@ -97,9 +99,13 @@ def inject_synthetic_objects(orbits: list[dict], epoch: str,
         n_planted = 0
         for night_idx in range(n_nights):
             night_dt = night_idx * 86400.0
+            spread_s = within_night_spread_hours * 3600.0
             for k in range(n_per_night):
-                # spread detections within ~2 hr of each night centre
-                ddt = (k - n_per_night / 2) * 1800.0
+                # Spread detections across the configured within-night window
+                # (default 4h -- typical of real survey cadence). Ensures the
+                # cluster step doesn't collapse multiple detections of the same
+                # night into one centroid.
+                ddt = (k / max(n_per_night - 1, 1) - 0.5) * spread_s
                 t = night_dt + ddt
                 xs, _ = kepler_step(r0, v0, GM_SUN, t)
                 R_e = body_state("EARTH", e0 + t, "J2000", "SUN")[:3]

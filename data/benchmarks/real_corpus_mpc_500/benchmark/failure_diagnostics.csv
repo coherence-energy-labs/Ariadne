@@ -1,0 +1,1 @@
+case_id,stratum,truth_label,predicted_label,confidence,margin,entropy,action,evidence_channels,missing_channels,top_hypotheses,strongest_terms,warnings,contradictions,posterior_warnings,recommendation

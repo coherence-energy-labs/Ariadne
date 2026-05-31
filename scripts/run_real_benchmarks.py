@@ -81,8 +81,14 @@ def run_sensitivity_recovery():
     print(f"  -> {len(alerts)} synthetic alerts planted ({sum(t.n_planted_alerts for t in truth)} total)")
 
     t0 = time.time()
+    # NEW: use the adaptive pair window (no explicit pair_dt) + tighter cluster
+    # tolerance so within-night detections stay distinct.
     pipeline_out = realtime.run_pipeline(
-        alerts, rms_threshold_arcsec=1e9, do_xmatch=False, smart_layer=True)
+        alerts, rms_threshold_arcsec=1e9, do_xmatch=False, smart_layer=True,
+        cluster_time_tol_days=0.02,
+        rate_window_arcsec_hr=(0.05, 5.0),
+        pair_dt_hours=(None, None),       # adaptive
+    )
     elapsed = time.time() - t0
 
     report = evaluate_recovery(pipeline_out, truth)

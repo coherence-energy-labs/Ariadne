@@ -1,0 +1,51 @@
+{
+  "alert_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "alert_path": "",
+  "benchmark": {
+    "accuracy": 1.0,
+    "certificate_hash": "da3b6fedff6aba7eac3c2b5bd6e1274ea2c7c7ba7888b1f0c18388938b8ff7ed",
+    "ece": 7.045142247363856e-12,
+    "macro_f1": 1.0,
+    "n": 500,
+    "safe_accuracy": 1.0
+  },
+  "benchmark_artifacts": {
+    "ablation": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\ablation.csv",
+    "calibration_search": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\calibration_search.csv",
+    "case_results": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\case_results.csv",
+    "confusion": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\confusion.csv",
+    "drift_manifest": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\drift_manifest.json",
+    "failure_diagnostics": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\failure_diagnostics.csv",
+    "holdout_manifest": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\holdout_manifest.json",
+    "metrics": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\metrics.json",
+    "precision_recall": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\precision_recall.csv",
+    "reliability_curve": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\reliability_curve.csv",
+    "reliability_diagram": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\reliability_diagram.png",
+    "strata": "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\strata.csv"
+  },
+  "case_hash": "220af135ce69a710684df8cee967b4bb8484c7beca5473bdc6447edec95856f0",
+  "case_path": "data\\benchmarks\\real_corpus_mpc_500\\labelled_cases.jsonl",
+  "created_utc": "2026-05-31T05:59:36.330974+00:00",
+  "n_alerts": 0,
+  "n_cases": 500,
+  "records": [
+    {
+      "error": "",
+      "n_alerts": 0,
+      "n_cases": 500,
+      "n_records": 0,
+      "path_or_url": "https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz",
+      "source": "mpc_mpcorb_live",
+      "status": "ok"
+    }
+  ],
+  "replay": null,
+  "schema": "ariadne.discovery.real_corpus_manifest.v1",
+  "source_references": {
+    "mpcorb_url": "https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz",
+    "rubin_alert_docs_url": "https://prompt-products.lsst.io/products/alerts/index.html",
+    "rubin_schema_url": "https://sdm-schemas.lsst.io/",
+    "ztf_alert_archive_url": "https://ztf.uw.edu/",
+    "ztf_docs_url": "https://irsa.ipac.caltech.edu/docs/program_interface/ztf_api.html"
+  }
+}

@@ -32,7 +32,9 @@ def nightly_tracklets(sources: list[Source],
                       max_rate_arcsec_hr: float = 5.0,
                       min_pair_dt_hours: float = 0.1,
                       max_pair_dt_hours: float = 6.0,
-                      obscode: str = "807") -> list[dict]:
+                      obscode: str = "807",
+                      min_pair_separation_arcsec: float = 0.5,
+                      max_per_night: int | None = 5000) -> list[dict]:
     """Pair sources within the same night into Ariadne-shaped tracklets.
 
     Default rate window targets the distant-object regime (TNOs / outer Centaurs /
@@ -45,21 +47,28 @@ def nightly_tracklets(sources: list[Source],
     tracks = []
     for night, ss in by_night.items():
         ss = sorted(ss, key=lambda s: s.mjd)
+        per_night = []
         for i in range(len(ss)):
             for j in range(i + 1, len(ss)):
                 a, b = ss[i], ss[j]
                 dt_h = (b.mjd - a.mjd) * 24.0
+                # SANITY: same-frame (dt=0) pairs cannot be a real tracklet
                 if dt_h < min_pair_dt_hours:
                     continue
                 if dt_h > max_pair_dt_hours:
                     break
-                rate = _angular_separation_arcsec(a, b) / dt_h
+                # SANITY: require minimum separation (drops noise pixels of
+                # the same source being paired across frames within seconds)
+                sep = _angular_separation_arcsec(a, b)
+                if sep < min_pair_separation_arcsec:
+                    continue
+                rate = sep / dt_h
                 if not (min_rate_arcsec_hr <= rate <= max_rate_arcsec_hr):
                     continue
                 jd_mid = 0.5 * (a.mjd + b.mjd) + 2400000.5
                 et_mid = (jd_mid - 2451545.0) * SEC_PER_DAY
                 dt_s = (b.mjd - a.mjd) * SEC_PER_DAY
-                tracks.append({
+                per_night.append({
                     "t": et_mid, "jd": jd_mid,
                     "ra": math.radians(0.5 * (a.ra + b.ra)),
                     "dec": math.radians(0.5 * (a.dec + b.dec)),
@@ -71,6 +80,16 @@ def nightly_tracklets(sources: list[Source],
                     "source_pair": (a, b),
                     "night": night,
                 })
+        # CAP: explosion-protection. With N detections you can build O(N^2)
+        # pairs; on 500-detection nights that's a quarter-million tracklets
+        # all of which then go through HelioLinC/IOD. Cap per night to keep
+        # downstream tractable. Keep the brightest-flux pairs.
+        if max_per_night is not None and len(per_night) > max_per_night:
+            per_night.sort(key=lambda t: (t["source_pair"][0].flux
+                                            + t["source_pair"][1].flux),
+                           reverse=True)
+            per_night = per_night[:max_per_night]
+        tracks.extend(per_night)
     return tracks
 
 

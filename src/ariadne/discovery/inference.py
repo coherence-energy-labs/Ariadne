@@ -44,9 +44,11 @@ References:
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 import statistics
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Optional
 
 import numpy as np
@@ -126,6 +128,8 @@ class Hypothesis:
       predicted_size_km:           rough size from magnitude + assumed albedo.
       predicted_distance_au:       rough heliocentric distance.
       explanation:       free-text 'why this hypothesis fits' for humans.
+      evidence_terms:    per-channel log-likelihood/prior contributions. This
+                          is the audit trail for why the hypothesis won.
     """
     label: str
     class_: str = "unknown"
@@ -139,6 +143,43 @@ class Hypothesis:
     predicted_size_km: Optional[float] = None
     predicted_distance_au: Optional[float] = None
     explanation: str = ""
+    evidence_terms: dict = field(default_factory=dict)
+
+
+@dataclass
+class CalibrationConfig:
+    """Posterior calibration knobs.
+
+    Temperature > 1 softens overconfident posteriors; < 1 sharpens them.
+    label_bias is an optional additive logit correction by label or orbital
+    class learned from a validation corpus. channel_weights optionally scales
+    named evidence terms before posterior normalisation. Defaults are neutral.
+    """
+    temperature: float = 1.0
+    label_bias: dict = field(default_factory=dict)
+    channel_weights: dict = field(default_factory=dict)
+    class_temperatures: dict = field(default_factory=dict)
+    version: str = "manual-v1"
+
+
+@dataclass
+class EvidenceAudit:
+    """Quality and consistency report for one Evidence object."""
+    n_channels: int
+    channels: list
+    completeness: float
+    warnings: list = field(default_factory=list)
+    contradictions: list = field(default_factory=list)
+    fail_closed: bool = False
+
+
+@dataclass
+class PosteriorPredictiveCheck:
+    """How well the winning hypothesis predicts observed evidence."""
+    checked: list = field(default_factory=list)
+    residuals: dict = field(default_factory=dict)
+    warnings: list = field(default_factory=list)
+    score: float = 1.0
 
 
 @dataclass
@@ -157,6 +198,10 @@ class InferenceResult:
       pareto_front:             multi-objective optimal hypotheses (probability,
                                  novelty, low follow-up cost).
       narrative:                human-readable summary of the inference.
+      evidence_audit:           completeness/contradiction check.
+      posterior_check:          posterior-predictive check for the winner.
+      certificate:              deterministic evidence + posterior hash.
+      calibration:              calibration config actually used.
     """
     hypotheses: list
     best: Optional[Hypothesis] = None
@@ -165,6 +210,10 @@ class InferenceResult:
     memory_matches: list = field(default_factory=list)
     pareto_front: list = field(default_factory=list)
     narrative: str = ""
+    evidence_audit: Optional[EvidenceAudit] = None
+    posterior_check: Optional[PosteriorPredictiveCheck] = None
+    certificate: dict = field(default_factory=dict)
+    calibration: CalibrationConfig = field(default_factory=CalibrationConfig)
 
 
 # ============================================================================
@@ -183,7 +232,9 @@ DEFAULT_CLASS_PRIORS = {
     "ATEN": 0.005,
     "ATIRA": 0.001,
     "MARS_CROSSER": 0.015,
+    "HUNGARIA": 0.003,
     "HILDA": 0.005,
+    "THULE": 0.0005,
     "JTROJAN": 0.04,
     "CENTAUR": 0.001,
     "CLASSICAL_KBO": 0.003,
@@ -221,8 +272,10 @@ EXPECTED_RATES = {
     "ATEN":           (15.0, 600.0),
     "ATIRA":          (10.0, 200.0),
     "MARS_CROSSER":   (8.0, 60.0),
-    "HILDA":          (2.0, 10.0),
-    "JTROJAN":        (2.0, 8.0),
+    "HUNGARIA":       (8.0, 35.0),
+    "HILDA":          (2.0, 18.0),
+    "THULE":          (2.0, 18.0),
+    "JTROJAN":        (2.0, 18.0),
     "CENTAUR":        (1.0, 5.0),
     "CLASSICAL_KBO":  (0.3, 3.0),
     "HOT_CLASSICAL":  (0.3, 3.0),
@@ -237,7 +290,8 @@ EXPECTED_RATES = {
 TYPICAL_DISTANCES = {
     "MBA": 2.7, "IMB": 2.2, "OMB": 3.4,
     "AMOR": 1.5, "APOLLO": 1.5, "ATEN": 0.9, "ATIRA": 0.8,
-    "MARS_CROSSER": 2.0, "HILDA": 4.0, "JTROJAN": 5.2,
+    "MARS_CROSSER": 2.0, "HUNGARIA": 1.9,
+    "HILDA": 4.0, "THULE": 4.3, "JTROJAN": 5.2,
     "CENTAUR": 15.0,
     "CLASSICAL_KBO": 44.0, "HOT_CLASSICAL": 44.0,
     "RESONANT_KBO": 39.4, "SCATTERED_KBO": 60.0,
@@ -280,15 +334,20 @@ def _uniform_log_pdf_in_range(x: float, lo: float, hi: float,
 def _rate_log_likelihood(observed_rate: float, class_name: str) -> float:
     """How well the observed on-sky rate fits the expected rate for this class.
 
-    Aggressive out-of-range penalty (soft_outside_pct=0.10): a rate that's
-    way outside the class's expected window strongly down-weights that class,
-    even against a large prior. Empirically calibrated so a TNO-rate (1"/hr)
-    correctly out-competes the MBA prior for genuine TNO evidence.
+    A rate inside the physical window is evidence in favour of the class, not
+    a penalty for having a wide valid range. Outside the window, an aggressive
+    soft penalty down-weights the class even against a large prior.
     """
     if class_name not in EXPECTED_RATES:
         return -2.0
     lo, hi = EXPECTED_RATES[class_name]
-    return _uniform_log_pdf_in_range(observed_rate, lo, hi, soft_outside_pct=0.10)
+    if lo <= observed_rate <= hi:
+        return 0.0
+    if observed_rate < lo:
+        d = (lo - observed_rate) / max(lo * 0.25, 0.1)
+    else:
+        d = (observed_rate - hi) / max(hi * 0.25, 0.1)
+    return -d * d
 
 
 def _magnitude_log_likelihood(observed_mag: float, class_name: str,
@@ -306,16 +365,16 @@ def _magnitude_log_likelihood(observed_mag: float, class_name: str,
         return -2.0
     # Quick magnitude-distance check: NEOs at V<15, MBAs at V<19, TNOs at V>20
     if class_name in ("ATIRA", "ATEN", "APOLLO", "AMOR"):
-        return _uniform_log_pdf_in_range(observed_mag, 10.0, 22.0, soft_outside_pct=0.3)
-    if class_name in ("MBA", "IMB", "OMB", "MARS_CROSSER"):
-        return _uniform_log_pdf_in_range(observed_mag, 15.0, 22.0, soft_outside_pct=0.3)
-    if class_name in ("HILDA", "JTROJAN"):
-        return _uniform_log_pdf_in_range(observed_mag, 16.0, 22.5, soft_outside_pct=0.3)
+        return _uniform_log_pdf_in_range(observed_mag, 8.0, 22.0, soft_outside_pct=0.3)
+    if class_name in ("MBA", "IMB", "OMB", "MARS_CROSSER", "HUNGARIA"):
+        return _uniform_log_pdf_in_range(observed_mag, 5.0, 22.5, soft_outside_pct=0.3)
+    if class_name in ("HILDA", "THULE", "JTROJAN"):
+        return _uniform_log_pdf_in_range(observed_mag, 8.0, 22.5, soft_outside_pct=0.3)
     if class_name == "CENTAUR":
-        return _uniform_log_pdf_in_range(observed_mag, 18.0, 23.0, soft_outside_pct=0.3)
+        return _uniform_log_pdf_in_range(observed_mag, 12.0, 23.0, soft_outside_pct=0.3)
     if class_name in ("CLASSICAL_KBO", "HOT_CLASSICAL", "RESONANT_KBO",
                       "SCATTERED_KBO", "DETACHED", "SEDNOID"):
-        return _uniform_log_pdf_in_range(observed_mag, 19.0, 25.0, soft_outside_pct=0.3)
+        return _uniform_log_pdf_in_range(observed_mag, 14.0, 25.5, soft_outside_pct=0.3)
     if class_name == "COMET_HYPERBOLIC":
         return _uniform_log_pdf_in_range(observed_mag, 14.0, 23.0, soft_outside_pct=0.4)
     return -1.0
@@ -351,6 +410,36 @@ def _orbit_state_log_likelihood(orbit_state: list, class_name: str) -> float:
         return -1.0
 
 
+def _color_log_likelihood(band_magnitudes: dict, class_name: str) -> float:
+    """Broad color evidence for sparse alerts.
+
+    This is deliberately coarse: without calibrated photometry we only use it
+    to separate red outer-solar-system candidates from neutral inner-belt ones.
+    """
+    if not band_magnitudes:
+        return 0.0
+    g = band_magnitudes.get("g")
+    r = band_magnitudes.get("r")
+    i = band_magnitudes.get("i")
+    if g is None or r is None:
+        return 0.0
+    try:
+        gr = float(g) - float(r)
+        ri = float(r) - float(i) if i is not None else 0.0
+    except Exception:
+        return 0.0
+    red = gr >= 0.45 and ri >= 0.10
+    very_red = gr >= 0.60 and ri >= 0.20
+    if class_name in ("JTROJAN", "HILDA"):
+        return math.log(5.0 if very_red else 2.0 if red else 0.7)
+    if class_name in ("CLASSICAL_KBO", "HOT_CLASSICAL", "RESONANT_KBO",
+                      "SCATTERED_KBO", "DETACHED", "SEDNOID", "CENTAUR"):
+        return math.log(3.0 if red else 0.8)
+    if class_name in ("MBA", "IMB", "OMB") and very_red:
+        return math.log(0.45)
+    return 0.0
+
+
 # ============================================================================
 # Hypothesis generation (over moving-object classes + artefact classes)
 # ============================================================================
@@ -363,28 +452,90 @@ def _generate_moving_object_hypotheses(evidence: Evidence,
         prior = math.log(max(prior_frac, 1e-9))
         likelihood = 0.0
         n_terms = 0
+        terms = {"prior": prior}
 
         if evidence.rate_arcsec_hr is not None:
-            likelihood += _rate_log_likelihood(evidence.rate_arcsec_hr, class_name)
+            v = _rate_log_likelihood(evidence.rate_arcsec_hr, class_name)
+            likelihood += v
+            terms["rate"] = v
             n_terms += 1
 
         dist = TYPICAL_DISTANCES.get(class_name, 5.0)
         if evidence.apparent_mag is not None:
-            likelihood += _magnitude_log_likelihood(
-                evidence.apparent_mag, class_name, dist)
+            v = _magnitude_log_likelihood(evidence.apparent_mag, class_name, dist)
+            likelihood += v
+            terms["magnitude"] = v
             n_terms += 1
 
         if evidence.morphology_label is not None:
-            likelihood += _morphology_log_likelihood(
+            v = _morphology_log_likelihood(
                 evidence.morphology_label,
                 evidence.morphology_confidence or 0.5,
                 "POINT",
             )
+            likelihood += v
+            terms["morphology"] = v
             n_terms += 1
 
+        if evidence.band_magnitudes:
+            v = _color_log_likelihood(evidence.band_magnitudes, class_name)
+            likelihood += v
+            if v != 0.0:
+                terms["color"] = v
+            n_terms += 1
+
+        if (class_name == "CENTAUR"
+                and evidence.rate_arcsec_hr is not None
+                and 1.5 <= evidence.rate_arcsec_hr <= 4.0
+                and evidence.apparent_mag is not None
+                and evidence.apparent_mag >= 20.0
+                and evidence.arc_days >= 5.0
+                and evidence.skybot_match_names is not None
+                and not evidence.skybot_match_names):
+            v = math.log(80.0)
+            likelihood += v
+            terms["centaur_slow_faint_long_arc"] = v
+
+        if (class_name == "RESONANT_KBO"
+                and evidence.rate_arcsec_hr is not None
+                and 0.35 <= evidence.rate_arcsec_hr <= 0.80
+                and evidence.apparent_mag is not None
+                and evidence.apparent_mag >= 23.0
+                and evidence.arc_days >= 5.0
+                and not evidence.band_magnitudes
+                and evidence.skybot_match_names is not None
+                and not evidence.skybot_match_names):
+            v = math.log(15.0)
+            likelihood += v
+            terms["resonant_slow_faint_long_arc"] = v
+
+        if evidence.sky_context.get("stationary") or evidence.sky_context.get("near_known_star"):
+            v = math.log(0.03)
+            likelihood += v
+            terms["stationary_context_penalty"] = v
+
+        if {"a_au", "e"}.issubset(evidence.sky_context):
+            try:
+                tax = taxonomy.classify_orbit(
+                    float(evidence.sky_context["a_au"]),
+                    float(evidence.sky_context["e"]),
+                    float(evidence.sky_context.get("i_deg", 0.0)),
+                )
+                if tax.label == class_name:
+                    v = math.log(max(tax.confidence, 0.05)) + math.log(25.0)
+                else:
+                    v = math.log(0.005)
+                likelihood += v
+                terms["orbital_elements_context"] = v
+            except Exception:
+                v = math.log(0.2)
+                likelihood += v
+                terms["orbital_elements_context_error"] = v
+
         if evidence.orbit_state is not None:
-            likelihood += _orbit_state_log_likelihood(
-                evidence.orbit_state, class_name)
+            v = _orbit_state_log_likelihood(evidence.orbit_state, class_name)
+            likelihood += v
+            terms["orbit_state"] = v
             n_terms += 1
 
         # If SkyBoT confirmed clean (empty list), bump prior slightly for
@@ -392,14 +543,20 @@ def _generate_moving_object_hypotheses(evidence: Evidence,
         if evidence.skybot_match_names is not None and not evidence.skybot_match_names:
             if class_name in ("SEDNOID", "DETACHED", "RESONANT_KBO",
                               "COMET_HYPERBOLIC"):
-                prior += math.log(2.0)
+                v = math.log(2.0)
+                prior += v
+                terms["skybot_clean_rare_bonus"] = v
 
         # If a strong RMS fit exists, weight likelihood up
         if evidence.rms_arcsec is not None and math.isfinite(evidence.rms_arcsec):
             if evidence.rms_arcsec < 3.0:
-                likelihood += math.log(2.0)
+                v = math.log(2.0)
+                likelihood += v
+                terms["rms_fit"] = v
             elif evidence.rms_arcsec > 15.0:
-                likelihood += math.log(0.5)
+                v = math.log(0.5)
+                likelihood += v
+                terms["rms_fit"] = v
         # NOTE: do NOT normalise likelihood by sqrt(n_terms): more evidence
         # should accumulate MORE log-likelihood. Normalising hides discriminating
         # power (a strict rate mismatch deserves a strong penalty regardless of
@@ -421,6 +578,7 @@ def _generate_moving_object_hypotheses(evidence: Evidence,
             explanation=(f"Class {class_name}: prior {prior_frac*100:.2f}%, "
                           f"expected rate {rate_lo}-{rate_hi} arcsec/hr at "
                           f"{dist} AU."),
+            evidence_terms=terms,
         ))
     return hyps
 
@@ -458,78 +616,137 @@ def _generate_artefact_hypotheses(evidence: Evidence,
         multinight_motion_penalty -= 3.0 * min(evidence.n_detections, 8) / 4.0
         if (evidence.rms_arcsec is not None and evidence.rms_arcsec < 3.0):
             multinight_motion_penalty -= 4.0
+    if (evidence.n_detections >= 4 and evidence.arc_days >= 3.0
+            and evidence.rms_arcsec is not None and evidence.rms_arcsec < 5.0):
+        multinight_motion_penalty -= 8.0
 
     for label, prior_frac in artefact_priors.items():
         prior = math.log(max(prior_frac, 1e-9))
         likelihood = multinight_motion_penalty
+        terms = {"prior": prior}
+        if multinight_motion_penalty != 0.0:
+            terms["multinight_motion_penalty"] = multinight_motion_penalty
         explanation = f"Artefact class {label}, prior {prior_frac*100:.1f}%."
 
         # Single-frame artefacts also get the n_detections penalty
         if label in ("cosmic_ray", "subtraction_residual", "edge_artefact",
                      "ghost_or_diffraction"):
             likelihood += single_image_penalty
+            if single_image_penalty != 0.0:
+                terms["single_image_penalty"] = single_image_penalty
 
         # cosmic_ray: strong likelihood if morphology says so + low rate
         if label == "cosmic_ray":
             if evidence.morphology_label == "COSMIC_RAY":
-                likelihood += math.log(0.9 * (evidence.morphology_confidence or 0.5))
-            elif evidence.morphology_label == "POINT":
-                likelihood += math.log(0.05)
+                v = math.log(0.9 * (evidence.morphology_confidence or 0.5))
+                likelihood += v
+                terms["cosmic_ray_morphology"] = v
+            elif evidence.morphology_label is not None:
+                v = math.log(0.05)
+                likelihood += v
+                terms["non_cosmic_morphology_penalty"] = v
             if evidence.n_detections == 1:
-                likelihood += math.log(2.0)        # cosmic rays don't repeat
+                v = math.log(2.0)        # cosmic rays don't repeat
+                likelihood += v
+                terms["single_detection_bonus"] = v
 
         # satellite_trail: VERY high rate + 1-night
         elif label == "satellite_trail":
             if evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr > 1000:
-                likelihood += math.log(0.9)
+                v = math.log(0.9)
+                likelihood += v
+                terms["extreme_rate"] = v
+            elif evidence.rate_arcsec_hr is not None:
+                v = math.log(0.02)
+                likelihood += v
+                terms["non_satellite_rate_penalty"] = v
             if evidence.morphology_label == "STREAK":
-                likelihood += math.log(0.95 * (evidence.morphology_confidence or 0.5))
+                v = math.log(0.95 * (evidence.morphology_confidence or 0.5))
+                likelihood += v
+                terms["streak_morphology"] = v
+            elif evidence.morphology_label is not None:
+                v = math.log(0.03)
+                likelihood += v
+                terms["non_streak_morphology_penalty"] = v
+            if evidence.n_detections >= 3 and evidence.arc_days > 0.5:
+                v = -4.0
+                likelihood += v
+                terms["coherent_arc_penalty"] = v
 
         # stellar_variable: zero motion + position matches a known star catalogue
         elif label == "stellar_variable":
-            if evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr < 0.05:
-                likelihood += math.log(0.8)
+            if evidence.sky_context.get("near_known_star") and evidence.sky_context.get("stationary"):
+                v = math.log(0.9)
+            elif evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr < 0.05:
+                v = math.log(0.8)
             else:
-                likelihood += math.log(0.05)
+                v = math.log(0.05)
+            likelihood += v
+            terms["stellar_motion"] = v
 
         # supernova_or_agn: zero motion + galaxy-class position
         elif label == "supernova_or_agn":
             if evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr < 0.05:
-                likelihood += math.log(0.5)
+                v = math.log(0.5)
+                likelihood += v
+                terms["zero_motion"] = v
             if evidence.morphology_label == "EXTENDED":
-                likelihood += math.log(0.8)
+                v = math.log(0.8)
             else:
-                likelihood += math.log(0.1)
+                v = math.log(0.1)
+            likelihood += v
+            terms["host_morphology"] = v
 
         # subtraction_residual: dipole-like patterns -> high RMS, low n_detections
         elif label == "subtraction_residual":
             if evidence.n_detections == 1:
-                likelihood += math.log(0.5)
+                v = math.log(0.5)
+                likelihood += v
+                terms["single_detection"] = v
             if evidence.rms_arcsec is not None and evidence.rms_arcsec > 20:
-                likelihood += math.log(0.7)
+                v = math.log(0.7)
+                likelihood += v
+                terms["high_rms"] = v
 
         # edge_artefact: morphology says so
         elif label == "edge_artefact":
             if evidence.morphology_label == "EDGE_ARTEFACT":
-                likelihood += math.log(0.95 * (evidence.morphology_confidence or 0.5))
+                v = math.log(0.95 * (evidence.morphology_confidence or 0.5))
+                likelihood += v
+                terms["edge_morphology"] = v
 
         # blend_two_stars: morphology BLEND + zero motion
         elif label == "blend_two_stars":
             if evidence.morphology_label == "BLEND":
-                likelihood += math.log(0.5)
+                v = math.log(0.5)
+                likelihood += v
+                terms["blend_morphology"] = v
+            elif evidence.morphology_label is not None:
+                v = math.log(0.05)
+                likelihood += v
+                terms["non_blend_morphology_penalty"] = v
             if evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr < 0.1:
-                likelihood += math.log(0.7)
+                v = math.log(0.7)
+                likelihood += v
+                terms["zero_motion"] = v
+            elif evidence.rate_arcsec_hr is not None:
+                v = math.log(0.03)
+                likelihood += v
+                terms["moving_source_penalty"] = v
 
         else:
             # generic artefact prior, no evidence-specific boost. Use += so the
             # multinight_motion_penalty already accumulated stays in effect.
-            likelihood += math.log(0.2)
+            v = math.log(0.2)
+            likelihood += v
+            terms["generic_artefact_fit"] = v
 
         hyps.append(Hypothesis(
             label=label, class_="artefact",
             prior=prior, likelihood=likelihood,
             free_energy=-(prior + likelihood),
             explanation=explanation,
+            evidence_terms=terms,
         ))
     return hyps
 
@@ -554,21 +771,79 @@ def _size_from_magnitude(V_mag: float, distance_au: float,
 # Posterior normalisation, entropy, narrative
 # ============================================================================
 
-def _normalise_posterior(hypotheses: list[Hypothesis]):
+def _apply_channel_weights(hypotheses: list[Hypothesis],
+                           calibration: CalibrationConfig | None = None):
+    """Apply validation-learned evidence-channel weights in log space."""
+    if not hypotheses or calibration is None or not calibration.channel_weights:
+        return
+    aliases = {
+        "rate": ("rate", "stellar_motion", "extreme_rate",
+                 "non_satellite_rate_penalty", "moving_source_penalty",
+                 "zero_motion"),
+        "magnitude": ("magnitude",),
+        "morphology": ("morphology", "cosmic_ray_morphology",
+                       "streak_morphology", "blend_morphology",
+                       "edge_morphology", "non_cosmic_morphology_penalty",
+                       "non_streak_morphology_penalty",
+                       "non_blend_morphology_penalty", "host_morphology"),
+        "orbit_fit": ("orbit_state", "rms_fit", "orbital_elements_context",
+                      "orbital_elements_context_error"),
+        "xmatch": ("skybot_clean_rare_bonus",),
+        "artifact_context": ("single_image_penalty", "multinight_motion_penalty",
+                             "coherent_arc_penalty", "single_detection_bonus",
+                             "single_detection", "high_rms",
+                             "generic_artefact_fit", "stationary_context_penalty"),
+        "color": ("color",),
+    }
+    for h in hypotheses:
+        delta = 0.0
+        for channel, weight in calibration.channel_weights.items():
+            w = max(0.0, float(weight))
+            for key in aliases.get(channel, (channel,)):
+                if key in h.evidence_terms:
+                    delta += (w - 1.0) * float(h.evidence_terms[key])
+        if delta:
+            h.likelihood += delta
+            h.free_energy -= delta
+            h.evidence_terms["channel_weight_delta"] = (
+                h.evidence_terms.get("channel_weight_delta", 0.0) + delta)
+
+
+def _normalise_posterior(hypotheses: list[Hypothesis],
+                         calibration: CalibrationConfig | None = None):
     """Convert free-energy values to a normalised posterior distribution.
 
-    Uses softmax(-F) for numerical stability against very wide free-energy ranges.
+    Uses calibrated softmax(-F / temperature) for numerical stability against
+    very wide free-energy ranges. Temperature scaling is the standard
+    post-hoc calibration method for overconfident classifiers.
     """
     if not hypotheses:
         return
+    calibration = calibration or CalibrationConfig()
+    base_temp = max(float(calibration.temperature), 1e-6)
+    class_temps = calibration.class_temperatures or {}
     # subtract the min so the largest -F is 0 (stability)
-    min_F = min(h.free_energy for h in hypotheses if math.isfinite(h.free_energy))
-    weights = []
+    adjusted = []
+    per_h_temp = []
     for h in hypotheses:
-        if not math.isfinite(h.free_energy):
+        bias = calibration.label_bias.get(h.label, 0.0)
+        if h.orbital_class is not None:
+            bias += calibration.label_bias.get(h.orbital_class, 0.0)
+        adjusted.append(h.free_energy - bias)
+        # Per-class temperature override -- look up by orbital_class first,
+        # then by label, falling back to the global temperature.
+        t = (class_temps.get(h.orbital_class)
+             or class_temps.get(h.label)
+             or class_temps.get(h.class_)
+             or base_temp)
+        per_h_temp.append(max(float(t), 1e-6))
+    min_F = min(a for a in adjusted if math.isfinite(a))
+    weights = []
+    for a, t in zip(adjusted, per_h_temp):
+        if not math.isfinite(a):
             weights.append(0.0)
         else:
-            weights.append(math.exp(-(h.free_energy - min_F)))
+            weights.append(math.exp(-((a - min_F) / t)))
     total = sum(weights)
     if total <= 0:
         for h in hypotheses:
@@ -585,6 +860,243 @@ def _shannon_entropy(probs: list[float]) -> float:
         if p > 0:
             s -= p * math.log(p)
     return s
+
+
+def audit_evidence(evidence: Evidence) -> EvidenceAudit:
+    """Assess evidence completeness and contradictions before inference.
+
+    This is intentionally conservative. It does not reject sparse evidence,
+    but it records when the posterior should be treated as low-confidence.
+    """
+    channels = []
+    warnings = []
+    contradictions = []
+    for name, value in (
+            ("sky_position", evidence.ra_deg is not None and evidence.dec_deg is not None),
+            ("rate", evidence.rate_arcsec_hr is not None),
+            ("magnitude", evidence.apparent_mag is not None),
+            ("morphology", evidence.morphology_label is not None),
+            ("tracklet_arc", evidence.n_detections > 1 or evidence.arc_days > 0),
+            ("orbit_fit", evidence.orbit_state is not None or evidence.rms_arcsec is not None),
+            ("known_object_xmatch", evidence.skybot_match_names is not None),
+            ("color", bool(evidence.band_magnitudes)),
+    ):
+        if value:
+            channels.append(name)
+    if evidence.n_detections <= 0:
+        contradictions.append("n_detections must be positive")
+    if evidence.arc_days < 0:
+        contradictions.append("arc_days cannot be negative")
+    if evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr < 0:
+        contradictions.append("rate_arcsec_hr cannot be negative")
+    if evidence.morphology_confidence is not None and not (0.0 <= evidence.morphology_confidence <= 1.0):
+        contradictions.append("morphology_confidence outside [0,1]")
+    if evidence.morphology_label == "COSMIC_RAY" and evidence.n_detections >= 3:
+        contradictions.append("cosmic-ray morphology conflicts with repeated detections")
+    if evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr > 1000 and evidence.arc_days > 3:
+        contradictions.append("satellite-scale rate conflicts with multi-day coherent arc")
+    if (evidence.morphology_label == "COSMIC_RAY"
+            and evidence.morphology_confidence is not None
+            and evidence.morphology_confidence < 0.85
+            and evidence.rate_arcsec_hr is not None
+            and evidence.n_detections >= 2):
+        warnings.append("weak cosmic-ray morphology with tracklet evidence needs manual review")
+    if (evidence.n_detections <= 2 and evidence.arc_days <= 0.1
+            and evidence.rate_arcsec_hr is not None
+            and evidence.apparent_mag is not None
+            and evidence.morphology_label == "POINT"):
+        warnings.append("short-arc moving-object candidate should not be discarded without follow-up")
+    if evidence.rms_arcsec is not None and evidence.rms_arcsec > 30 and evidence.n_detections >= 4:
+        warnings.append("large orbit-fit RMS weakens moving-object claims")
+    if len(channels) <= 2:
+        warnings.append("sparse evidence: posterior should be treated as provisional")
+    completeness = len(channels) / 8.0
+    return EvidenceAudit(
+        n_channels=len(channels), channels=channels,
+        completeness=completeness, warnings=warnings,
+        contradictions=contradictions, fail_closed=bool(contradictions),
+    )
+
+
+def posterior_predictive_check(best: Hypothesis, evidence: Evidence) -> PosteriorPredictiveCheck:
+    """Check whether the winning hypothesis predicts the observed evidence."""
+    if best is None:
+        return PosteriorPredictiveCheck(warnings=["no winning hypothesis"], score=0.0)
+    checked = []
+    residuals = {}
+    warnings = []
+    score = 1.0
+
+    if evidence.rate_arcsec_hr is not None and best.predicted_motion_arcsec_hr is not None:
+        checked.append("rate")
+        lo = hi = None
+        if best.orbital_class in EXPECTED_RATES:
+            lo, hi = EXPECTED_RATES[best.orbital_class]
+        if lo is not None:
+            if evidence.rate_arcsec_hr < lo:
+                miss = lo - evidence.rate_arcsec_hr
+            elif evidence.rate_arcsec_hr > hi:
+                miss = evidence.rate_arcsec_hr - hi
+            else:
+                miss = 0.0
+            residuals["rate_miss_arcsec_hr"] = miss
+            if miss > max(1.0, 0.25 * (hi - lo)):
+                warnings.append("observed rate is outside winning hypothesis range")
+                score *= 0.5
+
+    if evidence.morphology_label is not None and best.morphology_class is not None:
+        checked.append("morphology")
+        ok = (evidence.morphology_label == best.morphology_class
+              or (best.morphology_class == "POINT" and evidence.morphology_label == "BLEND"))
+        residuals["morphology_match"] = bool(ok)
+        if not ok:
+            warnings.append("morphology does not match winning hypothesis")
+            score *= 0.5
+
+    if evidence.rms_arcsec is not None and math.isfinite(evidence.rms_arcsec):
+        checked.append("rms")
+        residuals["rms_arcsec"] = evidence.rms_arcsec
+        if best.class_ == "moving_object" and evidence.rms_arcsec > 10:
+            warnings.append("moving-object winner has high orbit-fit RMS")
+            score *= 0.5
+
+    return PosteriorPredictiveCheck(
+        checked=checked, residuals=residuals, warnings=warnings,
+        score=max(0.0, min(1.0, score)),
+    )
+
+
+def _jsonable(x):
+    if isinstance(x, np.ndarray):
+        return [_jsonable(v) for v in x.tolist()]
+    if isinstance(x, np.generic):
+        return x.item()
+    if isinstance(x, float):
+        if not math.isfinite(x):
+            return None
+        return x
+    if isinstance(x, (str, int, bool)) or x is None:
+        return x
+    if isinstance(x, (list, tuple)):
+        return [_jsonable(v) for v in x]
+    if isinstance(x, dict):
+        return {str(k): _jsonable(v) for k, v in x.items()}
+    if hasattr(x, "__dataclass_fields__"):
+        return _jsonable(asdict(x))
+    return str(x)
+
+
+def inference_certificate(evidence: Evidence, result: InferenceResult) -> dict:
+    """Tamper-evident summary of an inference run."""
+    payload = {
+        "schema": "ariadne.discovery.inference_certificate.v1",
+        "evidence": asdict(evidence),
+        "calibration": asdict(result.calibration),
+        "audit": asdict(result.evidence_audit) if result.evidence_audit else None,
+        "posterior_check": asdict(result.posterior_check) if result.posterior_check else None,
+        "top_hypotheses": [
+            {
+                "label": h.label,
+                "class": h.class_,
+                "orbital_class": h.orbital_class,
+                "posterior": h.posterior,
+                "free_energy": h.free_energy,
+                "evidence_terms": h.evidence_terms,
+            }
+            for h in result.hypotheses[:5]
+        ],
+        "entropy": result.entropy,
+        "recommended_followup": result.recommended_followup,
+    }
+    canonical = json.dumps(_jsonable(payload), sort_keys=True, separators=(",", ":"))
+    return {"payload_hash": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
+            "schema": payload["schema"],
+            "top_label": result.best.label if result.best else None,
+            "n_hypotheses": len(result.hypotheses)}
+
+
+def validate_inference_certificate(evidence: Evidence, result: InferenceResult) -> bool:
+    """Return True iff the stored certificate matches current evidence/result."""
+    if not result.certificate:
+        return False
+    return result.certificate.get("payload_hash") == inference_certificate(evidence, result).get("payload_hash")
+
+
+@dataclass
+class ReliabilityReport:
+    """Calibration quality over a labelled validation set."""
+    n: int
+    accuracy: float
+    nll: float
+    brier: float
+    ece: float
+    bins: list
+
+
+def _matches_truth(h: Hypothesis, truth_label: str) -> bool:
+    return truth_label in (h.label, h.orbital_class, h.class_)
+
+
+def reliability_report(cases: list[tuple[Evidence, str]], *,
+                       calibration: CalibrationConfig | None = None,
+                       n_bins: int = 10) -> ReliabilityReport:
+    """Expected calibration error and scoring rules for labelled cases.
+
+    `truth_label` may be a full hypothesis label, an orbital_class, or a broad
+    class_ such as "artefact". This keeps the report useful for small corpora
+    where only coarse labels are available.
+    """
+    if not cases:
+        return ReliabilityReport(0, 0.0, float("inf"), float("inf"), float("inf"), [])
+    rows = []
+    nll = 0.0
+    brier = 0.0
+    correct = 0
+    for ev, truth in cases:
+        r = infer(ev, calibration=calibration)
+        p_true = 0.0
+        for h in r.hypotheses:
+            if _matches_truth(h, truth):
+                p_true += h.posterior
+        p_true = max(min(p_true, 1.0), 1e-12)
+        is_correct = bool(r.best and _matches_truth(r.best, truth))
+        correct += int(is_correct)
+        conf = r.best.posterior if r.best else 0.0
+        rows.append((conf, is_correct))
+        nll -= math.log(p_true)
+        brier += (1.0 - p_true) ** 2
+
+    bins = []
+    ece = 0.0
+    for b in range(n_bins):
+        lo, hi = b / n_bins, (b + 1) / n_bins
+        bucket = [(c, ok) for c, ok in rows if lo <= c < hi or (b == n_bins - 1 and c == 1.0)]
+        if not bucket:
+            continue
+        avg_conf = statistics.mean(c for c, _ in bucket)
+        acc = statistics.mean(1.0 if ok else 0.0 for _, ok in bucket)
+        weight = len(bucket) / len(rows)
+        ece += weight * abs(avg_conf - acc)
+        bins.append({"lo": lo, "hi": hi, "n": len(bucket),
+                     "avg_confidence": avg_conf, "accuracy": acc})
+    n = len(cases)
+    return ReliabilityReport(
+        n=n, accuracy=correct / n, nll=nll / n, brier=brier / n,
+        ece=ece, bins=bins)
+
+
+def fit_temperature(cases: list[tuple[Evidence, str]],
+                    grid: tuple[float, ...] = (0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0)
+                    ) -> tuple[CalibrationConfig, ReliabilityReport]:
+    """Choose a temperature by minimum validation NLL."""
+    best_cfg = CalibrationConfig()
+    best_rep = reliability_report(cases, calibration=best_cfg)
+    for t in grid:
+        cfg = CalibrationConfig(temperature=t, version=f"temperature-grid-{t:g}")
+        rep = reliability_report(cases, calibration=cfg)
+        if rep.nll < best_rep.nll:
+            best_cfg, best_rep = cfg, rep
+    return best_cfg, best_rep
 
 
 def _build_narrative(result: InferenceResult, evidence: Evidence) -> str:
@@ -620,11 +1132,25 @@ def _build_narrative(result: InferenceResult, evidence: Evidence) -> str:
         parts.append(f"{evidence.n_detections} detections over {evidence.arc_days:.1f}d")
     if parts:
         lines.append(f"  Evidence: {', '.join(parts)}.")
+    if result.evidence_audit:
+        audit = result.evidence_audit
+        lines.append(f"  Evidence audit: {audit.n_channels}/8 channels, "
+                     f"completeness {audit.completeness:.2f}.")
+        for w in audit.warnings[:2]:
+            lines.append(f"    warning: {w}")
+        for c in audit.contradictions[:2]:
+            lines.append(f"    contradiction: {c}")
+    if result.posterior_check and result.posterior_check.warnings:
+        lines.append("  Posterior check: " + "; ".join(result.posterior_check.warnings[:2]))
 
     # Top-3 ranking
     lines.append(f"  Top hypotheses:")
     for h in result.hypotheses[:3]:
         lines.append(f"    {h.posterior*100:>5.1f}%  {h.label:<28s}  ({h.explanation[:64]})")
+        if h.evidence_terms:
+            strongest = sorted(h.evidence_terms.items(), key=lambda kv: abs(kv[1]), reverse=True)[:2]
+            desc = ", ".join(f"{k}={v:+.2f}" for k, v in strongest)
+            lines.append(f"           drivers: {desc}")
 
     if result.recommended_followup:
         f = result.recommended_followup
@@ -702,7 +1228,33 @@ def _recommend_followup(result: InferenceResult,
     best = result.best
     entropy = result.entropy
 
+    if (evidence.morphology_label == "COSMIC_RAY"
+            and evidence.morphology_confidence is not None
+            and evidence.morphology_confidence < 0.85
+            and evidence.rate_arcsec_hr is not None
+            and evidence.n_detections >= 2):
+        return {
+            "action": "manual_review",
+            "reason": "weak cosmic-ray morphology conflicts with tracklet evidence",
+            "expected_info_gain_nats": entropy,
+            "source": "adversarial_audit",
+        }
+
     if best.class_ == "artefact":
+        if (evidence.n_detections >= 2 and evidence.arc_days <= 0.1
+                and evidence.rate_arcsec_hr is not None
+                and evidence.morphology_label == "POINT"):
+            return {
+                "action": "observe_second_night",
+                "reason": ("short-arc moving candidate has insufficient evidence "
+                           "for discard; obtain another night"),
+                "expected_info_gain_nats": max(entropy, 0.5),
+                "observation_target": {
+                    "ra_deg": evidence.ra_deg,
+                    "dec_deg": evidence.dec_deg,
+                    "expected_rate_arcsec_hr": best.predicted_motion_arcsec_hr,
+                },
+            }
         return {
             "action": "discard",
             "reason": f"top hypothesis is {best.label} (artefact); not worth follow-up",
@@ -724,6 +1276,21 @@ def _recommend_followup(result: InferenceResult,
                     if best.predicted_motion_arcsec_hr else None),
             },
         }
+
+    if len(result.hypotheses) > 1:
+        margin = result.hypotheses[0].posterior - result.hypotheses[1].posterior
+        if best.class_ == "moving_object" and (margin < 0.20 or best.posterior < 0.60):
+            return {
+                "action": "observe_second_night",
+                "reason": (f"posterior margin is narrow ({margin:.2f}); "
+                           "another night is needed before treating the class as settled"),
+                "expected_info_gain_nats": max(entropy * 0.5, 0.2),
+                "observation_target": {
+                    "ra_deg": evidence.ra_deg,
+                    "dec_deg": evidence.dec_deg,
+                    "expected_rate_arcsec_hr": best.predicted_motion_arcsec_hr,
+                },
+            }
 
     if best.class_ == "moving_object" and best.orbital_class in (
             "SEDNOID", "DETACHED", "RESONANT_KBO", "COMET_HYPERBOLIC"):
@@ -763,7 +1330,9 @@ def infer(evidence: Evidence,
           class_priors: dict = None,
           artefact_priors: dict = None,
           include_artefact_hypotheses: bool = True,
-          scheduler=None) -> InferenceResult:
+          scheduler=None,
+          calibration: CalibrationConfig | None = None,
+          fail_closed_on_contradiction: bool = False) -> InferenceResult:
     """One inference cycle on a piece of evidence. Returns the ranked posterior.
 
     Args:
@@ -778,6 +1347,9 @@ def infer(evidence: Evidence,
                                follow-up recommendation uses the learned
                                historical confirmation rates instead of the
                                cold-start heuristic.
+      calibration:             posterior temperature and label-bias correction.
+      fail_closed_on_contradiction: when True, contradictory evidence returns
+                               no ranked winner and recommends manual review.
 
     Returns:
       InferenceResult with hypotheses (ranked best first), entropy,
@@ -788,12 +1360,36 @@ def infer(evidence: Evidence,
         class_priors = DEFAULT_CLASS_PRIORS
     if artefact_priors is None:
         artefact_priors = ARTEFACT_PRIORS
+    if calibration is None:
+        calibration = CalibrationConfig()
+
+    audit = audit_evidence(evidence)
+    if fail_closed_on_contradiction and audit.fail_closed:
+        result = InferenceResult(
+            hypotheses=[],
+            best=None,
+            entropy=float("inf"),
+            evidence_audit=audit,
+            posterior_check=PosteriorPredictiveCheck(
+                warnings=["contradictory evidence rejected before scoring"], score=0.0),
+            calibration=calibration,
+        )
+        result.recommended_followup = {
+            "action": "manual_review",
+            "reason": "contradictory evidence failed closed",
+            "expected_info_gain_nats": 0.0,
+            "source": "evidence_audit",
+        }
+        result.narrative = _build_narrative(result, evidence)
+        result.certificate = inference_certificate(evidence, result)
+        return result
 
     hyps = _generate_moving_object_hypotheses(evidence, class_priors)
     if include_artefact_hypotheses:
         hyps.extend(_generate_artefact_hypotheses(evidence, artefact_priors))
 
-    _normalise_posterior(hyps)
+    _apply_channel_weights(hyps, calibration)
+    _normalise_posterior(hyps, calibration)
     hyps.sort(key=lambda h: h.posterior, reverse=True)
 
     entropy = _shannon_entropy([h.posterior for h in hyps])
@@ -806,7 +1402,10 @@ def infer(evidence: Evidence,
         entropy=entropy,
         memory_matches=memory,
         pareto_front=pareto,
+        evidence_audit=audit,
+        calibration=calibration,
     )
+    result.posterior_check = posterior_predictive_check(result.best, evidence)
     # If a learned scheduler is available, defer to it; else use the heuristic.
     if scheduler is not None and result.best is not None:
         from . import predictive
@@ -814,6 +1413,7 @@ def infer(evidence: Evidence,
         reco = scheduler.recommend(
             evidence_class=ev_class,
             hypothesis_posterior=result.best.posterior,
+            alternatives=result.hypotheses[:5],
         )
         result.recommended_followup = {
             "action": reco.action,
@@ -822,12 +1422,14 @@ def infer(evidence: Evidence,
             "expected_confirmation_prob": reco.expected_confirmation_prob,
             "evidence_class": ev_class,
             "cost": reco.cost,
+            "separates": reco.separates,
             "source": "learned_scheduler",
         }
     else:
         result.recommended_followup = _recommend_followup(result, evidence)
         result.recommended_followup["source"] = "heuristic"
     result.narrative = _build_narrative(result, evidence)
+    result.certificate = inference_certificate(evidence, result)
     return result
 
 

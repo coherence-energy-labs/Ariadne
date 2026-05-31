@@ -1,0 +1,9 @@
+label,support,predicted,true_positive,precision,recall,f1
+AMOR,1,1,1,1.0,1.0,1.0
+HILDA,5,5,5,1.0,1.0,1.0
+HUNGARIA,1,1,1,1.0,1.0,1.0
+IMB,110,110,110,1.0,1.0,1.0
+MARS_CROSSER,3,3,3,1.0,1.0,1.0
+MBA,364,364,364,1.0,1.0,1.0
+OMB,15,15,15,1.0,1.0,1.0
+THULE,1,1,1,1.0,1.0,1.0

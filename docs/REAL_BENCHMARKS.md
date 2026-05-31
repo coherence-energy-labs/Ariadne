@@ -25,30 +25,30 @@ Source counts: `{'real_mpc_known_object_proxy': 3, 'ztf_like_synthetic': 2, 'lss
 
 Injected **30 synthetic moving objects**
 into the live `realtime.run_pipeline` and measured the recovery rate.
-Elapsed: 239.0s.
+Elapsed: 426.9s.
 
 | Metric | Value |
 |---|---|
 | Injected | 30 |
-| Recovered | 13 |
-| Recovery rate | **43.3%** |
+| Recovered | 19 |
+| Recovery rate | **63.3%** |
 | False positives | 0 |
-| Median fit RMS | 0.10 arcsec |
-| Median recovered arc | 3.0 days |
+| Median fit RMS | 0.12 arcsec |
+| Median recovered arc | 3.2 days |
 
 ### Recovery by apparent magnitude
 
 | Mag bin | Injected | Recovered | Rate |
 |---|---|---|---|
-| 18-19 | 3 | 1 | 33% |
-| 19-20 | 7 | 2 | 29% |
-| 20-21 | 11 | 5 | 45% |
-| 21-22 | 6 | 2 | 33% |
-| 22-22.5 | 1 | 1 | 100% |
+| 18-19 | 3 | 2 | 67% |
+| 19-20 | 7 | 3 | 43% |
+| 20-21 | 11 | 7 | 64% |
+| 21-22 | 6 | 5 | 83% |
+| 22-22.5 | 1 | 0 | 0% |
 | 22.5-23.0 | 2 | 2 | 100% |
 
 ### Recovery by on-sky rate
 
 | Rate bin (arcsec/hr) | Injected | Recovered | Rate |
 |---|---|---|---|
-| 3.0-10.0 | 30 | 13 | 43% |
+| 3.0-10.0 | 30 | 19 | 63% |

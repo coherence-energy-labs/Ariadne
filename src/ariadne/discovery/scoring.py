@@ -71,19 +71,31 @@ def _rms_score(rms_arcsec: float | None) -> float:
 
 
 def _arc_score(arc_days: float) -> float:
-    """0 at arc=0 days, 0.5 at 7 days, 1.0 at ~30 days. (Beyond 30d, asymptotes.)"""
+    """0 at arc=0 days, 0.5 at 3 days, 0.9 at ~10 days, asymptotes past 30d.
+
+    Recalibrated 2026-06: previous centre at 7d meant a clean 3-night
+    discovery (a typical first multi-night detection) only scored ~0.30
+    on this axis, capping the candidate at grade C. New centre 3 days
+    means a real 3-night arc gets the credit it deserves while a 30-day
+    confirmed arc still maxes the channel.
+    """
     if arc_days <= 0:
         return 0.0
-    return _logistic(arc_days, x0=7.0, slope=0.20)
+    return _logistic(arc_days, x0=3.0, slope=0.35)
 
 
 def _runs_score(n_runs: int) -> float:
-    """0.3 at 1 run (one-night detection), 0.6 at 2, 0.9 at 5+. A second
-    independent surfacing is the strongest "this is real" prior we have.
+    """0.45 at 1 run (one-night detection), 0.70 at 2, 0.95 at 5+.
+
+    Recalibrated 2026-06: a single nightly run is the typical state of
+    a fresh discovery -- the previous 0.30 floor was too punitive. We
+    still reward re-detections (the strongest "this is real" prior),
+    but the new mapping gives single-night candidates a fair shot at
+    grade B given good RMS + sky + obs.
     """
     if n_runs <= 0:
         return 0.0
-    return min(1.0, 0.3 + 0.3 * math.log1p(n_runs - 1))
+    return min(1.0, 0.45 + 0.25 * math.log1p(n_runs - 1))
 
 
 def _skybot_score(skybot_names: list, has_xmatch_run: bool = True) -> float:

@@ -26,6 +26,65 @@ from ..dynamics.secular import kepler_step
 from ..data.ephemeris import body_state
 
 
+def iod_diagnose(tracklets, *, r_grid_au=None, rdot_grid=None) -> dict:
+    """Trace exactly which guard rejects a tracklet set in iod_hypothesis_search.
+
+    Returns a dict with per-guard rejection counts:
+      n_tracklets:           input length
+      n_hypotheses_tried:    r_grid_au * rdot_grid
+      rejected_too_few_valid:tracklets at (r, rdot) where < 3 tracklets pass
+                              the geometry transform
+      rejected_nan_propagation: kepler_step produced NaN for all states
+      best_scatter_km:       best basin found (if any)
+      converged:             True if at least one basin was finite
+    """
+    if len(tracklets) < 3:
+        return {"n_tracklets": len(tracklets),
+                "rejection_reason": "below_min_3_tracklets",
+                "converged": False}
+    geom = L.precompute_geometry(tracklets)
+    if r_grid_au is None:
+        r_grid_au = np.concatenate([np.linspace(30, 80, 51),
+                                     np.linspace(82, 200, 60),
+                                     np.linspace(205, 400, 40)])
+    if rdot_grid is None:
+        rdot_grid = np.linspace(-1.5, 1.5, 31)
+    n_total = len(r_grid_au) * len(rdot_grid)
+    n_too_few_valid = 0
+    n_nan_prop = 0
+    n_converged = 0
+    best_scatter = np.inf
+    t_ref = float(np.median(geom.t))
+    for r_au in r_grid_au:
+        r_km = r_au * AU_KM
+        for rdot in rdot_grid:
+            x, v, valid = L.transform(geom, r_km, rdot)
+            if valid.sum() < 3:
+                n_too_few_valid += 1
+                continue
+            idx = np.where(valid)[0]
+            with np.errstate(all="ignore"):
+                xref, vref = kepler_step(x[idx], v[idx], GM_SUN, t_ref - geom.t[idx])
+            fin = np.all(np.isfinite(xref), axis=1) & np.all(np.isfinite(vref), axis=1)
+            if fin.sum() < 3:
+                n_nan_prop += 1
+                continue
+            n_converged += 1
+            xref = xref[fin]
+            x_med = np.median(xref, axis=0)
+            scatter = float(np.sum(np.linalg.norm(xref - x_med, axis=1) ** 2))
+            best_scatter = min(best_scatter, scatter)
+    return {
+        "n_tracklets": len(tracklets),
+        "n_hypotheses_tried": n_total,
+        "rejected_too_few_valid": n_too_few_valid,
+        "rejected_nan_propagation": n_nan_prop,
+        "n_converged_hypotheses": n_converged,
+        "best_scatter_km": (None if not np.isfinite(best_scatter) else best_scatter),
+        "converged": n_converged > 0,
+    }
+
+
 def iod_hypothesis_search(tracklets, t_ref=None,
                           r_grid_au=None, rdot_grid=None,
                           refine_iters=2):
@@ -71,7 +130,6 @@ def iod_hypothesis_search(tracklets, t_ref=None,
 
     if not np.isfinite(best["scatter_km"]):
         return None
-
     # local refinement: zoom into the (r, rdot) basin
     zooms = [(4.0, 0.20, 25, 21), (1.0, 0.05, 25, 21)]    # (Δr, Δrdot, n_r, n_rdot) per pass
     for (dr, drd, nr, nrd) in zooms[:refine_iters]:

@@ -1,0 +1,2 @@
+{"alert_id": "2499542226215015013", "band": "r", "dec": -0.5500812, "mag": 18.41879, "meta": {"alerce_class": "asteroid", "ndethist": 1, "probability": 1.0}, "mjd": 60253.54222219996, "obj_id": "ZTF23abpccoo", "ra": 181.7101612, "survey": "ZTF"}
+{"alert_id": "2499540286215015004", "band": "r", "dec": -0.5498311, "mag": 18.374893, "meta": {"alerce_class": "asteroid", "ndethist": 1, "probability": 1.0}, "mjd": 60253.540289400145, "obj_id": "ZTF23abpccpu", "ra": 181.7094941, "survey": "ZTF"}

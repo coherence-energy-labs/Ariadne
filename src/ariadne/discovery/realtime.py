@@ -89,21 +89,57 @@ def cluster_centroid(cluster: list[Alert]) -> Alert:
                  band=cluster[0].band, meta=meta)
 
 
+def adaptive_pair_window(min_rate_arcsec_hr: float, max_rate_arcsec_hr: float,
+                          *, min_useful_motion_arcsec: float = 0.5,
+                          max_pair_displacement_arcsec: float = 60.0
+                          ) -> tuple[float, float]:
+    """Derive (min_pair_dt_hours, max_pair_dt_hours) from the rate window.
+
+    Constraint:
+      * pair_dt * max_rate <= max_pair_displacement (so source doesn't move
+        further than the tracklet-linker can re-match in one night).
+      * pair_dt * min_rate >= min_useful_motion (so the pair actually shows
+        motion, not noise).
+
+    Examples:
+      rate (0.05, 5.0):  min ~= 0.10h, max ~= 12h  (TNO regime)
+      rate (5,   30):    min ~= 0.017h, max ~= 2h  (MBA regime)
+      rate (30,  600):   min ~= 0.0008h ~= 3s, max ~= 0.1h  (NEO regime)
+    """
+    if max_rate_arcsec_hr <= 0:
+        return 0.5, 6.0
+    max_dt = max_pair_displacement_arcsec / max(max_rate_arcsec_hr, 0.01)
+    min_dt = min_useful_motion_arcsec / max(min_rate_arcsec_hr, 0.001) / 3600.0  # s to h
+    # sanity: 30 s floor, 12 h ceiling
+    min_dt = max(min_dt, 30.0 / 3600.0)
+    max_dt = min(max_dt, 12.0)
+    if min_dt >= max_dt:
+        min_dt = max_dt / 4.0
+    return float(min_dt), float(max_dt)
+
+
 # ---------- stage 3: pair multi-night detections into tracklets ---------------
 def build_tracklets(detections: list[Alert],
                     min_rate_arcsec_hr: float = 0.05,
                     max_rate_arcsec_hr: float = 5.0,
-                    min_pair_dt_hours: float = 0.5,
-                    max_pair_dt_hours: float = 6.0) -> list[dict]:
+                    min_pair_dt_hours: float | None = None,
+                    max_pair_dt_hours: float | None = None) -> list[dict]:
     """Pair detections separated by < a night into tracklets with a derived on-sky rate.
 
     Default rate window [0.05, 5] arcsec/hr targets the distant-object regime
     (TNOs ~1-3 arcsec/hr; outer-MBA ~5; faster movers excluded for the TNO use case).
+    When pair_dt arguments are None (default), they are derived from the rate
+    window via `adaptive_pair_window` -- this is the right behaviour for any
+    rate regime, especially fast NEOs where a 30-min minimum is too long.
+
     The pair must be from the same band-class survey to avoid colour-drift artefacts.
 
     Returns list of tracklet dicts with t (seconds past J2000), jd, ra, dec, dra, ddec,
     rate_arcsec_hr, desig (synthetic).
     """
+    if min_pair_dt_hours is None or max_pair_dt_hours is None:
+        min_pair_dt_hours, max_pair_dt_hours = adaptive_pair_window(
+            min_rate_arcsec_hr, max_rate_arcsec_hr)
     SEC_PER_DAY = 86400.0
     tracks = []
     detections = sorted(detections, key=lambda d: d.mjd)
@@ -337,7 +373,8 @@ def link_helio_linc(tracklets: list[dict],
 
 
 # ---------- stage 5b: smart-layer annotations --------------------------------
-def smart_annotate(tracklets: list[dict]) -> list[dict]:
+def smart_annotate(tracklets: list[dict], *, calibration=None,
+                   scheduler=None) -> list[dict]:
     """Run real-bogus filter + inference engine + quality scorer on accepted tracklets.
 
     Adds these fields to each tracklet:
@@ -399,7 +436,8 @@ def smart_annotate(tracklets: list[dict]) -> list[dict]:
             skybot_match_names=tr.get("xmatch", {}).get("names", []),
         )
         try:
-            res = inference.infer(ev)
+            res = inference.infer(ev, calibration=calibration,
+                                   scheduler=scheduler)
             tr["_inference"] = {
                 "best_label": res.best.label,
                 "best_class": res.best.class_,
@@ -439,11 +477,13 @@ def run_pipeline(alerts: Iterable[Alert],
                  cluster_pos_tol_arcsec: float = 1.0,
                  cluster_time_tol_days: float = 0.5,
                  rate_window_arcsec_hr: tuple[float, float] = (0.05, 5.0),
-                 pair_dt_hours: tuple[float, float] = (0.5, 6.0),
+                 pair_dt_hours: tuple = (None, None),  # adaptive by default
                  rms_threshold_arcsec: float = 10.0,
                  do_xmatch: bool = True,
                  use_helio_linc: bool = False,
-                 smart_layer: bool = True):
+                 smart_layer: bool = True,
+                 calibration=None,
+                 scheduler=None):
     """Run all 5 pipeline stages end-to-end. Returns the annotated tracklet list.
 
     Discovery candidates: `[t for t in result if t['status']=='accepted'
@@ -495,7 +535,8 @@ def run_pipeline(alerts: Iterable[Alert],
     # Smart-layer enrichment: real-bogus, inference, taxonomy, quality
     if smart_layer:
         print(f"[6/6] smart-layer annotation (realbogus + inference + taxonomy + scoring)...")
-        annotated = smart_annotate(annotated)
+        annotated = smart_annotate(annotated, calibration=calibration,
+                                    scheduler=scheduler)
         n_after_smart = sum(1 for t in annotated if t.get("status") == "accepted")
         n_grade_a = sum(1 for t in annotated if t.get("_quality_grade") == "A")
         print(f"      -> {n_after_smart} survive smart filter; {n_grade_a} grade-A")
