@@ -30,6 +30,7 @@ import numpy as np
 from .brokers.base import Alert
 from . import iod as IOD
 from . import linkage as LK
+from .operations.replay import stable_hash
 
 
 # ---------- stage 1: pull (broker-dependent; caller drives the broker query) ----
@@ -68,16 +69,24 @@ def cluster_same_night(alerts: Iterable[Alert], pos_tol_arcsec: float = 1.0,
 
 
 def cluster_centroid(cluster: list[Alert]) -> Alert:
-    """Average position / time of a same-night cluster as a single Alert."""
+    """Average position / time of a same-night cluster as a single Alert.
+
+    Preserves the first member's meta so downstream code (recovery harness
+    truth_id matching, sensitivity validation) can still trace the centroid
+    back to its underlying source.
+    """
     n = len(cluster)
     mjd = sum(a.mjd for a in cluster) / n
     ra = sum(a.ra for a in cluster) / n
     dec = sum(a.dec for a in cluster) / n
     mag = sum(a.mag for a in cluster if a.mag > -50) / max(1,
             sum(1 for a in cluster if a.mag > -50))
+    # Inherit the first member's meta + record the cluster size
+    meta = dict(cluster[0].meta) if cluster[0].meta else {}
+    meta["n_alerts"] = n
     return Alert(survey=cluster[0].survey, alert_id=cluster[0].alert_id,
                  obj_id=cluster[0].obj_id, mjd=mjd, ra=ra, dec=dec, mag=mag,
-                 band=cluster[0].band, meta={"n_alerts": n})
+                 band=cluster[0].band, meta=meta)
 
 
 # ---------- stage 3: pair multi-night detections into tracklets ---------------
@@ -192,27 +201,33 @@ def chain_tracklets(tracklets: list[dict],
 def fit_filter(tracklets: list[dict], rms_threshold_arcsec: float = 10.0):
     """Run IOD+LM on each tracklet group; keep only those with fit RMS below threshold.
 
-    For multi-night chains (from `chain_tracklets`), unpack the contained tracklet
-    `members` into a single list of Alert objects and fit one orbit. For single 2-
-    point tracklets, tag as 'unfittable_single_arc' (4 observations < 6 unknowns).
+    IOD.fit_candidate expects TRACKLET DICTS (with t/ra/dec/dra/ddec) -- it
+    runs the linker's geometry precompute over them. The Alert `members` are
+    only useful for n-detection counting and arc-day estimation.
+
+    For multi-night chains: feed the contained tracklets (NOT the flattened
+    Alert list) to IOD. For single 2-point tracklets without a chain, tag
+    as 'unfittable_single_arc' (4 observations < 6 unknowns).
     """
     out = []
     for tr in tracklets:
-        # If this is a chain (list-of-tracklets), flatten the members
-        members = tr.get("members", [])
-        if isinstance(tr.get("chain"), list):
-            members = [m for sub in tr["chain"] for m in sub.get("members", [])]
-            tr["members"] = members
-        if len(members) < 4:
+        # Build the tracklet list for IOD. If we have a chain, USE IT.
+        if isinstance(tr.get("chain"), list) and len(tr["chain"]) >= 3:
+            iod_input = tr["chain"]
+        else:
             tr_out = dict(tr); tr_out["status"] = "unfittable_single_arc"
             tr_out["rms_arcsec"] = None
             out.append(tr_out)
             continue
-        # IOD+LM on this tracklet cluster
+        # Make sure the flattened members are still attached for downstream
+        # (smart_annotate / nightly use them for n_detections + arc_days).
+        members = [m for sub in tr["chain"] for m in sub.get("members", [])]
+        tr["members"] = members
+
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                fit = IOD.fit_candidate(tr["members"])
+                fit = IOD.fit_candidate(iod_input)
         except Exception as e:
             tr_out = dict(tr); tr_out["status"] = f"fit_error: {str(e)[:60]}"
             tr_out["rms_arcsec"] = None
@@ -321,6 +336,104 @@ def link_helio_linc(tracklets: list[dict],
     return chains
 
 
+# ---------- stage 5b: smart-layer annotations --------------------------------
+def smart_annotate(tracklets: list[dict]) -> list[dict]:
+    """Run real-bogus filter + inference engine + quality scorer on accepted tracklets.
+
+    Adds these fields to each tracklet:
+      _realbogus       RealBogusVerdict with bogus_score + rules_fired + is_real
+      _inference       InferenceResult.best.label + posterior + entropy + grade
+      _quality_grade   A/B/C/D quality grade (from scoring module)
+      _quality_score   0..1 total quality score
+      _taxonomy        OrbitClass label if the fitted orbit is a moving object
+
+    Only runs on tracklets with status='accepted'. Cheap (sub-millisecond per
+    candidate); always safe to call on every nightly run.
+    """
+    from . import realbogus
+    from . import inference
+    from . import scoring
+    from . import taxonomy
+    from .operations.candidate_store import Candidate
+    import numpy as np
+
+    out = []
+    for tr in tracklets:
+        if tr.get("status") != "accepted":
+            out.append(tr); continue
+
+        # 1. Real-bogus rule filter
+        rb = realbogus.score_realbogus(tr)
+        tr["_realbogus"] = rb
+
+        # If the rules say it's bogus, demote it before the inference engine
+        if not rb.is_real:
+            tr["status"] = "rejected_by_realbogus"
+            out.append(tr); continue
+
+        # 2. Orbital taxonomy from the fitted orbit
+        orbital_class = None
+        if "x_fit_km" in tr and "v_fit_kms" in tr:
+            try:
+                t = taxonomy.classify_state(
+                    np.asarray(tr["x_fit_km"]), np.asarray(tr["v_fit_kms"]))
+                orbital_class = t.label
+                tr["_taxonomy"] = {"label": t.label, "confidence": t.confidence}
+            except Exception:
+                pass
+
+        # 3. Inference engine -- cognitive fusion over the evidence
+        ev = inference.Evidence(
+            mjd=float(tr["jd"] - 2400000.5) if "jd" in tr else None,
+            ra_deg=math.degrees(tr["ra"]),
+            dec_deg=math.degrees(tr["dec"]),
+            rate_arcsec_hr=float(tr.get("rate_arcsec_hr", 0.0)),
+            apparent_mag=None,
+            n_detections=len(tr.get("members", [])),
+            arc_days=(max(m.mjd for m in tr.get("members", []))
+                       - min(m.mjd for m in tr.get("members", [])))
+                       if tr.get("members") else 0.0,
+            rms_arcsec=float(tr.get("rms_arcsec") or 0.0),
+            orbit_state=(tr.get("x_fit_km", []) + tr.get("v_fit_kms", []))
+                         if "x_fit_km" in tr else None,
+            skybot_match_names=tr.get("xmatch", {}).get("names", []),
+        )
+        try:
+            res = inference.infer(ev)
+            tr["_inference"] = {
+                "best_label": res.best.label,
+                "best_class": res.best.class_,
+                "orbital_class": res.best.orbital_class,
+                "posterior": res.best.posterior,
+                "entropy": res.entropy,
+                "recommended_action": res.recommended_followup.get("action"),
+            }
+        except Exception as e:
+            tr["_inference"] = {"error": str(e)[:120]}
+
+        # 4. Quality scoring (build a transient Candidate just for scoring)
+        try:
+            arc = ev.arc_days
+            cand = Candidate(
+                key="transient", ra=ev.ra_deg, dec=ev.dec_deg,
+                rate_arcsec_hr=ev.rate_arcsec_hr,
+                first_seen_mjd=ev.mjd - arc if ev.mjd else 0.0,
+                last_seen_mjd=ev.mjd or 0.0,
+                n_runs=1,
+                rms_history=[[ev.mjd or 0, ev.rms_arcsec]],
+                skybot_names=ev.skybot_match_names or [],
+            )
+            qs = scoring.score_candidate(cand)
+            tr["_quality_grade"] = qs.grade()
+            tr["_quality_score"] = qs.total
+        except Exception as e:
+            tr["_quality_grade"] = "?"
+            tr["_quality_score"] = 0.0
+
+        out.append(tr)
+    return out
+
+
 # ---------- end-to-end ---------------------------------------------------------
 def run_pipeline(alerts: Iterable[Alert],
                  cluster_pos_tol_arcsec: float = 1.0,
@@ -329,11 +442,17 @@ def run_pipeline(alerts: Iterable[Alert],
                  pair_dt_hours: tuple[float, float] = (0.5, 6.0),
                  rms_threshold_arcsec: float = 10.0,
                  do_xmatch: bool = True,
-                 use_helio_linc: bool = False):
+                 use_helio_linc: bool = False,
+                 smart_layer: bool = True):
     """Run all 5 pipeline stages end-to-end. Returns the annotated tracklet list.
 
     Discovery candidates: `[t for t in result if t['status']=='accepted'
                             and t.get('xmatch', {}).get('n_known', 0) == 0]`
+
+    When `smart_layer=True` (default), accepted candidates are annotated with
+    real-bogus verdict, inference engine posterior, orbital taxonomy, and
+    quality grade. The fields are stored on each tracklet under `_realbogus`,
+    `_inference`, `_taxonomy`, and `_quality_grade` for downstream pipelines.
     """
     print(f"[1/5] pulled {len(list(alerts) if not isinstance(alerts, list) else alerts)} alerts")
     alerts = list(alerts)
@@ -373,8 +492,32 @@ def run_pipeline(alerts: Iterable[Alert],
         annotated = fitted
         if do_xmatch:
             print(f"[5/5] no candidates passed filter; skipping cross-match")
+    # Smart-layer enrichment: real-bogus, inference, taxonomy, quality
+    if smart_layer:
+        print(f"[6/6] smart-layer annotation (realbogus + inference + taxonomy + scoring)...")
+        annotated = smart_annotate(annotated)
+        n_after_smart = sum(1 for t in annotated if t.get("status") == "accepted")
+        n_grade_a = sum(1 for t in annotated if t.get("_quality_grade") == "A")
+        print(f"      -> {n_after_smart} survive smart filter; {n_grade_a} grade-A")
     n_discovery = sum(1 for t in annotated
                       if t.get("status") == "accepted"
                       and t.get("xmatch", {}).get("n_known") == 0)
     print(f"\n  RESULT: {n_discovery} candidate(s) not matching any SkyBoT known object")
     return annotated
+
+
+def run_pipeline_with_provenance(alerts: Iterable[Alert], *, ledger=None,
+                                 source: str = "realtime", **kwargs):
+    """Run `run_pipeline` and record input/output hashes in a provenance ledger."""
+    alerts = list(alerts)
+    if ledger is not None:
+        ledger.record(event="pipeline_start", source=source, alerts=alerts,
+                      parameters=kwargs)
+    result = run_pipeline(alerts, **kwargs)
+    if ledger is not None:
+        ledger.record(event="pipeline_complete", source=source, alerts=alerts,
+                      outputs=result, parameters={
+                          **kwargs,
+                          "input_hash": stable_hash([a.__dict__ for a in alerts]),
+                      })
+    return result

@@ -1,0 +1,74 @@
+{
+  "inference": {
+    "n_cases": 14,
+    "elapsed_s": 0.07308197021484375,
+    "accuracy": 0.9285714285714286,
+    "macro_precision": 0.6818181818181818,
+    "macro_recall": 0.7272727272727273,
+    "macro_f1": 0.696969696969697,
+    "nll": 0.9251283086078029,
+    "brier": 0.3300230388090792,
+    "ece": 0.2905966063831035,
+    "source_counts": {
+      "real_mpc_known_object_proxy": 3,
+      "ztf_like_synthetic": 2,
+      "lsst_like_synthetic": 2,
+      "adversarial_false_positive": 5,
+      "blind_holdout": 2
+    },
+    "split_counts": {
+      "validation": 12,
+      "blind": 2
+    },
+    "certificate_hash": "1932e62a2351871e6ed32cdc7dcafe9a060a7a31e7e2d98f173045a3b714c5f6",
+    "calibration_temperature": 0.75
+  },
+  "sensitivity": {
+    "n_injected": 30,
+    "n_recovered": 13,
+    "n_false_positives": 0,
+    "recovery_rate": 0.43333333333333335,
+    "median_rms_arcsec": 0.09605443719931164,
+    "median_arc_days": 3.03125,
+    "by_magnitude": {
+      "18-19": {
+        "n_injected": 3,
+        "n_recovered": 1,
+        "rate": 0.3333333333333333
+      },
+      "19-20": {
+        "n_injected": 7,
+        "n_recovered": 2,
+        "rate": 0.2857142857142857
+      },
+      "20-21": {
+        "n_injected": 11,
+        "n_recovered": 5,
+        "rate": 0.45454545454545453
+      },
+      "21-22": {
+        "n_injected": 6,
+        "n_recovered": 2,
+        "rate": 0.3333333333333333
+      },
+      "22-22.5": {
+        "n_injected": 1,
+        "n_recovered": 1,
+        "rate": 1.0
+      },
+      "22.5-23.0": {
+        "n_injected": 2,
+        "n_recovered": 2,
+        "rate": 1.0
+      }
+    },
+    "by_rate": {
+      "3.0-10.0": {
+        "n_injected": 30,
+        "n_recovered": 13,
+        "rate": 0.43333333333333335
+      }
+    },
+    "elapsed_s": 239.002179145813
+  }
+}

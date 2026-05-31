@@ -217,7 +217,7 @@ def evaluate_recovery(pipeline_output: list[dict], injections: list[InjectionRec
 def make_population(
     *,
     n_objects: int = 30,
-    a_range_au: tuple = (2.0, 80.0),
+    a_range_au: tuple = (35.0, 80.0),         # IOD's default search range (TNO-tuned)
     e_range: tuple = (0.01, 0.4),
     i_range_deg: tuple = (0.0, 30.0),
     mag_range: tuple = (18.0, 23.0),

@@ -142,14 +142,30 @@ def _process_one_cone(cfg: NightlyConfig, ra: float, dec: float, radius_deg: flo
         # Persist epoch alongside state so the follow-up predictor knows when
         # the orbit was anchored (otherwise it falls back to last_seen_mjd).
         t_ref_et = float(tr.get("t", 0.0))
+        # Smart-layer annotations from realtime.smart_annotate -- promoted into
+        # the candidate's meta so the dashboard + downstream tools can use them.
+        meta = {"survey": "ZTF", "run_id": run_id,
+                "t_ref_et": t_ref_et, "cone_idx": cone_idx}
+        if "_inference" in tr:
+            meta["inference"] = tr["_inference"]
+        if "_taxonomy" in tr:
+            meta["taxonomy"] = tr["_taxonomy"]
+        if "_quality_grade" in tr:
+            meta["quality_grade"] = tr["_quality_grade"]
+            meta["quality_score"] = tr.get("_quality_score", 0.0)
+        if "_realbogus" in tr:
+            rb = tr["_realbogus"]
+            meta["realbogus"] = {
+                "is_real": rb.is_real, "bogus_score": rb.bogus_score,
+                "rules_fired": rb.rules_fired,
+            }
         cand, is_new = store.upsert(
             ra=ra_deg, dec=dec_deg, rate_arcsec_hr=rate, mjd=mjd,
             rms_arcsec=rms,
             orbit_state=(tr.get("x_fit_km", []) + tr.get("v_fit_kms", []))
                         if "x_fit_km" in tr else None,
             skybot_names=skybot_names,
-            meta={"survey": "ZTF", "run_id": run_id,
-                  "t_ref_et": t_ref_et, "cone_idx": cone_idx},
+            meta=meta,
         )
         if is_new and not skybot_names:
             new_alerts += 1
@@ -178,12 +194,29 @@ def run_nightly(cfg: NightlyConfig) -> dict:
         per_cone.append({"cone": (ra, dec, r), **s})
 
     n_stale = 0
+    followup_targets = []
     if not cfg.dry_run and store is not None:
         n_stale = store.mark_stale(max_age_days=cfg.stale_after_days)
         store.save()
         print(f"\n  store: {len(store)} total candidates "
               f"({len(store.discovery_candidates())} active discovery leads), "
               f"{n_stale} marked stale")
+        # Smart-layer auto-generated follow-up list for tomorrow night
+        try:
+            from .. import followup
+            import time as _time
+            mjd_now = _time.time() / 86400.0 + 40587.0
+            followup_targets = followup.next_night_targets(
+                store.discovery_candidates(),
+                mjd_next=mjd_now + 1.0,
+                max_sigma_arcsec=900.0,
+                n_samples=20,
+            )
+            if followup_targets:
+                print(f"  followup targets for tomorrow: {len(followup_targets)} "
+                      f"(top sigma {followup_targets[0]['sigma_arcsec']:.0f}\")")
+        except Exception as e:
+            print(f"  followup generation failed: {str(e)[:80]}")
 
     elapsed = time.time() - t0
     print(f"  fired {agg['new']} new-candidate alerts across {len(cones)} cone(s); "
@@ -191,4 +224,5 @@ def run_nightly(cfg: NightlyConfig) -> dict:
     return {"run_id": run_id, "n_cones": len(cones),
             "alerts": agg["alerts"], "accepted": agg["accepted"],
             "new": agg["new"], "stale_marked": n_stale,
-            "elapsed_s": elapsed, "per_cone": per_cone}
+            "elapsed_s": elapsed, "per_cone": per_cone,
+            "followup_targets": followup_targets}

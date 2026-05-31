@@ -1,0 +1,27 @@
+{
+  "n_fits_files": 6,
+  "n_raw_sources": 476,
+  "morphology_distribution": {
+    "POINT": 425,
+    "EXTENDED": 29,
+    "STREAK": 8,
+    "BLEND": 14
+  },
+  "n_blends_deblended": 0,
+  "n_streaks_detected": 0,
+  "n_tracklets_built": 18891,
+  "n_orbits_fitted": 0,
+  "inference_results": [],
+  "modules_exercised": [
+    "source_extraction",
+    "psf_centroid",
+    "morphology",
+    "deblend",
+    "streaks",
+    "difference",
+    "tracklets_from_images",
+    "iod",
+    "taxonomy",
+    "inference"
+  ]
+}

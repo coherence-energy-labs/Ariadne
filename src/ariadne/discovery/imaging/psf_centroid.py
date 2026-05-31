@@ -196,11 +196,15 @@ def refine_sources_psf(image_data: np.ndarray, sources: list[Source],
                                      wcs=wcs)
         if not fit.success and discard_failed:
             continue
-        if fit.success:
-            ra, dec = wcs.pixel_to_world_values(fit.x_sub, fit.y_sub)
-            ra = float(ra) % 360.0
-            dec = float(dec)
+        if fit.success and wcs is not None:
+            try:
+                ra, dec = wcs.pixel_to_world_values(fit.x_sub, fit.y_sub)
+                ra = float(ra) % 360.0
+                dec = float(dec)
+            except Exception:
+                ra, dec = s.ra, s.dec
         else:
+            # No WCS or fit failed -- keep the input source's RA/Dec
             ra, dec = s.ra, s.dec
         out.append(Source(
             ra=ra, dec=dec, flux=s.flux, mag=s.mag,
