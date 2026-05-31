@@ -237,10 +237,63 @@ def candidate_to_records(candidate: Candidate, alerts: list[Alert],
     return recs
 
 
+class GradeAGateError(ValueError):
+    """Raised when a candidate fails the grade-A submission gate."""
+
+
+def grade_a_submission_gate(cand: Candidate, *,
+                             require_mcmc: bool = True,
+                             require_min_arc_days: float = 2.0,
+                             require_min_runs: int = 2,
+                             max_rms_arcsec: float = 1.5,
+                             min_n_observations: int = 6) -> None:
+    """Validate a candidate against the grade-A submission criteria.
+
+    The MPC has zero tolerance for marginal submissions; this gate enforces
+    every quality threshold a "publishable" candidate must clear:
+
+      * MCMC orbit posterior present (covariance, not just point estimate)
+        -- shows we know what we DON'T know about the orbit
+      * arc >= require_min_arc_days (recommended: 3+)
+      * n_runs >= require_min_runs (independent re-detections)
+      * RMS <= max_rms_arcsec (final fit precision)
+      * observations >= min_n_observations (orbit identifiability)
+
+    Raises GradeAGateError with a specific failure reason. Caller should
+    catch and either drop the candidate or downgrade to non-discovery.
+    """
+    arc_days = max(0.0, cand.last_seen_mjd - cand.first_seen_mjd)
+    if arc_days < require_min_arc_days:
+        raise GradeAGateError(
+            f"arc {arc_days:.2f} d < required {require_min_arc_days} d")
+    if cand.n_runs < require_min_runs:
+        raise GradeAGateError(
+            f"n_runs {cand.n_runs} < required {require_min_runs}")
+    if cand.rms_history:
+        last_rms = cand.rms_history[-1][1]
+        if last_rms > max_rms_arcsec:
+            raise GradeAGateError(
+                f"final-fit RMS {last_rms:.2f}\" > required {max_rms_arcsec}\"")
+    else:
+        raise GradeAGateError("no rms_history -- candidate has no fitted orbit")
+    if len(cand.rms_history) < min_n_observations and cand.meta.get(
+            "n_observations", len(cand.rms_history)) < min_n_observations:
+        raise GradeAGateError(
+            f"only {len(cand.rms_history)} observations < required {min_n_observations}")
+    if require_mcmc:
+        mcmc = cand.meta.get("mcmc") if cand.meta else None
+        if not mcmc or "a_au_quantiles" not in mcmc:
+            raise GradeAGateError(
+                "MCMC posterior is missing from candidate.meta['mcmc'] "
+                "-- grade-A submissions require posterior uncertainty quantification")
+
+
 def emit_submission(header: MPCHeader,
                     candidates_with_alerts: list[tuple[Candidate, list[Alert]]],
                     *, observatory_code: str | None = None,
-                    band: str = " ") -> str:
+                    band: str = " ",
+                    enforce_grade_a_gate: bool = True,
+                    require_mcmc: bool = True) -> str:
     """Emit a complete MPC-format submission text (header + all records).
 
     Paste the returned text into an email body to obs@minorplanetcenter.net.
@@ -250,13 +303,28 @@ def emit_submission(header: MPCHeader,
       candidates_with_alerts: list of (candidate, [alerts]) pairs, one per object.
       observatory_code: override; defaults to header.observatory_code.
       band: per-detection band character if Alert.band is missing.
+      enforce_grade_a_gate: when True (default), each candidate must pass
+                            grade_a_submission_gate() before its records
+                            are emitted. Candidates that fail are SKIPPED
+                            (not silently included) and a `# COM SKIPPED`
+                            line is added recording the reason.
+      require_mcmc: forwarded to grade_a_submission_gate; controls whether
+                    MCMC posterior is a hard requirement.
 
     Returns:
       Multi-line string, header lines first, then 80-col astrometric block.
+      Includes COM lines for any candidates skipped by the gate so the
+      operator can see what was rejected.
     """
     obs = observatory_code or header.observatory_code
     out = list(header_lines(header))
     for cand, alerts in candidates_with_alerts:
+        if enforce_grade_a_gate:
+            try:
+                grade_a_submission_gate(cand, require_mcmc=require_mcmc)
+            except GradeAGateError as e:
+                out.append(f"COM SKIPPED {cand.key}: {e}")
+                continue
         recs = candidate_to_records(cand, alerts,
                                     observatory_code=obs,
                                     band=band,

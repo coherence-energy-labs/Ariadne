@@ -1,0 +1,21 @@
+{
+  "data_source": "synthetic",
+  "n_fits_files": 6,
+  "n_raw_sources": 460,
+  "morphology_distribution": {
+    "POINT": 411,
+    "EXTENDED": 29,
+    "STREAK": 7,
+    "BLEND": 13
+  },
+  "n_point_sources_after_filter": 406,
+  "n_tracklets": 69,
+  "n_chains": 4,
+  "n_sane_chains": 4,
+  "n_iod_attempts": 4,
+  "n_iod_success": 0,
+  "winning_strategies": {},
+  "n_smart_annotated": 0,
+  "n_grade_a": 0,
+  "n_mcmc": 0
+}

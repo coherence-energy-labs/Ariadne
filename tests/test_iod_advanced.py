@@ -102,8 +102,12 @@ class TestEnsemble:
     def test_ensemble_records_all_strategy_attempts(self):
         from ariadne.discovery.iod_advanced import fit_candidate_ensemble
         tracks = _make_synthetic_tno_tracklets()
-        ens = fit_candidate_ensemble(tracks, n_linker_retries=2)
-        # Should have one Gauss + 2 retries of linker + Vaisala + BK = 5 results
+        # cheap_first=False forces every strategy to run regardless of whether
+        # the cheap ones already met the acceptance threshold; early_exit_rms
+        # raised to a very small number so it never fires.
+        ens = fit_candidate_ensemble(tracks, n_linker_retries=2,
+                                       cheap_first=False,
+                                       early_exit_rms_arcsec=1e-9)
         labels = [s.strategy for s in ens.strategy_results]
         assert "gauss" in labels
         assert "vaisala" in labels

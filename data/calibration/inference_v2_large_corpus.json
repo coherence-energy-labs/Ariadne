@@ -1,0 +1,8 @@
+{
+  "schema": "ariadne.discovery.inference.calibration.v1",
+  "temperature": 2.0,
+  "label_bias": {},
+  "channel_weights": {},
+  "class_temperatures": {},
+  "version": "global-only-2"
+}
