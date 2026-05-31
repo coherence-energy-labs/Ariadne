@@ -1,7 +1,7 @@
 {
   "inference": {
     "n_cases": 14,
-    "elapsed_s": 0.08148670196533203,
+    "elapsed_s": 0.06167244911193848,
     "accuracy": 0.9285714285714286,
     "macro_precision": 0.6818181818181818,
     "macro_recall": 0.7272727272727273,
@@ -21,7 +21,18 @@
       "blind": 2
     },
     "certificate_hash": "3e969506a0e7fba99d6e6507eb097a537259081b1257d7e5e9919b6e6f64654d",
-    "calibration_temperature": 0.75
+    "calibration_temperature": 0.75,
+    "fitted_calibration": {
+      "global_T": 0.75,
+      "class_T_count": 0,
+      "class_T": {},
+      "version": "global-only-0.75",
+      "post_fit_nll": 4.740255852510766,
+      "post_fit_brier": 0.4257340332646392,
+      "post_fit_ece": 0.24462240901330734,
+      "nll_improvement": -3.8151275439029635,
+      "ece_improvement": 0.04597419736979613
+    }
   },
   "sensitivity": {
     "n_injected": 30,
@@ -69,6 +80,6 @@
         "rate": 0.6333333333333333
       }
     },
-    "elapsed_s": 426.8556911945343
+    "elapsed_s": 405.6749038696289
   }
 }

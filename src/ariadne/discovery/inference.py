@@ -1088,7 +1088,7 @@ def reliability_report(cases: list[tuple[Evidence, str]], *,
 def fit_temperature(cases: list[tuple[Evidence, str]],
                     grid: tuple[float, ...] = (0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0)
                     ) -> tuple[CalibrationConfig, ReliabilityReport]:
-    """Choose a temperature by minimum validation NLL."""
+    """Choose a global temperature by minimum validation NLL."""
     best_cfg = CalibrationConfig()
     best_rep = reliability_report(cases, calibration=best_cfg)
     for t in grid:
@@ -1097,6 +1097,99 @@ def fit_temperature(cases: list[tuple[Evidence, str]],
         if rep.nll < best_rep.nll:
             best_cfg, best_rep = cfg, rep
     return best_cfg, best_rep
+
+
+def fit_per_class_temperatures(
+        cases: list[tuple[Evidence, str]],
+        *,
+        grid: tuple[float, ...] = (0.3, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0),
+        global_temperature: float | None = None,
+) -> tuple[CalibrationConfig, ReliabilityReport]:
+    """Fit a per-class temperature on labelled cases.
+
+    For each truth label appearing in `cases`, sweep the grid and pick the
+    T that minimises NLL. The result is a CalibrationConfig with
+    class_temperatures populated.
+
+    If global_temperature is provided, every class without enough samples
+    falls back to that; otherwise the class's own global-grid best.
+    """
+    if not cases:
+        return CalibrationConfig(), ReliabilityReport(0, 0.0, float("inf"),
+                                                      float("inf"), float("inf"), [])
+    # Start from the best global T as the seed
+    if global_temperature is None:
+        seed_cfg, seed_rep = fit_temperature(cases, grid=grid)
+        global_T = seed_cfg.temperature
+    else:
+        global_T = float(global_temperature)
+        seed_rep = reliability_report(cases, calibration=CalibrationConfig(temperature=global_T))
+
+    # Group cases by truth label
+    from collections import defaultdict
+    by_label: dict[str, list] = defaultdict(list)
+    for ev, truth in cases:
+        by_label[truth].append((ev, truth))
+
+    class_temps: dict[str, float] = {}
+    for label, label_cases in by_label.items():
+        if len(label_cases) < 2:
+            # not enough data to fit a class-specific T; inherit global
+            continue
+        best_T = global_T
+        best_nll = float("inf")
+        for t in grid:
+            cfg = CalibrationConfig(temperature=global_T,
+                                     class_temperatures={label: t})
+            rep = reliability_report(label_cases, calibration=cfg)
+            if rep.nll < best_nll:
+                best_nll = rep.nll
+                best_T = t
+        # Only persist if it's clearly different from the global default
+        if abs(best_T - global_T) > 0.05:
+            class_temps[label] = best_T
+
+    final_cfg = CalibrationConfig(
+        temperature=global_T,
+        class_temperatures=class_temps,
+        version=f"per-class-fitted-{global_T:g}",
+    )
+    final_rep = reliability_report(cases, calibration=final_cfg)
+    # Only adopt if NLL actually improved over the global-only fit
+    if final_rep.nll > seed_rep.nll:
+        return CalibrationConfig(temperature=global_T,
+                                  version=f"global-only-{global_T:g}"), seed_rep
+    return final_cfg, final_rep
+
+
+def save_calibration(cfg: CalibrationConfig, path) -> None:
+    """Persist a CalibrationConfig to a JSON file."""
+    from pathlib import Path
+    payload = {
+        "schema": "ariadne.discovery.inference.calibration.v1",
+        "temperature": cfg.temperature,
+        "label_bias": dict(cfg.label_bias),
+        "channel_weights": dict(cfg.channel_weights),
+        "class_temperatures": dict(cfg.class_temperatures),
+        "version": cfg.version,
+    }
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def load_calibration(path) -> CalibrationConfig:
+    """Read back a CalibrationConfig saved by save_calibration."""
+    from pathlib import Path
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    return CalibrationConfig(
+        temperature=float(raw.get("temperature", 1.0)),
+        label_bias=dict(raw.get("label_bias", {})),
+        channel_weights=dict(raw.get("channel_weights", {})),
+        class_temperatures={k: float(v) for k, v
+                             in raw.get("class_temperatures", {}).items()},
+        version=raw.get("version", "loaded"),
+    )
 
 
 def _build_narrative(result: InferenceResult, evidence: Evidence) -> str:

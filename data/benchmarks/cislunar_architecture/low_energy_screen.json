@@ -1,0 +1,552 @@
+{
+  "candidates": [
+    {
+      "architecture_id": "cislunar_8d6f168c8c56b5",
+      "assumptions": [
+        "Earth-centered full-ephemeris targeting with Sun perturbation",
+        "patched lunar orbit insertion at selected LLO altitude",
+        "near-parabolic lunar escape branch used as safe-return proxy",
+        "requires later high-fidelity targeting to certified reentry corridor"
+      ],
+      "certificate_hash": "8d6f168c8c56b53c3ff8af4719122068c9efb7f9289c14c059868ae0cd03f02f",
+      "fidelity": "analytic_patch",
+      "free_return_capable": true,
+      "lunar_stay_days": 7.0,
+      "outbound": {
+        "assumptions": [
+          "Earth-centered full-ephemeris targeting with Sun perturbation",
+          "patched lunar orbit insertion at selected LLO altitude"
+        ],
+        "components": {
+          "loi_ms": 837.6463092328055,
+          "miss_km": 0.011707817100579684,
+          "tli_ms": 3140.603731051687,
+          "v_inf_kms": 0.8774468731540606
+        },
+        "direction": "earth_to_moon",
+        "dv_ms": 3978.2500402844926,
+        "engine": "ephemeris_transfer.optimize_transfer",
+        "fidelity": "full_ephemeris",
+        "name": "direct_ephemeris_4.00d",
+        "raw": {
+          "dv_loi_ms": 837.6463092328055,
+          "dv_tli_ms": 3140.603731051687,
+          "et0": 802008069.1849052,
+          "miss_km": 0.011707817100579684,
+          "tof_days": 4.0,
+          "total_ms": 3978.2500402844926,
+          "v_inf_kms": 0.8774468731540606
+        },
+        "risk": 0.1002341563420116,
+        "robustness": 0.8997658436579884,
+        "tof_days": 4.0,
+        "validations": [
+          "Lambert seed corrected by finite-difference shooting",
+          "targeting miss 0.0117 km"
+        ]
+      },
+      "pareto_optimal": true,
+      "return_leg": {
+        "assumptions": [
+          "near-parabolic lunar escape branch used as safe-return proxy",
+          "requires later high-fidelity targeting to certified reentry corridor"
+        ],
+        "components": {
+          "dv_depart_ms": 676.6195629279879,
+          "earth_entry_speed_kms": 11.110414340395351,
+          "entry_perigee_km": 6458.137,
+          "v_inf_kms": 0.0
+        },
+        "direction": "moon_to_earth",
+        "dv_ms": 676.6195629279879,
+        "engine": "analytic_ballistic_return_budget",
+        "fidelity": "analytic_patch",
+        "name": "ballistic_safe_return_4.50d",
+        "raw": {
+          "corridor_ok": true,
+          "tof_days": 4.5
+        },
+        "risk": 0.16,
+        "robustness": 0.82,
+        "tof_days": 4.5,
+        "validations": [
+          "entry perigee proxy 6458.1 km",
+          "free-return capable by architecture intent"
+        ]
+      },
+      "score": 6.468004243109137,
+      "total_dv_ms": 4654.869603212481,
+      "total_tof_days": 15.5,
+      "validations": [
+        "Lambert seed corrected by finite-difference shooting",
+        "targeting miss 0.0117 km",
+        "entry perigee proxy 6458.1 km",
+        "free-return capable by architecture intent"
+      ]
+    },
+    {
+      "architecture_id": "cislunar_2362097a627dc3",
+      "assumptions": [
+        "Earth-centered full-ephemeris targeting with Sun perturbation",
+        "patched lunar orbit insertion at selected LLO altitude",
+        "LLO departure uses patched reverse lunar-insertion energetics",
+        "Earth arrival assumes atmospheric capture/reentry, not Earth orbit insertion"
+      ],
+      "certificate_hash": "2362097a627dc37f0c66f1754feb0ea5a0c184bdbe29448de745a7f266564d40",
+      "fidelity": "analytic_patch",
+      "free_return_capable": false,
+      "lunar_stay_days": 7.0,
+      "outbound": {
+        "assumptions": [
+          "Earth-centered full-ephemeris targeting with Sun perturbation",
+          "patched lunar orbit insertion at selected LLO altitude"
+        ],
+        "components": {
+          "loi_ms": 837.6463092328055,
+          "miss_km": 0.011707817100579684,
+          "tli_ms": 3140.603731051687,
+          "v_inf_kms": 0.8774468731540606
+        },
+        "direction": "earth_to_moon",
+        "dv_ms": 3978.2500402844926,
+        "engine": "ephemeris_transfer.optimize_transfer",
+        "fidelity": "full_ephemeris",
+        "name": "direct_ephemeris_4.00d",
+        "raw": {
+          "dv_loi_ms": 837.6463092328055,
+          "dv_tli_ms": 3140.603731051687,
+          "et0": 802008069.1849052,
+          "miss_km": 0.011707817100579684,
+          "tof_days": 4.0,
+          "total_ms": 3978.2500402844926,
+          "v_inf_kms": 0.8774468731540606
+        },
+        "risk": 0.1002341563420116,
+        "robustness": 0.8997658436579884,
+        "tof_days": 4.0,
+        "validations": [
+          "Lambert seed corrected by finite-difference shooting",
+          "targeting miss 0.0117 km"
+        ]
+      },
+      "pareto_optimal": true,
+      "return_leg": {
+        "assumptions": [
+          "LLO departure uses patched reverse lunar-insertion energetics",
+          "Earth arrival assumes atmospheric capture/reentry, not Earth orbit insertion"
+        ],
+        "components": {
+          "dv_depart_ms": 821.7099445690743,
+          "earth_entry_speed_kms": 11.14148605390049,
+          "entry_perigee_km": 6458.137,
+          "v_inf_kms": 0.8315074708001325
+        },
+        "direction": "moon_to_earth",
+        "dv_ms": 821.7099445690743,
+        "engine": "analytic_lunar_return_budget",
+        "fidelity": "analytic_patch",
+        "name": "direct_return_3.00d",
+        "raw": {
+          "corridor_ok": true,
+          "tof_days": 3.0
+        },
+        "risk": 0.22,
+        "robustness": 0.68,
+        "tof_days": 3.0,
+        "validations": [
+          "entry perigee proxy 6458.1 km",
+          "entry speed proxy 11.141 km/s"
+        ]
+      },
+      "score": 6.481594624750223,
+      "total_dv_ms": 4799.959984853567,
+      "total_tof_days": 14.0,
+      "validations": [
+        "Lambert seed corrected by finite-difference shooting",
+        "targeting miss 0.0117 km",
+        "entry perigee proxy 6458.1 km",
+        "entry speed proxy 11.141 km/s"
+      ]
+    },
+    {
+      "architecture_id": "cislunar_c3f33eb4f08356",
+      "assumptions": [
+        "standard TLI paired with CR3BP manifold ballistic lunar capture",
+        "Sun/BCR4BP phasing not fully optimized in this leg",
+        "near-parabolic lunar escape branch used as safe-return proxy",
+        "requires later high-fidelity targeting to certified reentry corridor"
+      ],
+      "certificate_hash": "c3f33eb4f08356218160a1635379ab43477a4a91d282d76aa22c3979a2320242",
+      "fidelity": "analytic_patch",
+      "free_return_capable": true,
+      "lunar_stay_days": 7.0,
+      "outbound": {
+        "assumptions": [
+          "standard TLI paired with CR3BP manifold ballistic lunar capture",
+          "Sun/BCR4BP phasing not fully optimized in this leg"
+        ],
+        "components": {
+          "coimbra_reference_ms": 3925.0,
+          "direct_baseline_ms": 3953.0549332894843,
+          "loi_ms": 646.0039009902064,
+          "periapsis_alt_km": 91.64998051879616,
+          "tli_ms": 3131.3449887204097
+        },
+        "direction": "earth_to_moon",
+        "dv_ms": 3777.3488897106163,
+        "engine": "low_energy_lunar_transfer",
+        "fidelity": "cr3bp_patch",
+        "name": "low_energy_L2_C3.100",
+        "raw": {
+          "jacobi": 3.1,
+          "loi_ms": 646.0039009902064,
+          "periapsis_alt_km": 91.64998051879616,
+          "point": "L2",
+          "tli_ms": 3131.3449887204097,
+          "tof_days": 18.058052293692775,
+          "total_ms": 3777.3488897106163
+        },
+        "risk": 0.2208350019481204,
+        "robustness": 0.7027077493181579,
+        "tof_days": 18.058052293692775,
+        "validations": [
+          "capture state generated from invariant-manifold propagation",
+          "patched-conic direct budget retained as comparison baseline"
+        ]
+      },
+      "pareto_optimal": true,
+      "return_leg": {
+        "assumptions": [
+          "near-parabolic lunar escape branch used as safe-return proxy",
+          "requires later high-fidelity targeting to certified reentry corridor"
+        ],
+        "components": {
+          "dv_depart_ms": 676.6195629279879,
+          "earth_entry_speed_kms": 11.110414340395351,
+          "entry_perigee_km": 6458.137,
+          "v_inf_kms": 0.0
+        },
+        "direction": "moon_to_earth",
+        "dv_ms": 676.6195629279879,
+        "engine": "analytic_ballistic_return_budget",
+        "fidelity": "analytic_patch",
+        "name": "ballistic_safe_return_4.50d",
+        "raw": {
+          "corridor_ok": true,
+          "tof_days": 4.5
+        },
+        "risk": 0.16,
+        "robustness": 0.82,
+        "tof_days": 4.5,
+        "validations": [
+          "entry perigee proxy 6458.1 km",
+          "free-return capable by architecture intent"
+        ]
+      },
+      "score": 8.03679487253031,
+      "total_dv_ms": 4453.9684526386045,
+      "total_tof_days": 29.558052293692775,
+      "validations": [
+        "capture state generated from invariant-manifold propagation",
+        "patched-conic direct budget retained as comparison baseline",
+        "entry perigee proxy 6458.1 km",
+        "free-return capable by architecture intent"
+      ]
+    },
+    {
+      "architecture_id": "cislunar_c9c6b28dd6c9f3",
+      "assumptions": [
+        "standard TLI paired with CR3BP manifold ballistic lunar capture",
+        "Sun/BCR4BP phasing not fully optimized in this leg",
+        "LLO departure uses patched reverse lunar-insertion energetics",
+        "Earth arrival assumes atmospheric capture/reentry, not Earth orbit insertion"
+      ],
+      "certificate_hash": "c9c6b28dd6c9f391b05a9652a8d8033a51058738dc5d8aeadbc21fac784d26a3",
+      "fidelity": "analytic_patch",
+      "free_return_capable": false,
+      "lunar_stay_days": 7.0,
+      "outbound": {
+        "assumptions": [
+          "standard TLI paired with CR3BP manifold ballistic lunar capture",
+          "Sun/BCR4BP phasing not fully optimized in this leg"
+        ],
+        "components": {
+          "coimbra_reference_ms": 3925.0,
+          "direct_baseline_ms": 3953.0549332894843,
+          "loi_ms": 646.0039009902064,
+          "periapsis_alt_km": 91.64998051879616,
+          "tli_ms": 3131.3449887204097
+        },
+        "direction": "earth_to_moon",
+        "dv_ms": 3777.3488897106163,
+        "engine": "low_energy_lunar_transfer",
+        "fidelity": "cr3bp_patch",
+        "name": "low_energy_L2_C3.100",
+        "raw": {
+          "jacobi": 3.1,
+          "loi_ms": 646.0039009902064,
+          "periapsis_alt_km": 91.64998051879616,
+          "point": "L2",
+          "tli_ms": 3131.3449887204097,
+          "tof_days": 18.058052293692775,
+          "total_ms": 3777.3488897106163
+        },
+        "risk": 0.2208350019481204,
+        "robustness": 0.7027077493181579,
+        "tof_days": 18.058052293692775,
+        "validations": [
+          "capture state generated from invariant-manifold propagation",
+          "patched-conic direct budget retained as comparison baseline"
+        ]
+      },
+      "pareto_optimal": true,
+      "return_leg": {
+        "assumptions": [
+          "LLO departure uses patched reverse lunar-insertion energetics",
+          "Earth arrival assumes atmospheric capture/reentry, not Earth orbit insertion"
+        ],
+        "components": {
+          "dv_depart_ms": 821.7099445690743,
+          "earth_entry_speed_kms": 11.14148605390049,
+          "entry_perigee_km": 6458.137,
+          "v_inf_kms": 0.8315074708001325
+        },
+        "direction": "moon_to_earth",
+        "dv_ms": 821.7099445690743,
+        "engine": "analytic_lunar_return_budget",
+        "fidelity": "analytic_patch",
+        "name": "direct_return_3.00d",
+        "raw": {
+          "corridor_ok": true,
+          "tof_days": 3.0
+        },
+        "risk": 0.22,
+        "robustness": 0.68,
+        "tof_days": 3.0,
+        "validations": [
+          "entry perigee proxy 6458.1 km",
+          "entry speed proxy 11.141 km/s"
+        ]
+      },
+      "score": 8.050385254171394,
+      "total_dv_ms": 4599.058834279691,
+      "total_tof_days": 28.058052293692775,
+      "validations": [
+        "capture state generated from invariant-manifold propagation",
+        "patched-conic direct budget retained as comparison baseline",
+        "entry perigee proxy 6458.1 km",
+        "entry speed proxy 11.141 km/s"
+      ]
+    },
+    {
+      "architecture_id": "cislunar_287c3899f83ff6",
+      "assumptions": [
+        "standard TLI paired with CR3BP manifold ballistic lunar capture",
+        "Sun/BCR4BP phasing not fully optimized in this leg",
+        "near-parabolic lunar escape branch used as safe-return proxy",
+        "requires later high-fidelity targeting to certified reentry corridor"
+      ],
+      "certificate_hash": "287c3899f83ff6676a908ca42c9b8fdde3f3e02b7506f7b5d8b8258805733ad7",
+      "fidelity": "analytic_patch",
+      "free_return_capable": true,
+      "lunar_stay_days": 7.0,
+      "outbound": {
+        "assumptions": [
+          "standard TLI paired with CR3BP manifold ballistic lunar capture",
+          "Sun/BCR4BP phasing not fully optimized in this leg"
+        ],
+        "components": {
+          "coimbra_reference_ms": 3925.0,
+          "direct_baseline_ms": 3953.0549332894843,
+          "loi_ms": 648.8832928118966,
+          "periapsis_alt_km": 90.12724484546288,
+          "tli_ms": 3131.3449887204097
+        },
+        "direction": "earth_to_moon",
+        "dv_ms": 3780.2282815323065,
+        "engine": "low_energy_lunar_transfer",
+        "fidelity": "cr3bp_patch",
+        "name": "low_energy_L1_C3.100",
+        "raw": {
+          "jacobi": 3.1,
+          "loi_ms": 648.8832928118966,
+          "periapsis_alt_km": 90.12724484546288,
+          "point": "L1",
+          "tli_ms": 3131.3449887204097,
+          "tof_days": 19.492265833264042,
+          "total_ms": 3780.2282815323065
+        },
+        "risk": 0.22098727551545372,
+        "robustness": 0.7026544535695912,
+        "tof_days": 19.492265833264042,
+        "validations": [
+          "capture state generated from invariant-manifold propagation",
+          "patched-conic direct budget retained as comparison baseline"
+        ]
+      },
+      "pareto_optimal": false,
+      "return_leg": {
+        "assumptions": [
+          "near-parabolic lunar escape branch used as safe-return proxy",
+          "requires later high-fidelity targeting to certified reentry corridor"
+        ],
+        "components": {
+          "dv_depart_ms": 676.6195629279879,
+          "earth_entry_speed_kms": 11.110414340395351,
+          "entry_perigee_km": 6458.137,
+          "v_inf_kms": 0.0
+        },
+        "direction": "moon_to_earth",
+        "dv_ms": 676.6195629279879,
+        "engine": "analytic_ballistic_return_budget",
+        "fidelity": "analytic_patch",
+        "name": "ballistic_safe_return_4.50d",
+        "raw": {
+          "corridor_ok": true,
+          "tof_days": 4.5
+        },
+        "risk": 0.16,
+        "robustness": 0.82,
+        "tof_days": 4.5,
+        "validations": [
+          "entry perigee proxy 6458.1 km",
+          "free-return capable by architecture intent"
+        ]
+      },
+      "score": 8.211850125283483,
+      "total_dv_ms": 4456.847844460294,
+      "total_tof_days": 30.992265833264042,
+      "validations": [
+        "capture state generated from invariant-manifold propagation",
+        "patched-conic direct budget retained as comparison baseline",
+        "entry perigee proxy 6458.1 km",
+        "free-return capable by architecture intent"
+      ]
+    },
+    {
+      "architecture_id": "cislunar_8bee715e9e5c23",
+      "assumptions": [
+        "standard TLI paired with CR3BP manifold ballistic lunar capture",
+        "Sun/BCR4BP phasing not fully optimized in this leg",
+        "LLO departure uses patched reverse lunar-insertion energetics",
+        "Earth arrival assumes atmospheric capture/reentry, not Earth orbit insertion"
+      ],
+      "certificate_hash": "8bee715e9e5c2324a817fef60e9615d0a2cb8e82d8db360145a5ede04f5b45b7",
+      "fidelity": "analytic_patch",
+      "free_return_capable": false,
+      "lunar_stay_days": 7.0,
+      "outbound": {
+        "assumptions": [
+          "standard TLI paired with CR3BP manifold ballistic lunar capture",
+          "Sun/BCR4BP phasing not fully optimized in this leg"
+        ],
+        "components": {
+          "coimbra_reference_ms": 3925.0,
+          "direct_baseline_ms": 3953.0549332894843,
+          "loi_ms": 648.8832928118966,
+          "periapsis_alt_km": 90.12724484546288,
+          "tli_ms": 3131.3449887204097
+        },
+        "direction": "earth_to_moon",
+        "dv_ms": 3780.2282815323065,
+        "engine": "low_energy_lunar_transfer",
+        "fidelity": "cr3bp_patch",
+        "name": "low_energy_L1_C3.100",
+        "raw": {
+          "jacobi": 3.1,
+          "loi_ms": 648.8832928118966,
+          "periapsis_alt_km": 90.12724484546288,
+          "point": "L1",
+          "tli_ms": 3131.3449887204097,
+          "tof_days": 19.492265833264042,
+          "total_ms": 3780.2282815323065
+        },
+        "risk": 0.22098727551545372,
+        "robustness": 0.7026544535695912,
+        "tof_days": 19.492265833264042,
+        "validations": [
+          "capture state generated from invariant-manifold propagation",
+          "patched-conic direct budget retained as comparison baseline"
+        ]
+      },
+      "pareto_optimal": false,
+      "return_leg": {
+        "assumptions": [
+          "LLO departure uses patched reverse lunar-insertion energetics",
+          "Earth arrival assumes atmospheric capture/reentry, not Earth orbit insertion"
+        ],
+        "components": {
+          "dv_depart_ms": 821.7099445690743,
+          "earth_entry_speed_kms": 11.14148605390049,
+          "entry_perigee_km": 6458.137,
+          "v_inf_kms": 0.8315074708001325
+        },
+        "direction": "moon_to_earth",
+        "dv_ms": 821.7099445690743,
+        "engine": "analytic_lunar_return_budget",
+        "fidelity": "analytic_patch",
+        "name": "direct_return_3.00d",
+        "raw": {
+          "corridor_ok": true,
+          "tof_days": 3.0
+        },
+        "risk": 0.22,
+        "robustness": 0.68,
+        "tof_days": 3.0,
+        "validations": [
+          "entry perigee proxy 6458.1 km",
+          "entry speed proxy 11.141 km/s"
+        ]
+      },
+      "score": 8.225440506924569,
+      "total_dv_ms": 4601.938226101381,
+      "total_tof_days": 29.492265833264042,
+      "validations": [
+        "capture state generated from invariant-manifold propagation",
+        "patched-conic direct budget retained as comparison baseline",
+        "entry perigee proxy 6458.1 km",
+        "entry speed proxy 11.141 km/s"
+      ]
+    }
+  ],
+  "certificate_hash": "bd5f29daef6452cec34354bac946a2fd428c86becfb3a4ad198ad962002233dd",
+  "constraints": {
+    "epoch": "2025-06-01T00:00:00",
+    "include_coherence": false,
+    "include_direct": true,
+    "include_free_return": true,
+    "include_low_energy": true,
+    "leo_alt_km": 200.0,
+    "llo_alt_km": 100.0,
+    "low_energy_jacobi": [
+      3.1
+    ],
+    "lunar_stay_days": 7.0,
+    "max_reentry_perigee_km": 6498.0,
+    "max_total_dv_ms": null,
+    "max_total_tof_days": null,
+    "min_reentry_perigee_km": 6408.0,
+    "outbound_tof_days": [
+      4.0
+    ],
+    "return_tof_days": [
+      3.0
+    ]
+  },
+  "created_utc": "2026-05-31T11:31:12.672489+00:00",
+  "pareto_front": [
+    "cislunar_2362097a627dc3",
+    "cislunar_8d6f168c8c56b5",
+    "cislunar_c3f33eb4f08356",
+    "cislunar_c9c6b28dd6c9f3"
+  ],
+  "recommended_id": "cislunar_8d6f168c8c56b5",
+  "schema": "ariadne.cislunar_mission_architect.v1",
+  "weights": {
+    "dv": 1.0,
+    "fidelity_bonus": 0.2,
+    "risk": 0.8,
+    "robustness": 0.35,
+    "tof": 0.12
+  }
+}

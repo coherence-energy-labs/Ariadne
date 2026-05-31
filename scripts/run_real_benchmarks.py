@@ -24,8 +24,14 @@ from pathlib import Path
 
 
 def run_inference_benchmark():
-    """Run the inference benchmark on the labelled suite (offline-safe)."""
+    """Run the inference benchmark on the labelled suite (offline-safe).
+
+    NEW: fits both a global temperature AND per-class temperatures on the
+    same labelled corpus, persists the calibration to disk, and re-runs
+    the benchmark with it to confirm ECE improvement.
+    """
     from ariadne.discovery import benchmarking
+    from ariadne.discovery import inference
     print("=" * 70)
     print("INFERENCE BENCHMARK -- labelled cases through ariadne.discovery.inference")
     print("=" * 70)
@@ -47,7 +53,7 @@ def run_inference_benchmark():
     print(f"  source counts:    {result.source_counts}")
     print(f"  split counts:     {result.split_counts}")
     print(f"  certificate:      {result.certificate_hash[:16]}...")
-    return {
+    baseline = {
         "n_cases": result.n, "elapsed_s": elapsed,
         "accuracy": result.accuracy,
         "macro_precision": result.macro_precision,
@@ -61,6 +67,39 @@ def run_inference_benchmark():
         "certificate_hash": result.certificate_hash,
         "calibration_temperature": result.calibration.temperature,
     }
+
+    # --- per-class temperature fit + re-run --------------------------------
+    print("\n  --- per-class temperature fit ---")
+    reliability_cases = [(c.evidence, c.truth_label) for c in cases]
+    t1 = time.time()
+    fitted_cfg, fitted_rep = inference.fit_per_class_temperatures(
+        reliability_cases)
+    print(f"    fit took {time.time() - t1:.1f}s; global T={fitted_cfg.temperature:.2f}, "
+          f"per-class entries={len(fitted_cfg.class_temperatures)}")
+    print(f"    fitted reliability: NLL {fitted_rep.nll:.3f}, "
+          f"Brier {fitted_rep.brier:.3f}, ECE {fitted_rep.ece:.3f}")
+    # Persist calibration to disk for the live pipeline to load
+    calib_path = Path("data/calibration/inference_v1.json")
+    inference.save_calibration(fitted_cfg, calib_path)
+    print(f"    calibration saved -> {calib_path}")
+
+    baseline["fitted_calibration"] = {
+        "global_T": fitted_cfg.temperature,
+        "class_T_count": len(fitted_cfg.class_temperatures),
+        "class_T": dict(fitted_cfg.class_temperatures),
+        "version": fitted_cfg.version,
+        "post_fit_nll": fitted_rep.nll,
+        "post_fit_brier": fitted_rep.brier,
+        "post_fit_ece": fitted_rep.ece,
+        "nll_improvement": baseline["nll"] - fitted_rep.nll,
+        "ece_improvement": baseline["ece"] - fitted_rep.ece,
+    }
+    print(f"\n    NLL improvement:  {baseline['nll']:.3f} -> "
+          f"{fitted_rep.nll:.3f} ({baseline['nll'] - fitted_rep.nll:+.3f})")
+    print(f"    ECE improvement:  {baseline['ece']:.3f} -> "
+          f"{fitted_rep.ece:.3f} ({baseline['ece'] - fitted_rep.ece:+.3f})")
+
+    return baseline
 
 
 def run_sensitivity_recovery():

@@ -234,7 +234,46 @@ def chain_tracklets(tracklets: list[dict],
 
 
 # ---------- stage 4: IOD + LM filter ------------------------------------------
-def fit_filter(tracklets: list[dict], rms_threshold_arcsec: float = 10.0):
+def filter_chain_sanity(chains: list[list[dict]],
+                         *, max_rate_change_pct: float = 80.0,
+                         min_chain_nights: int = 2) -> list[list[dict]]:
+    """Drop obviously-broken chains BEFORE the expensive IOD.
+
+    Filters out chains that:
+      * span <`min_chain_nights` distinct nights (single-night chains are
+        useless for orbit determination).
+      * contain tracklets whose rate disagrees by more than `max_rate_change_pct`
+        from the chain median -- a sign the linker merged unrelated detections.
+
+    Returns the surviving chains. This step is O(N) so it's free; the IOD
+    that follows is O(N * |hypothesis grid|) so cutting noise chains early
+    pays huge dividends.
+    """
+    import statistics
+    survivors = []
+    for ch in chains:
+        if len({tr.get("night", -1) for tr in ch}) < min_chain_nights:
+            continue
+        rates = [tr.get("rate_arcsec_hr", 0.0) for tr in ch
+                 if tr.get("rate_arcsec_hr", 0.0) > 0]
+        if not rates:
+            continue
+        med_rate = statistics.median(rates)
+        if med_rate <= 0:
+            continue
+        # Drop the chain if ANY member is way out of the median's neighbourhood
+        ok = all(
+            abs(r - med_rate) / med_rate * 100.0 <= max_rate_change_pct
+            for r in rates
+        )
+        if ok:
+            survivors.append(ch)
+    return survivors
+
+
+def fit_filter(tracklets: list[dict], rms_threshold_arcsec: float = 10.0,
+               *, nbody_refine_rms_threshold: float = 5.0,
+               nbody_perturbers: tuple = ("JUPITER", "NEPTUNE")):
     """Run IOD+LM on each tracklet group; keep only those with fit RMS below threshold.
 
     IOD.fit_candidate expects TRACKLET DICTS (with t/ra/dec/dra/ddec) -- it
@@ -276,7 +315,29 @@ def fit_filter(tracklets: list[dict], rms_threshold_arcsec: float = 10.0):
         tr_out["rms_arcsec"] = fit["rms_arcsec"]
         tr_out["x_fit_km"] = fit["x_fit"].tolist()
         tr_out["v_fit_kms"] = fit["v_fit"].tolist()
-        tr_out["status"] = ("accepted" if fit["rms_arcsec"] < rms_threshold_arcsec
+        # N-body refinement: when the 2-body fit RMS is between the OK
+        # threshold and the rejection threshold, an N-body LM step often
+        # tightens it enough to convert "high_rms_rejected" into
+        # "accepted". Slow (~10s per refinement) so only used when it
+        # has a chance of helping.
+        if (nbody_refine_rms_threshold > 0
+                and fit["rms_arcsec"] > nbody_refine_rms_threshold
+                and fit["rms_arcsec"] < 4.0 * rms_threshold_arcsec):
+            try:
+                from . import orbit_fit_nbody as _ofn
+                refined = _ofn.fit_orbit_nbody(
+                    iod_input, fit["t_ref"],
+                    np.asarray(fit["x_fit"]), np.asarray(fit["v_fit"]),
+                    perturbers=nbody_perturbers, max_nfev=60)
+                if (refined.get("success")
+                        and refined["rms_arcsec"] < fit["rms_arcsec"]):
+                    tr_out["rms_arcsec"] = refined["rms_arcsec"]
+                    tr_out["x_fit_km"] = refined["x_fit"].tolist()
+                    tr_out["v_fit_kms"] = refined["v_fit"].tolist()
+                    tr_out["nbody_refined"] = True
+            except Exception:
+                pass
+        tr_out["status"] = ("accepted" if tr_out["rms_arcsec"] < rms_threshold_arcsec
                             else "high_rms_rejected")
         out.append(tr_out)
     return out
@@ -374,7 +435,8 @@ def link_helio_linc(tracklets: list[dict],
 
 # ---------- stage 5b: smart-layer annotations --------------------------------
 def smart_annotate(tracklets: list[dict], *, calibration=None,
-                   scheduler=None) -> list[dict]:
+                   scheduler=None, mcmc_for_high_quality: bool = False,
+                   mcmc_n_steps: int = 200) -> list[dict]:
     """Run real-bogus filter + inference engine + quality scorer on accepted tracklets.
 
     Adds these fields to each tracklet:
@@ -468,6 +530,30 @@ def smart_annotate(tracklets: list[dict], *, calibration=None,
             tr["_quality_grade"] = "?"
             tr["_quality_score"] = 0.0
 
+        # 5. Optional MCMC posterior for grade-A/B candidates
+        if (mcmc_for_high_quality and tr.get("_quality_grade") in ("A", "B")
+                and "x_fit_km" in tr and "v_fit_kms" in tr
+                and isinstance(tr.get("chain"), list)
+                and len(tr["chain"]) >= 3):
+            try:
+                from . import bayes_orbit
+                t_ref = float(tr.get("t", 0.0))
+                post = bayes_orbit.sample_posterior(
+                    tr["chain"], t_ref=t_ref,
+                    x_seed_km=np.asarray(tr["x_fit_km"]),
+                    v_seed_kms=np.asarray(tr["v_fit_kms"]),
+                    n_walkers=12, n_steps=mcmc_n_steps,
+                    burn_in=max(mcmc_n_steps // 3, 20), thin=2)
+                tr["_mcmc"] = {
+                    "sampler": post.sampler_used,
+                    "n_samples": int(post.chain.size // 6),
+                    "a_au_quantiles": post.a_quantiles_au,
+                    "e_quantiles": post.e_quantiles,
+                    "i_deg_quantiles": post.i_quantiles_deg,
+                }
+            except Exception as e:
+                tr["_mcmc"] = {"error": str(e)[:120]}
+
         out.append(tr)
     return out
 
@@ -512,6 +598,13 @@ def run_pipeline(alerts: Iterable[Alert],
     else:
         chains = chain_tracklets(tracklets)
     print(f"      -> {len(chains)} multi-night candidate arcs")
+    # Pre-IOD sanity filter: drop obviously-broken chains so they don't
+    # consume IOD wall-clock. Cheap (O(N)) vs IOD's O(N * |grid|).
+    n_before_sanity = len(chains)
+    chains = filter_chain_sanity(chains)
+    if len(chains) < n_before_sanity:
+        print(f"      -> {len(chains)} after sanity filter "
+              f"(dropped {n_before_sanity - len(chains)})")
     # Convert chains into the tracklet-cluster format the fit_filter expects.
     chain_clusters = []
     for ch in chains:
