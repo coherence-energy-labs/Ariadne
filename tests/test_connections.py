@@ -1,5 +1,6 @@
 """Heteroclinic-connection tests (Gate G6)."""
 import numpy as np
+import pytest
 
 from ariadne.data.constants import EARTH_MOON
 from ariadne.orbits.families import lyapunov_orbit_at_jacobi
@@ -22,12 +23,14 @@ def test_loop_intersections_crossing_squares():
     assert len(loop_intersections(a, b)) >= 2
 
 
+@pytest.mark.slow
 def test_lyapunov_orbit_at_target_jacobi():
     for point, c in (("L1", 3.17), ("L2", 3.15)):
         orb = lyapunov_orbit_at_jacobi(MU, point, c)
         assert abs(orb.jacobi - c) < 1e-7
 
 
+@pytest.mark.slow
 def test_heteroclinic_l1_l2_connection_exists():
     conn = find_heteroclinic(MU, 3.15, "L1", "L2", n_seeds=140, displacement=1e-4)
     assert conn is not None

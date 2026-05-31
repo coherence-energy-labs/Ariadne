@@ -1,4 +1,6 @@
 """Low-energy transfer tests (Gate G8r / G8t, Stage 6)."""
+import pytest
+
 from ariadne.data.constants import EARTH_MOON
 from ariadne.orbits.families import lyapunov_orbit_at_jacobi
 from ariadne.optimize.budget import earth_moon_budget
@@ -8,6 +10,7 @@ from ariadne.transfers.low_energy_lunar import low_energy_lunar_transfer
 MU = EARTH_MOON.mu
 
 
+@pytest.mark.slow
 def test_ballistic_capture_beats_direct():
     orb = lyapunov_orbit_at_jacobi(MU, "L1", 3.15)
     cap = ballistic_capture(orb, llo_alt=100.0)
@@ -20,6 +23,7 @@ def test_ballistic_capture_beats_direct():
     assert cap["dv_capture_kms"] < direct_loi
 
 
+@pytest.mark.slow
 def test_low_energy_total_brackets_coimbra():
     best, recs, base = low_energy_lunar_transfer()
     assert best is not None and len(recs) >= 4

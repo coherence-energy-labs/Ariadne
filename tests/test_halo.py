@@ -1,5 +1,6 @@
 """3D halo orbit tests (Gate G_halo)."""
 import numpy as np
+import pytest
 
 from ariadne.data.constants import EARTH_MOON
 from ariadne.dynamics.cr3bp import propagate
@@ -8,6 +9,7 @@ from ariadne.orbits.halo import halo_family
 MU = EARTH_MOON.mu
 
 
+@pytest.mark.slow
 def test_halo_family_periodic_and_3d():
     halos = halo_family(MU, "L1", n=8, dz=2e-3, fam_n=40)
     assert len(halos) >= 6
@@ -18,6 +20,7 @@ def test_halo_family_periodic_and_3d():
         assert h.z_amplitude > 0.0          # genuinely out of plane
 
 
+@pytest.mark.slow
 def test_halo_branches_at_lyapunov_bifurcation():
     halos = halo_family(MU, "L1", n=8, dz=2e-3, fam_n=40)
     # halos branch from the Lyapunov vertical bifurcation found in Stage 2 (C ~ 3.186)

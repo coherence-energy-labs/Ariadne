@@ -2,6 +2,7 @@
 import os
 
 import numpy as np
+import pytest
 
 from ariadne.data.constants import SUN_EARTH
 from ariadne.data.ephemeris import body_state, et
@@ -10,6 +11,7 @@ from ariadne.dynamics.ephemeris_nbody import propagate_test_particle
 from ariadne.transfers.genesis import genesis_halo, earth_approach
 
 
+@pytest.mark.slow
 def test_genesis_halo_period_and_manifold_reaches_earth():
     h, _ = genesis_halo()
     period_d = h.period * SUN_EARTH.T_star / 86400.0

@@ -1,5 +1,6 @@
 """Periodic-orbit and family tests (Gates G3, G4)."""
 import numpy as np
+import pytest
 
 from ariadne.data.constants import EARTH_MOON
 from ariadne.dynamics.cr3bp import propagate
@@ -36,6 +37,7 @@ def test_lyapunov_orbit_is_periodic():
     assert _periodicity(orb) < 1e-9
 
 
+@pytest.mark.slow
 def test_family_monotonic_jacobi_and_halo_bifurcation():
     fam = lyapunov_family(MU, "L1", amplitude0=1e-3, dx=2e-3, n=30)
     assert len(fam) >= 20
