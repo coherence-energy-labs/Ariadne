@@ -113,6 +113,30 @@ def _cmd_benchmark(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_nightly(args: argparse.Namespace) -> int:
+    """Run one nightly discovery iteration. Idempotent on the candidate store."""
+    from .discovery.operations.nightly import NightlyConfig, run_nightly
+    from .discovery.operations.alerts import FileSink, WebhookSink
+    sinks = []
+    if args.alert_log:
+        sinks.append(FileSink(args.alert_log))
+    if args.webhook_url:
+        sinks.append(WebhookSink(args.webhook_url, format=args.webhook_format))
+    cfg = NightlyConfig(
+        store_path=args.store, source=args.source,
+        ra=args.ra, dec=args.dec, radius_deg=args.radius,
+        mjd_start=args.mjd_start, mjd_end=args.mjd_end,
+        max_alerts=args.max_alerts,
+        rms_threshold_arcsec=args.rms_threshold,
+        do_xmatch=not args.no_skybot,
+        dry_run=args.dry_run,
+        alert_sinks=sinks,
+    )
+    summary = run_nightly(cfg)
+    print(f"\n=== summary: {summary}")
+    return 0
+
+
 def _cmd_discover_ztf(args: argparse.Namespace) -> int:
     """Subscribe to ALeRCE/ZTF in a cone+time window, run the discovery pipeline."""
     import time
@@ -187,6 +211,25 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("benchmark", help="run the 16-check reference benchmark suite"
                    ).set_defaults(func=_cmd_benchmark)
+
+    p_n = sub.add_parser("nightly",
+        help="one nightly discovery iteration -- pull, filter, dedupe vs store, fire alerts")
+    p_n.add_argument("--store", required=True, help="path to JSON candidate store")
+    p_n.add_argument("--source", default="alerce_ztf",
+                     choices=("alerce_ztf", "synthetic", "synthetic_kepler"))
+    p_n.add_argument("--ra", type=float, default=180.0)
+    p_n.add_argument("--dec", type=float, default=20.0)
+    p_n.add_argument("--radius", type=float, default=5.0)
+    p_n.add_argument("--mjd-start", type=float, default=None)
+    p_n.add_argument("--mjd-end", type=float, default=None)
+    p_n.add_argument("--max-alerts", type=int, default=1000)
+    p_n.add_argument("--rms-threshold", type=float, default=15.0)
+    p_n.add_argument("--no-skybot", action="store_true")
+    p_n.add_argument("--dry-run", action="store_true")
+    p_n.add_argument("--alert-log", default=None, help="JSON-lines alert audit log path")
+    p_n.add_argument("--webhook-url", default=None, help="Slack/Discord/generic webhook URL")
+    p_n.add_argument("--webhook-format", default="slack", choices=("slack", "discord", "raw"))
+    p_n.set_defaults(func=_cmd_nightly)
 
     p_ztf = sub.add_parser("discover-ztf",
         help="subscribe to ALeRCE/ZTF in a sky/time window, run the moving-object pipeline")
