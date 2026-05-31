@@ -1,8 +1,10 @@
 {
   "artifacts": {
     "corridor_atlas": "data\\benchmarks\\solar_transfer_atlas\\solar_transfer_corridor_atlas.png",
+    "cost_field": "data\\benchmarks\\solar_transfer_atlas\\solar_cost_field.png",
     "optimal_route_map": "data\\benchmarks\\solar_transfer_atlas\\solar_transfer_optimal_route_map.png",
-    "pairwise_heatmap": "data\\benchmarks\\solar_transfer_atlas\\solar_transfer_pairwise_heatmap.png"
+    "pairwise_heatmap": "data\\benchmarks\\solar_transfer_atlas\\solar_transfer_pairwise_heatmap.png",
+    "trail_atlas": "data\\benchmarks\\solar_transfer_atlas\\solar_trail_atlas.png"
   },
   "bodies": [
     {

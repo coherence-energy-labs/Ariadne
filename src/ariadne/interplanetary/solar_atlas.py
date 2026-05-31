@@ -302,6 +302,394 @@ def _orbit_xy(body: AtlasBody, epoch_et: float, n=540):
         return np.column_stack([body.a_au * np.cos(theta), body.a_au * np.sin(theta)])
 
 
+# ===========================================================================
+# Spatial cost-field heatmap (top-down solar system, colour = transfer cost)
+# ===========================================================================
+
+def render_solar_cost_field(atlas: SolarTransferAtlas,
+                             outpath: str | Path,
+                             *, n_grid: int = 320,
+                             max_au: float | None = None,
+                             dv_clip_kms: float = 18.0) -> Path:
+    """Top-down heatmap of the solar system showing transfer cost to every (x, y).
+
+    For each grid cell (x_au, y_au), estimate the dv cost of a Hohmann-like
+    Earth-to-(x, y) transfer at the atlas epoch. Build a spatial cost field
+    that you can READ like a topographic map: dark = cheap, bright = expensive.
+    Overlay planet orbits, current body positions, and the selected optimal
+    route as a glowing trail through the field.
+
+    This is the "where is it cheap to fly?" view the corridor matrix can't
+    show. Operators can see at a glance which sectors of the solar system
+    are within reach for the epoch.
+    """
+    _patch_matplotlib_deepcopy_bug()
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LinearSegmentedColormap
+    from . import nasa_plate as NP
+
+    NP.apply_style()
+    e0 = et(atlas.epoch_start_utc)
+    body_by_name = {b.name: b for b in atlas.bodies}
+    if max_au is None:
+        if atlas.optimal_route:
+            max_au = max(body_by_name[n].a_au for n in atlas.optimal_route
+                          if n in body_by_name) * 1.18
+        else:
+            max_au = max(b.a_au for b in atlas.bodies) * 1.08
+    max_au = float(max_au)
+
+    # Earth's heliocentric state at epoch -- the launch site for the cost field
+    earth_state = body_state("EARTH", e0, "J2000", "SUN")
+    earth_pos = np.array(earth_state[:3], dtype=float)
+    earth_v = np.array(earth_state[3:], dtype=float)
+    v_earth_kms = float(np.linalg.norm(earth_v))
+
+    # Build the cost field via Hohmann approximation. For each grid cell
+    # at radius R, treat the cell as a circular orbit at R and a Hohmann
+    # transfer FROM Earth's orbit (a=1 AU) TO R. The total dv is then:
+    #   dv = |v_perihelion(transfer) - v_earth_circular|        (departure)
+    #      + |v_target_circular     - v_aphelion(transfer)|    (insertion)
+    # Units: GM_SUN is in km^3/s^2 and AU_KM is in km, so velocities come
+    # out in km/s directly. Do NOT divide by 1000.
+    # This is a fast analytic proxy -- not exact Lambert, but a faithful
+    # topology of which regions are reachable cheaply at this epoch.
+    xs = np.linspace(-max_au, max_au, n_grid)
+    ys = np.linspace(-max_au, max_au, n_grid)
+    X, Y = np.meshgrid(xs, ys)
+    R = np.sqrt(X ** 2 + Y ** 2)
+    a_earth_au = 1.0
+    # Avoid div-by-zero at the Sun + near Earth's orbit
+    R_safe = np.maximum(R, 0.25)
+    # Hohmann semi-major axis from Earth (a=1 AU) to target r (in AU)
+    a_xfer = 0.5 * (a_earth_au + R_safe)
+    v_earth_orb = math.sqrt(GM_SUN / (a_earth_au * AU_KM))
+    v_target_orb_circ = np.sqrt(GM_SUN / (R_safe * AU_KM))
+    # Outbound transfers (R > 1): perihelion = Earth side
+    # Inbound transfers (R < 1): aphelion = Earth side -- formula symmetric
+    v_at_earth_xfer = np.sqrt(GM_SUN * (2 / (a_earth_au * AU_KM)
+                                          - 1 / (a_xfer * AU_KM)))
+    v_at_target_xfer = np.sqrt(GM_SUN * (2 / (R_safe * AU_KM)
+                                            - 1 / (a_xfer * AU_KM)))
+    # Inject burn at Earth + circularise at target
+    dv_kms = (np.abs(v_at_earth_xfer - v_earth_orb)
+              + np.abs(v_target_orb_circ - v_at_target_xfer))
+    # Saturate at the clip level so colour map renders the useful band
+    cost = np.clip(dv_kms, 0, dv_clip_kms)
+
+    # Heat-trail palette: deep navy -> cyan -> gold (cheap to expensive)
+    trail_cmap = LinearSegmentedColormap.from_list("ariadne_trail", [
+        (0.0,  "#04101a"),
+        (0.18, "#0c2336"),
+        (0.38, "#176aa0"),
+        (0.58, "#3ec5d4"),
+        (0.78, "#f0c674"),
+        (1.0,  "#f85149"),
+    ])
+
+    fig = plt.figure(figsize=(13.6, 12.4), facecolor=NP.DEEP_SPACE_BG)
+    fig.subplots_adjust(left=0.06, right=0.92, top=0.91, bottom=0.07)
+    ax = fig.add_subplot(111)
+    ax.set_facecolor(NP.DEEP_SPACE_BG)
+
+    # Cost field (raster)
+    im = ax.imshow(cost, extent=(-max_au, max_au, -max_au, max_au),
+                    origin="lower", cmap=trail_cmap, alpha=0.92,
+                    interpolation="bilinear", zorder=1)
+    cb = fig.colorbar(im, ax=ax, pad=0.015, shrink=0.82)
+    cb.set_label("EARTH -> (X, Y) HOHMANN COST (km/s)",
+                  color=NP.TEXT_SECONDARY, fontsize=8.5)
+    cb.ax.tick_params(colors=NP.TEXT_SECONDARY)
+    cb.outline.set_edgecolor(NP.GRID_LINE)
+
+    # Iso-cost contours so the topology is readable
+    cs = ax.contour(X, Y, cost,
+                     levels=np.linspace(2, dv_clip_kms, 6),
+                     colors=NP.TEXT_PRIMARY, linewidths=0.4, alpha=0.30,
+                     zorder=2)
+    ax.clabel(cs, inline=True, fontsize=6.5, fmt="%.0f km/s",
+               colors=NP.TEXT_PRIMARY)
+
+    # Orbit lines (thin dashed circles -- top-down approximation)
+    for body in atlas.bodies:
+        if body.a_au > max_au * 1.05:
+            continue
+        circle = plt.Circle((0, 0), body.a_au, fill=False,
+                              color=NP.TEXT_SECONDARY, alpha=0.45,
+                              linewidth=0.6, linestyle=(0, (4, 3)), zorder=3)
+        ax.add_patch(circle)
+
+    # Sun
+    ax.scatter([0], [0], s=520, color=NP.ACCENT_GOLD,
+                edgecolor=NP.DEEP_SPACE_BG, linewidths=1.5, zorder=10)
+
+    # Body positions + labels with halos
+    pos3 = _body_positions(atlas)
+    for body in atlas.bodies:
+        if body.a_au > max_au * 1.05:
+            continue
+        x, y = pos3[body.name][:2]
+        ax.scatter([x], [y], s=140 * body.radius_scale,
+                    color=body.color, edgecolor=NP.TEXT_PRIMARY,
+                    linewidths=1.0, zorder=11)
+        NP.halo_text(ax, x, y + max_au * 0.025,
+                      body.name.title(),
+                      color=NP.TEXT_PRIMARY, fontsize=9, weight="bold",
+                      ha="center", halo_width=2.5)
+
+    # Selected route as a glowing trail through the cost field
+    if atlas.optimal_route and len(atlas.optimal_route) >= 2:
+        route_xs, route_ys = [], []
+        for name in atlas.optimal_route:
+            if name in body_by_name:
+                route_xs.append(pos3[name][0])
+                route_ys.append(pos3[name][1])
+        if len(route_xs) >= 2:
+            # Multi-pass glow
+            for lw, alpha in ((8.5, 0.22), (5.5, 0.42), (3.0, 0.88)):
+                ax.plot(route_xs, route_ys, color=NP.ACCENT_CYAN, lw=lw,
+                          alpha=alpha, solid_capstyle="round", zorder=12)
+            ax.scatter(route_xs, route_ys, s=180, marker="o",
+                        facecolor=NP.ACCENT_CYAN,
+                        edgecolor=NP.DEEP_SPACE_BG, linewidths=1.5,
+                        zorder=14)
+            # Endpoints
+            ax.scatter([route_xs[0]], [route_ys[0]], s=240, marker="^",
+                        facecolor=NP.ACCENT_GREEN,
+                        edgecolor=NP.DEEP_SPACE_BG, linewidths=1.5,
+                        zorder=15)
+            ax.scatter([route_xs[-1]], [route_ys[-1]], s=320, marker="*",
+                        facecolor=NP.ACCENT_GOLD,
+                        edgecolor=NP.DEEP_SPACE_BG, linewidths=1.5,
+                        zorder=15)
+
+    ax.set_xlim(-max_au, max_au); ax.set_ylim(-max_au, max_au)
+    ax.set_aspect("equal")
+    NP.style_axes(ax, title="", grid=False,
+                   xlabel="X (AU)  -  HELIOCENTRIC J2000",
+                   ylabel="Y (AU)  -  HELIOCENTRIC J2000")
+    # Thin grid only (no major)
+    ax.grid(True, color=NP.GRID_LINE, alpha=0.15, linewidth=0.4)
+
+    route_label = " -> ".join(atlas.optimal_route) if atlas.optimal_route else "no route selected"
+    NP.mission_title(fig,
+        title="Solar-system cost field",
+        subtitle=f"Heatmap = Hohmann dv from Earth at "
+                  f"{atlas.epoch_start_utc[:10]}. Cyan glow = selected route: {route_label}")
+    NP.mission_footer(fig,
+        mission_id="SOLAR_COST_FIELD",
+        cert=atlas.certificate_hash,
+        fidelity="hohmann approximation + DE ephemeris positions",
+        extras=[("grid", f"{n_grid}x{n_grid}"),
+                  ("clip", f"{dv_clip_kms:.0f} km/s")])
+
+    out = Path(outpath)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=180, bbox_inches="tight",
+                 facecolor=NP.DEEP_SPACE_BG)
+    plt.close(fig)
+    NP.reset_style()
+    return out
+
+
+# ===========================================================================
+# Trail atlas (every-body-to-every-body tube map; selected route glows)
+# ===========================================================================
+
+def render_solar_trail_atlas(atlas: SolarTransferAtlas,
+                              outpath: str | Path,
+                              *, max_au: float | None = None) -> Path:
+    """Tube-style transit map of every body-to-body corridor.
+
+    Each pair of bodies is connected by a curved tube. The tube's
+    LINE WIDTH encodes corridor quality (low cost = thick), the COLOUR
+    encodes total dv (cividis low-to-high), and the OPACITY tapers
+    toward the planets so labels stay legible. The selected route is
+    painted on top as a multi-pass glowing gold trail with directional
+    arrows.
+
+    Reads like a transit map -- you see every "trail" in the forest at
+    once and the recommended one shines through.
+    """
+    _patch_matplotlib_deepcopy_bug()
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import Normalize
+    from matplotlib.cm import ScalarMappable
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    from . import nasa_plate as NP
+
+    NP.apply_style()
+    e0 = et(atlas.epoch_start_utc)
+    pos3 = _body_positions(atlas)
+    pos = {name: xyz[:2] for name, xyz in pos3.items()}
+    body_by_name = {b.name: b for b in atlas.bodies}
+
+    if max_au is None:
+        max_au = max(b.a_au for b in atlas.bodies) * 1.05
+    max_au = float(max_au)
+
+    costs_kms = np.array([c.total_dv_ms / 1000.0 for c in atlas.corridors])
+    cmin = float(np.percentile(costs_kms, 10)) if costs_kms.size else 0.0
+    cmax = float(np.percentile(costs_kms, 90)) if costs_kms.size else 1.0
+    if cmax <= cmin:
+        cmax = float(costs_kms.max()) if costs_kms.size else 1.0
+    norm = Normalize(vmin=cmin, vmax=cmax)
+    cm = plt.get_cmap("cividis")
+    route_edges = (list(zip(atlas.optimal_route[:-1], atlas.optimal_route[1:]))
+                    if atlas.optimal_route and len(atlas.optimal_route) >= 2 else [])
+    by_edge = _corridor_lookup(atlas)
+
+    def draw_scene(ax, *, view_lim, inner=False):
+        """Render the trail-atlas scene into `ax`. Skips bodies/corridors
+        that fall outside the view (so the inner-system inset doesn't try
+        to label Saturn/Neptune)."""
+        ax.set_facecolor(NP.DEEP_SPACE_BG)
+
+        # Orbit rings inside the view
+        for body in atlas.bodies:
+            if body.a_au > view_lim * 1.05:
+                continue
+            circ = plt.Circle((0, 0), body.a_au, fill=False,
+                                color=NP.GRID_LINE, alpha=0.55,
+                                linewidth=0.6, linestyle=(0, (4, 3)),
+                                zorder=2)
+            ax.add_patch(circ)
+
+        # Tubes between body-pairs that fit inside the view.
+        # Sort by cost descending so cheapest ones are drawn LAST (on top).
+        for c in sorted(atlas.corridors, key=lambda x: -x.total_dv_ms):
+            if c.origin not in pos or c.target not in pos:
+                continue
+            if (body_by_name[c.origin].a_au > view_lim
+                    or body_by_name[c.target].a_au > view_lim):
+                continue
+            p0 = pos[c.origin]; p1 = pos[c.target]
+            curve = _corridor_curve(p0, p1,
+                                      bend=0.16 if c.origin < c.target else -0.16,
+                                      n=160)
+            cost_kms = c.total_dv_ms / 1000.0
+            rgba = cm(norm(cost_kms))
+            q = max(0.0, min(1.0, (cost_kms - cmin) / max(cmax - cmin, 1e-6)))
+            lw_base = (2.8 if inner else 3.4) - 2.4 * q
+            # Glow halo + main tube
+            ax.plot(curve[:, 0], curve[:, 1], color=NP.DEEP_SPACE_BG,
+                      lw=lw_base + 1.6, alpha=0.55,
+                      solid_capstyle="round", zorder=3)
+            ax.plot(curve[:, 0], curve[:, 1], color=rgba, lw=lw_base,
+                      alpha=0.78, solid_capstyle="round", zorder=4)
+
+        # Sun
+        ax.scatter([0], [0], s=620 if not inner else 280,
+                    color=NP.ACCENT_GOLD,
+                    edgecolor=NP.DEEP_SPACE_BG, linewidths=1.5, zorder=10)
+
+        # Bodies + labels
+        for body in atlas.bodies:
+            if body.a_au > view_lim * 1.05:
+                continue
+            x, y = pos[body.name]
+            ax.scatter([x], [y],
+                        s=(170 if not inner else 110) * body.radius_scale,
+                        color=body.color, edgecolor=NP.TEXT_PRIMARY,
+                        linewidths=1.2, zorder=11)
+            r_body = math.hypot(x, y)
+            if r_body > 0:
+                # Label outward from Sun + scale offset to the view size
+                dx, dy = x / r_body, y / r_body
+                offset = view_lim * (0.05 if inner else 0.03)
+                NP.halo_text(ax, x + dx * offset, y + dy * offset,
+                              body.name.title(),
+                              color=NP.TEXT_PRIMARY,
+                              fontsize=(9 if inner else 10),
+                              weight="bold",
+                              ha="center", va="center", halo_width=2.5)
+
+        # Selected route on top
+        for a, b in route_edges:
+            if a not in pos or b not in pos:
+                continue
+            if (body_by_name[a].a_au > view_lim
+                    or body_by_name[b].a_au > view_lim):
+                continue
+            c = by_edge.get((a, b))
+            curve = _corridor_curve(pos[a], pos[b],
+                                      bend=0.10 if a < b else -0.10,
+                                      n=240)
+            for lw, alpha, color in (
+                ((7.5 if inner else 9.0), 0.25, NP.ACCENT_GOLD),
+                ((5.0 if inner else 6.0), 0.45, NP.ACCENT_GOLD),
+                ((2.6 if inner else 3.0), 0.95, NP.ACCENT_GOLD),
+            ):
+                ax.plot(curve[:, 0], curve[:, 1], color=color, lw=lw,
+                          alpha=alpha, solid_capstyle="round", zorder=12)
+            if c is not None:
+                k0, k1 = int(0.60 * len(curve)), int(0.66 * len(curve))
+                ax.annotate("", xy=curve[k1], xytext=curve[k0],
+                              arrowprops={"arrowstyle": "-|>",
+                                            "color": NP.ACCENT_GOLD,
+                                            "lw": 2.2, "mutation_scale": 22,
+                                            "alpha": 0.95}, zorder=13)
+                if not inner:
+                    mid = curve[int(0.50 * len(curve))]
+                    NP.halo_text(ax, mid[0], mid[1],
+                                  f"{c.total_dv_ms/1000:.1f} km/s\n{c.tof_days:.0f} d",
+                                  color=NP.ACCENT_GOLD, fontsize=8.5,
+                                  weight="bold", ha="center", va="center",
+                                  halo_width=2.5)
+
+        ax.set_xlim(-view_lim, view_lim); ax.set_ylim(-view_lim, view_lim)
+        ax.set_aspect("equal")
+
+    fig = plt.figure(figsize=(14.4, 12.4), facecolor=NP.DEEP_SPACE_BG)
+    fig.subplots_adjust(left=0.05, right=0.93, top=0.91, bottom=0.07)
+    ax = fig.add_subplot(111)
+    draw_scene(ax, view_lim=max_au, inner=False)
+    NP.style_axes(ax, title="", grid=False,
+                    xlabel="X (AU)  -  HELIOCENTRIC J2000",
+                    ylabel="Y (AU)  -  HELIOCENTRIC J2000")
+
+    # Inner-system inset so Mercury/Venus/Earth/Mars labels don't collide
+    axins = inset_axes(ax, width="32%", height="32%", loc="lower left",
+                         borderpad=2.0)
+    draw_scene(axins, view_lim=2.1, inner=True)
+    axins.set_xticks([]); axins.set_yticks([])
+    axins.set_title("INNER SYSTEM (<= 2.1 AU)",
+                      color=NP.TEXT_SECONDARY,
+                      fontsize=8.5, weight="bold", pad=4)
+    for spine in axins.spines.values():
+        spine.set_edgecolor(NP.GRID_LINE)
+        spine.set_linewidth(0.8)
+
+    # Colorbar for the tube colour mapping
+    sm = ScalarMappable(norm=norm, cmap=cm)
+    sm.set_array([])
+    cb = fig.colorbar(sm, ax=ax, pad=0.015, shrink=0.78)
+    cb.set_label("CORRIDOR dv (km/s)  -  thicker = cheaper, gold = selected",
+                  color=NP.TEXT_SECONDARY, fontsize=8.5)
+    cb.ax.tick_params(colors=NP.TEXT_SECONDARY)
+    cb.outline.set_edgecolor(NP.GRID_LINE)
+
+    route_label = " -> ".join(atlas.optimal_route) if atlas.optimal_route else "no route selected"
+    NP.mission_title(fig,
+        title="Solar-system trail atlas",
+        subtitle=f"Every body-to-body corridor (thickness = quality); "
+                  f"selected route: {route_label}")
+    NP.mission_footer(fig,
+        mission_id="SOLAR_TRAIL_ATLAS",
+        cert=atlas.certificate_hash,
+        fidelity="lambert pairwise + DE ephemerides",
+        extras=[("bodies", str(len(atlas.bodies))),
+                  ("trails", str(len(atlas.corridors)))])
+
+    out = Path(outpath)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=180, bbox_inches="tight",
+                 facecolor=NP.DEEP_SPACE_BG)
+    plt.close(fig)
+    NP.reset_style()
+    return out
+
+
 def render_solar_transfer_atlas(atlas: SolarTransferAtlas, outdir: str | Path) -> dict:
     """Write atlas JSON plus solar corridor PNG artifacts."""
     _patch_matplotlib_deepcopy_bug()
@@ -552,6 +940,14 @@ def render_solar_transfer_atlas(atlas: SolarTransferAtlas, outdir: str | Path) -
     plt.close(fig)
     NP.reset_style()
 
+    # The two SPATIAL views the operator asked for:
+    #   (a) cost-field topology over the whole solar system
+    #   (b) trail-atlas tube map between every gravity body
+    cost_field_path = render_solar_cost_field(
+        atlas, out / "solar_cost_field.png")
+    trail_atlas_path = render_solar_trail_atlas(
+        atlas, out / "solar_trail_atlas.png")
+
     payload = {
         **asdict(atlas),
         "corridors": [asdict(c) | {"utc_dep": utc(c.et_dep), "utc_arr": utc(c.et_arr)}
@@ -560,6 +956,8 @@ def render_solar_transfer_atlas(atlas: SolarTransferAtlas, outdir: str | Path) -
             "corridor_atlas": str(network_path),
             "optimal_route_map": str(route_path),
             "pairwise_heatmap": str(heatmap_path),
+            "cost_field": str(cost_field_path),
+            "trail_atlas": str(trail_atlas_path),
         },
     }
     json_path = out / "solar_transfer_atlas.json"
@@ -568,5 +966,7 @@ def render_solar_transfer_atlas(atlas: SolarTransferAtlas, outdir: str | Path) -
         "corridor_atlas": str(network_path),
         "optimal_route_map": str(route_path),
         "pairwise_heatmap": str(heatmap_path),
+        "cost_field": str(cost_field_path),
+        "trail_atlas": str(trail_atlas_path),
         "atlas_json": str(json_path),
     }
