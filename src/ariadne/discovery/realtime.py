@@ -29,6 +29,7 @@ import numpy as np
 
 from .brokers.base import Alert
 from . import iod as IOD
+from . import linkage as LK
 
 
 # ---------- stage 1: pull (broker-dependent; caller drives the broker query) ----
@@ -269,6 +270,57 @@ def skybot_xmatch(tracklets: list[dict], cone_arcmin: float = 4.0,
     return annotated
 
 
+# ---------- stage 3c: HelioLinC linker (alternative to extrapolation chainer) -
+def link_helio_linc(tracklets: list[dict],
+                    r_grid_au=None, rdot_grid=None,
+                    cluster_au: float = 0.2, min_obs: int = 3,
+                    min_nights: int = 2) -> list[list[dict]]:
+    """Run the full HelioLinC (r, rdot) hypothesis sweep to group tracklets.
+
+    This is the validated linker from Stage 39: it hypothesises a heliocentric
+    distance + radial velocity, maps every tracklet to a heliocentric state,
+    propagates to a common reference epoch, and clusters in 6D. The clusters ARE
+    the candidate multi-tracklet arcs.
+
+    Compared to `chain_tracklets` (greedy extrapolation): HelioLinC is more
+    expensive but recovers more genuine long-arc associations (especially when
+    nights are >2 weeks apart) and uses real Kepler propagation, not linear
+    extrapolation. Use for the high-budget pipeline; use chain_tracklets for
+    quick-look nightly runs.
+
+    Returns: list of "chains" (list of tracklet dicts) in the same format as
+    chain_tracklets so the downstream fit_filter can consume either.
+    """
+    import numpy as np
+    if not tracklets:
+        return []
+    if r_grid_au is None:
+        # default: a coarse grid spanning MBA -> TNO. For deep TNO-only sweeps,
+        # override with r_grid_au=np.linspace(30, 100, 30).
+        r_grid_au = np.linspace(2.0, 80.0, 30)
+    if rdot_grid is None:
+        rdot_grid = np.linspace(-2.0, 2.0, 17)
+
+    geom = LK.precompute_geometry(tracklets)
+    t_ref = float(np.median(geom.t))
+    cluster_km = cluster_au * 149597870.7
+    cand_sets = LK.link(geom, t_ref, r_grid_au, rdot_grid,
+                        cluster_au=cluster_km / 149597870.7,
+                        min_obs=min_obs, min_nights=min_nights)
+    # rebuild as list-of-tracklets (chains), matching chain_tracklets' output
+    chains = []
+    SEC_PER_DAY = 86400.0
+    for idx_set in cand_sets:
+        chain = [tracklets[i] for i in idx_set]
+        # tag the chain members with the night they sit in (downstream uses)
+        for t in chain:
+            t.setdefault("night", int(round((t["jd"] - 2451545.0)
+                                              if "jd" in t else
+                                              (t["t"] / SEC_PER_DAY + 10957.5))))
+        chains.append(sorted(chain, key=lambda t: t["t"]))
+    return chains
+
+
 # ---------- end-to-end ---------------------------------------------------------
 def run_pipeline(alerts: Iterable[Alert],
                  cluster_pos_tol_arcsec: float = 1.0,
@@ -276,7 +328,8 @@ def run_pipeline(alerts: Iterable[Alert],
                  rate_window_arcsec_hr: tuple[float, float] = (0.05, 5.0),
                  pair_dt_hours: tuple[float, float] = (0.5, 6.0),
                  rms_threshold_arcsec: float = 10.0,
-                 do_xmatch: bool = True):
+                 do_xmatch: bool = True,
+                 use_helio_linc: bool = False):
     """Run all 5 pipeline stages end-to-end. Returns the annotated tracklet list.
 
     Discovery candidates: `[t for t in result if t['status']=='accepted'
@@ -294,7 +347,11 @@ def run_pipeline(alerts: Iterable[Alert],
     tracklets = build_tracklets(centroids, *rate_window_arcsec_hr, *pair_dt_hours)
     print(f"      -> {len(tracklets)} candidate single-night tracklets")
     # Chain multi-night tracklets so the IOD has 6+ detections (3+ tracklets x 2 each).
-    chains = chain_tracklets(tracklets)
+    if use_helio_linc:
+        print(f"      using HelioLinC linker (full (r, rdot) hypothesis sweep)...")
+        chains = link_helio_linc(tracklets)
+    else:
+        chains = chain_tracklets(tracklets)
     print(f"      -> {len(chains)} multi-night candidate arcs")
     # Convert chains into the tracklet-cluster format the fit_filter expects.
     chain_clusters = []
