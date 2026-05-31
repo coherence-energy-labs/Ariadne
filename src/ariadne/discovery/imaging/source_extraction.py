@@ -88,9 +88,13 @@ def detect_sources_in_image(image_data, wcs, mjd: float, image_id: str,
         return []
 
     sources = []
+    # Modern photutils uses x_centroid / y_centroid (underscore); older versions
+    # used xcentroid / ycentroid. Try the newer name first, fall back.
+    x_col = "x_centroid" if "x_centroid" in tbl.colnames else "xcentroid"
+    y_col = "y_centroid" if "y_centroid" in tbl.colnames else "ycentroid"
     for row in tbl:
-        x = float(row["xcentroid"])
-        y = float(row["ycentroid"])
+        x = float(row[x_col])
+        y = float(row[y_col])
         # FWHM filter to reject cosmic-ray hits / extended artefacts
         s_fwhm = float(row.get("sharpness", 1.0)) * fwhm_px  # rough proxy
         if not (min_fwhm_px <= s_fwhm <= max_fwhm_px):
