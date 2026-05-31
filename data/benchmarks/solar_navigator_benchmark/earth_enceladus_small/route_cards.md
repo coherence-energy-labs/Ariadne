@@ -8,6 +8,7 @@
 
 ## Artifacts
 
+- `mission_plate`: `data\benchmarks\solar_navigator_benchmark\earth_enceladus_small\mission_plate.png`
 - `porkchop_heatmap`: `data\benchmarks\solar_navigator_benchmark\earth_enceladus_small\porkchop_heatmap.png`
 - `report`: `data\benchmarks\solar_navigator_benchmark\earth_enceladus_small\navigator_report.json`
 - `route_trade_space`: `data\benchmarks\solar_navigator_benchmark\earth_enceladus_small\route_trade_space.png`

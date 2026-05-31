@@ -128,9 +128,25 @@ def main():
                                     max_per_night=2000)
     print(f"    {len(tracklets)} within-night tracklets")
 
-    # 6. Chain across nights
-    chains = chain_multi_night(tracklets)
-    print(f"\n[6] {len(chains)} multi-night chains")
+    # 6. Chain across nights (try each strategy independently, then merge)
+    from ariadne.discovery.imaging.advanced_linking import (
+        discover_in_images_chains, probabilistic_chain,
+        multipass_refined_chain, helio_linc_image_bridge)
+    greedy_chains = chain_multi_night(tracklets)
+    prob_chains = probabilistic_chain(tracklets, position_sigma_arcsec=60,
+                                        log_likelihood_threshold=-10)
+    multi_chains = multipass_refined_chain(tracklets,
+                                             initial_sigma_arcsec=60,
+                                             refined_sigma_arcsec=15)
+    try:
+        helio_chains = helio_linc_image_bridge(tracklets)
+    except Exception as e:
+        print(f"    helio_linc failed: {str(e)[:80]}")
+        helio_chains = []
+    chains = discover_in_images_chains(tracklets)
+    print(f"\n[6] per-strategy: greedy {len(greedy_chains)} | "
+          f"probabilistic {len(prob_chains)} | multipass {len(multi_chains)} | "
+          f"helio_linc {len(helio_chains)} | merged {len(chains)}")
 
     # 7. Chain sanity filter
     from ariadne.discovery.realtime import filter_chain_sanity

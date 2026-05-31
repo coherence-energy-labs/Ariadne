@@ -1,5 +1,6 @@
 {
   "artifacts": {
+    "mission_plate": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\mission_plate.png",
     "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\porkchop_heatmap.png",
     "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_trade_space.png"
   },
@@ -28,7 +29,7 @@
       2400.0
     ]
   },
-  "created_utc": "2026-05-31T11:48:12.901445+00:00",
+  "created_utc": "2026-05-31T22:15:32.703553+00:00",
   "fastest_id": "route_e90cb7ad9b86db",
   "origin": {
     "body_radius_km": null,

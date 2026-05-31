@@ -1,5 +1,6 @@
 {
   "artifacts": {
+    "mission_plate": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\mission_plate.png",
     "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\porkchop_heatmap.png",
     "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\route_trade_space.png"
   },
@@ -28,7 +29,7 @@
       420.0
     ]
   },
-  "created_utc": "2026-05-31T11:48:12.737325+00:00",
+  "created_utc": "2026-05-31T22:15:31.015302+00:00",
   "fastest_id": "route_12a8b5753f0a5a",
   "origin": {
     "body_radius_km": null,

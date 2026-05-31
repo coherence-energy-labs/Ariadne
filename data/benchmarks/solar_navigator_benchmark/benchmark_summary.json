@@ -1,12 +1,14 @@
 {
   "artifacts": {
     "earth_enceladus_small": {
+      "mission_plate": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\mission_plate.png",
       "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\porkchop_heatmap.png",
       "report": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\navigator_report.json",
       "route_cards": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_cards.md",
       "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_trade_space.png"
     },
     "earth_mars_small": {
+      "mission_plate": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\mission_plate.png",
       "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\porkchop_heatmap.png",
       "report": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\navigator_report.json",
       "route_cards": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\route_cards.md",
@@ -52,9 +54,9 @@
       "target": "ENCELADUS"
     }
   ],
-  "certificate_hash": "96509c5f6efc3a341ba10dc1199f4db1bc72b8751ac39708c656376786673146",
-  "created_utc": "2026-05-31T11:48:12.935328+00:00",
-  "elapsed_s": 0.3158969000214711,
+  "certificate_hash": "23868e414d330c938099c5d78c675adc09eed946790a5c6f9aeb7f6fee9e44fe",
+  "created_utc": "2026-05-31T22:15:34.018850+00:00",
+  "elapsed_s": 3.1271171000553295,
   "passed": true,
   "schema": "ariadne.solar_system_navigator_benchmark.v1",
   "validations": [
