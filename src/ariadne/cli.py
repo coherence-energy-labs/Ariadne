@@ -113,6 +113,37 @@ def _cmd_benchmark(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_discover_ztf(args: argparse.Namespace) -> int:
+    """Subscribe to ALeRCE/ZTF in a cone+time window, run the discovery pipeline."""
+    import time
+    from .discovery.brokers.alerce import AlerceZTFBroker
+    from .discovery.brokers.base import collect
+    from .discovery import realtime
+    print(f"ALeRCE/ZTF cone search: ({args.ra}, {args.dec}) r={args.radius} deg, "
+          f"MJD {args.mjd_start}..{args.mjd_end}")
+    broker = AlerceZTFBroker()
+    t0 = time.time()
+    try:
+        alerts = collect(broker.query_cone(args.ra, args.dec, args.radius,
+                                            args.mjd_start, args.mjd_end,
+                                            max_alerts=args.max_alerts),
+                          max_n=args.max_alerts)
+    except Exception as e:
+        print(f"  ALeRCE query failed: {e}", file=sys.stderr)
+        return 2
+    print(f"  fetched {len(alerts)} alerts in {time.time()-t0:.1f}s\n")
+    if not alerts:
+        return 1
+    res = realtime.run_pipeline(alerts,
+                                 cluster_pos_tol_arcsec=args.cluster_arcsec,
+                                 rms_threshold_arcsec=args.rms_threshold,
+                                 do_xmatch=not args.no_skybot)
+    candidates = [t for t in res
+                   if t.get("status") == "accepted"
+                   and t.get("xmatch", {}).get("n_known") == 0]
+    return 0 if candidates else 1
+
+
 def _cmd_tutorial(args: argparse.Namespace) -> int:
     root = Path(__file__).resolve().parents[2]
     examples = root / "examples"
@@ -157,8 +188,24 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("benchmark", help="run the 16-check reference benchmark suite"
                    ).set_defaults(func=_cmd_benchmark)
 
-    p_tut = sub.add_parser("tutorial", help="run a numbered tutorial script (1..7)")
-    p_tut.add_argument("number", type=int, choices=(1, 2, 3, 4, 5, 6, 7))
+    p_ztf = sub.add_parser("discover-ztf",
+        help="subscribe to ALeRCE/ZTF in a sky/time window, run the moving-object pipeline")
+    p_ztf.add_argument("--ra", type=float, default=180.0, help="cone centre RA (deg)")
+    p_ztf.add_argument("--dec", type=float, default=20.0, help="cone centre Dec (deg)")
+    p_ztf.add_argument("--radius", type=float, default=3.0, help="cone radius (deg)")
+    p_ztf.add_argument("--mjd-start", type=float, required=True, help="start MJD")
+    p_ztf.add_argument("--mjd-end", type=float, required=True, help="end MJD")
+    p_ztf.add_argument("--max-alerts", type=int, default=2000)
+    p_ztf.add_argument("--cluster-arcsec", type=float, default=1.5,
+                        help="same-night clustering radius (default 1.5\")")
+    p_ztf.add_argument("--rms-threshold", type=float, default=15.0,
+                        help="IOD+LM acceptance RMS threshold (default 15\")")
+    p_ztf.add_argument("--no-skybot", action="store_true",
+                        help="skip the SkyBoT cross-match (faster, but candidates aren't filtered)")
+    p_ztf.set_defaults(func=_cmd_discover_ztf)
+
+    p_tut = sub.add_parser("tutorial", help="run a numbered tutorial script (1..9)")
+    p_tut.add_argument("number", type=int, choices=(1, 2, 3, 4, 5, 6, 7, 8, 9))
     p_tut.set_defaults(func=_cmd_tutorial)
 
     args = p.parse_args(argv)
