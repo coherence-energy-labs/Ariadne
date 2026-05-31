@@ -1,0 +1,84 @@
+{
+  "artifacts": {
+    "earth_enceladus_small": {
+      "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\porkchop_heatmap.png",
+      "report": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\navigator_report.json",
+      "route_cards": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_cards.md",
+      "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_trade_space.png"
+    },
+    "earth_mars_small": {
+      "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\porkchop_heatmap.png",
+      "report": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\navigator_report.json",
+      "route_cards": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\route_cards.md",
+      "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\route_trade_space.png"
+    }
+  },
+  "cases": [
+    {
+      "balanced": {
+        "arrival_vinf_kms": 2.716245869853926,
+        "c3_km2_s2": 9.18214113116599,
+        "name": "direct_optimized",
+        "route_id": "route_360cab946c0202",
+        "sequence": [
+          "EARTH",
+          "MARS BARYCENTER"
+        ],
+        "tof_days": 292.3272916143833,
+        "total_dv_ms": 3633.7767237682933
+      },
+      "certificate_hash": "a431a1db1bfb285cec065c13ed5db50bdb22ad039f515b2971fafc66ff6b5606",
+      "name": "earth_mars_small",
+      "route_count": 12,
+      "target": "MARS"
+    },
+    {
+      "balanced": {
+        "arrival_vinf_kms": 5.754144449978402,
+        "c3_km2_s2": 106.50718367963891,
+        "name": "direct_optimized_plus_saturn_moon_tour_to_enceladus",
+        "route_id": "route_e560eba24bcf16",
+        "sequence": [
+          "EARTH",
+          "SATURN BARYCENTER",
+          "ENCELADUS"
+        ],
+        "tof_days": 2168.703244862143,
+        "total_dv_ms": 7305.358709235279
+      },
+      "certificate_hash": "545284acf4c88a5d049c1dd3520d374b4b65d78b5fea5fc0e87a5eb8d037063f",
+      "name": "earth_enceladus_small",
+      "route_count": 9,
+      "target": "ENCELADUS"
+    }
+  ],
+  "certificate_hash": "96509c5f6efc3a341ba10dc1199f4db1bc72b8751ac39708c656376786673146",
+  "created_utc": "2026-05-31T11:48:12.935328+00:00",
+  "elapsed_s": 0.3158969000214711,
+  "passed": true,
+  "schema": "ariadne.solar_system_navigator_benchmark.v1",
+  "validations": [
+    {
+      "balanced_id": "route_360cab946c0202",
+      "cheapest_id": "route_360cab946c0202",
+      "failures": [],
+      "fastest_id": "route_12a8b5753f0a5a",
+      "pareto_count": 8,
+      "passed": true,
+      "route_count": 12,
+      "target": "MARS",
+      "warnings": []
+    },
+    {
+      "balanced_id": "route_e560eba24bcf16",
+      "cheapest_id": "route_e560eba24bcf16",
+      "failures": [],
+      "fastest_id": "route_e90cb7ad9b86db",
+      "pareto_count": 7,
+      "passed": true,
+      "route_count": 9,
+      "target": "ENCELADUS",
+      "warnings": []
+    }
+  ]
+}

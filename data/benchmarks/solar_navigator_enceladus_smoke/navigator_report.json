@@ -1,0 +1,268 @@
+{
+  "artifacts": {
+    "porkchop_heatmap": "data\\benchmarks\\solar_navigator_enceladus_smoke\\porkchop_heatmap.png",
+    "route_trade_space": "data\\benchmarks\\solar_navigator_enceladus_smoke\\route_trade_space.png"
+  },
+  "balanced_id": "route_e560eba24bcf16",
+  "certificate_hash": "c302ace32f8741888dccb08e23c727785030d75fbd66012080a15cedea9f2395",
+  "cheapest_id": "route_e560eba24bcf16",
+  "constraints": {
+    "departure_window_days": 900.0,
+    "epoch_start": "2028-01-01T00:00:00",
+    "flyby_alt_km": 300.0,
+    "flyby_maxiter": 35,
+    "include_direct": true,
+    "include_gravity_assist": false,
+    "include_moon_tour": true,
+    "max_tof_days": null,
+    "max_total_dv_ms": null,
+    "n_dep": 14,
+    "n_tof": 12,
+    "optimize_direct": true,
+    "optimize_flybys": false,
+    "origin": "EARTH",
+    "target": "Enceladus",
+    "tof_range_days": [
+      700.0,
+      2400.0
+    ]
+  },
+  "created_utc": "2026-05-31T11:42:43.253163+00:00",
+  "fastest_id": "route_e560eba24bcf16",
+  "origin": {
+    "body_radius_km": null,
+    "ephemeris_name": "EARTH",
+    "gm_km3_s2": null,
+    "kind": "planet",
+    "name": "EARTH",
+    "orbit_radius_km": null,
+    "primary": null,
+    "system_barycenter": "EARTH"
+  },
+  "pareto_front": [
+    "route_e560eba24bcf16"
+  ],
+  "routes": [
+    {
+      "arrival_vinf_kms": 5.754144449978402,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model",
+        "moon tour is Tisserand energy screening, not phased moon ephemeris"
+      ],
+      "c3_km2_s2": 106.50718367963891,
+      "certificate_hash": "e560eba24bcf169c5ccaf82860fc5b502fa7093a53e0a0c5b8177b3647ef29c5",
+      "components": {
+        "c3_km2_s2": 106.50718367963891,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 7305.358709235279,
+        "moon_tour": {
+          "anchor": "ENCELADUS",
+          "ga_deterministic_dv_ms": 0.0,
+          "hohmann_dv_ms": 0.0,
+          "junctions": [],
+          "legs": [],
+          "saving_ms": 0.0,
+          "sequence": [
+            "ENCELADUS"
+          ]
+        }
+      },
+      "engine": "porkchop.optimize_window+tisserand_moon_tour",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            56891253.4044937,
+            -129387533.97781833,
+            -56087133.04643192
+          ],
+          "epoch_utc": "2028-07-14T06:59:43.799",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "SATURN BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2034-06-21T23:52:24.154",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 5.754144449978402
+        },
+        {
+          "body": "ENCELADUS",
+          "coordinates_km": null,
+          "epoch_utc": "2034-06-21T23:52:24.154",
+          "notes": "",
+          "role": "moon-tour-node",
+          "vinf_kms": null
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_optimized_plus_saturn_moon_tour_to_enceladus",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 5.754144449978402,
+        "c3": 106.50718367963891,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 10.320231764821898,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 7305.358709235279,
+        "et_arr": 1087818813.3383875,
+        "et_dep": 900442852.9822983,
+        "moon_tour": {
+          "anchor": "ENCELADUS",
+          "ga_deterministic_dv_ms": 0.0,
+          "hohmann_dv_ms": 0.0,
+          "junctions": [],
+          "legs": [],
+          "saving_ms": 0.0,
+          "sequence": [
+            "ENCELADUS"
+          ]
+        },
+        "tof_days": 2168.703244862143,
+        "total_ms": 7305.358709235279,
+        "utc_arr": "2034-06-21T23:52:24.154",
+        "utc_dep": "2028-07-14T06:59:43.799"
+      },
+      "risk": 0.4918048149992801,
+      "route_id": "route_e560eba24bcf16",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "target": "ENCELADUS",
+      "tof_days": 2168.703244862143,
+      "total_dv_ms": 7305.358709235279,
+      "validations": [
+        "launch C3 106.507 km^2/s^2",
+        "arrival v_inf 5.754 km/s",
+        "moon-tour deterministic mismatch 0.0 m/s",
+        "moon-tour Hohmann baseline 0.0 m/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 5.832583436247178,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model",
+        "moon tour is Tisserand energy screening, not phased moon ephemeris"
+      ],
+      "c3_km2_s2": 114.8029740769316,
+      "certificate_hash": "d85d2239326f4c7a5d6dc5359fceccda115555982ecff782827d5544e605dab4",
+      "components": {
+        "c3_km2_s2": 114.8029740769316,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 7577.783557695971,
+        "moon_tour": {
+          "anchor": "ENCELADUS",
+          "ga_deterministic_dv_ms": 0.0,
+          "hohmann_dv_ms": 0.0,
+          "junctions": [],
+          "legs": [],
+          "saving_ms": 0.0,
+          "sequence": [
+            "ENCELADUS"
+          ]
+        }
+      },
+      "engine": "porkchop.optimize_window+tisserand_moon_tour",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            84540258.3689287,
+            -115821665.22968315,
+            -50205927.189165235
+          ],
+          "epoch_utc": "2028-07-26T16:36:55.385",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "SATURN BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2034-09-19T03:31:28.113",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 5.832583436247178
+        },
+        {
+          "body": "ENCELADUS",
+          "coordinates_km": null,
+          "epoch_utc": "2034-09-19T03:31:28.113",
+          "notes": "",
+          "role": "moon-tour-node",
+          "vinf_kms": null
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_grid_best_plus_saturn_moon_tour_to_enceladus",
+      "pareto_optimal": false,
+      "raw": {
+        "arr_vinf_kms": 5.832583436247178,
+        "c3": 114.8029740769316,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 10.714614975673722,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 7577.783557695971,
+        "et_arr": 1095521557.295793,
+        "et_dep": 901514284.5685204,
+        "moon_tour": {
+          "anchor": "ENCELADUS",
+          "ga_deterministic_dv_ms": 0.0,
+          "hohmann_dv_ms": 0.0,
+          "junctions": [],
+          "legs": [],
+          "saving_ms": 0.0,
+          "sequence": [
+            "ENCELADUS"
+          ]
+        },
+        "tof_days": 2245.454545454545,
+        "total_ms": 7577.783557695971
+      },
+      "risk": 0.4944194478749059,
+      "route_id": "route_d85d2239326f4c",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "target": "ENCELADUS",
+      "tof_days": 2245.454545454545,
+      "total_dv_ms": 7577.783557695971,
+      "validations": [
+        "launch C3 114.803 km^2/s^2",
+        "arrival v_inf 5.833 km/s",
+        "moon-tour deterministic mismatch 0.0 m/s",
+        "moon-tour Hohmann baseline 0.0 m/s"
+      ]
+    }
+  ],
+  "schema": "ariadne.solar_system_navigator.v1",
+  "target": {
+    "body_radius_km": 252.1,
+    "ephemeris_name": "SATURN BARYCENTER",
+    "gm_km3_s2": 7.2027,
+    "kind": "moon",
+    "name": "ENCELADUS",
+    "orbit_radius_km": 237948.0,
+    "primary": "SATURN",
+    "system_barycenter": "SATURN BARYCENTER"
+  },
+  "weights": {
+    "arrival_vinf": 0.25,
+    "c3": 0.04,
+    "dv": 1.0,
+    "fidelity_bonus": 0.25,
+    "risk": 1.0,
+    "tof": 0.002
+  }
+}

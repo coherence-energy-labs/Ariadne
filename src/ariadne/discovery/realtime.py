@@ -273,7 +273,8 @@ def filter_chain_sanity(chains: list[list[dict]],
 
 def fit_filter(tracklets: list[dict], rms_threshold_arcsec: float = 10.0,
                *, nbody_refine_rms_threshold: float = 5.0,
-               nbody_perturbers: tuple = ("JUPITER", "NEPTUNE")):
+               nbody_perturbers: tuple = ("JUPITER", "NEPTUNE"),
+               use_ensemble_iod: bool = False):
     """Run IOD+LM on each tracklet group; keep only those with fit RMS below threshold.
 
     IOD.fit_candidate expects TRACKLET DICTS (with t/ra/dec/dra/ddec) -- it
@@ -302,7 +303,24 @@ def fit_filter(tracklets: list[dict], rms_threshold_arcsec: float = 10.0,
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                fit = IOD.fit_candidate(iod_input)
+                if use_ensemble_iod:
+                    from . import iod_advanced as IODA
+                    ens = IODA.fit_candidate_ensemble(
+                        iod_input, rms_acceptance_arcsec=rms_threshold_arcsec * 3,
+                        refine_with_nbody=False)
+                    # Map EnsembleFit -> fit dict shape iod.fit_candidate produces
+                    if ens.success:
+                        fit = {"x_fit": ens.x_fit, "v_fit": ens.v_fit,
+                               "rms_arcsec": ens.rms_arcsec,
+                               "nfev": ens.nfev, "success": True,
+                               "t_ref": ens.t_ref,
+                               "iod": {"r_au": 0.0, "rdot": 0.0,
+                                       "scatter_km": 0.0, "n_valid": 0},
+                               "_ensemble": IODA.ensemble_summary(ens)}
+                    else:
+                        fit = None
+                else:
+                    fit = IOD.fit_candidate(iod_input)
         except Exception as e:
             tr_out = dict(tr); tr_out["status"] = f"fit_error: {str(e)[:60]}"
             tr_out["rms_arcsec"] = None
@@ -569,7 +587,8 @@ def run_pipeline(alerts: Iterable[Alert],
                  use_helio_linc: bool = False,
                  smart_layer: bool = True,
                  calibration=None,
-                 scheduler=None):
+                 scheduler=None,
+                 use_ensemble_iod: bool = False):
     """Run all 5 pipeline stages end-to-end. Returns the annotated tracklet list.
 
     Discovery candidates: `[t for t in result if t['status']=='accepted'
@@ -615,7 +634,8 @@ def run_pipeline(alerts: Iterable[Alert],
         centroid["chain"] = ch
         chain_clusters.append(centroid)
     print(f"[4/5] IOD+LM filter (RMS threshold {rms_threshold_arcsec}\")...")
-    fitted = fit_filter(chain_clusters, rms_threshold_arcsec)
+    fitted = fit_filter(chain_clusters, rms_threshold_arcsec,
+                          use_ensemble_iod=use_ensemble_iod)
     n_accepted = sum(1 for t in fitted if t.get("status") == "accepted")
     print(f"      -> {n_accepted} pass the orbit-fit filter")
     if do_xmatch and n_accepted > 0:

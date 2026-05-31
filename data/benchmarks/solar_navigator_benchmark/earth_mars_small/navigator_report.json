@@ -1,0 +1,868 @@
+{
+  "artifacts": {
+    "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\porkchop_heatmap.png",
+    "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\route_trade_space.png"
+  },
+  "balanced_id": "route_360cab946c0202",
+  "certificate_hash": "a431a1db1bfb285cec065c13ed5db50bdb22ad039f515b2971fafc66ff6b5606",
+  "cheapest_id": "route_360cab946c0202",
+  "constraints": {
+    "departure_window_days": 540.0,
+    "epoch_start": "2026-01-01T00:00:00",
+    "flyby_alt_km": 300.0,
+    "flyby_maxiter": 35,
+    "include_direct": true,
+    "include_gravity_assist": false,
+    "include_moon_tour": true,
+    "max_direct_pareto_routes": 10,
+    "max_tof_days": null,
+    "max_total_dv_ms": null,
+    "n_dep": 18,
+    "n_tof": 14,
+    "optimize_direct": true,
+    "optimize_flybys": false,
+    "origin": "EARTH",
+    "target": "Mars",
+    "tof_range_days": [
+      120.0,
+      420.0
+    ]
+  },
+  "created_utc": "2026-05-31T11:48:12.737325+00:00",
+  "fastest_id": "route_12a8b5753f0a5a",
+  "origin": {
+    "body_radius_km": null,
+    "ephemeris_name": "EARTH",
+    "gm_km3_s2": null,
+    "kind": "planet",
+    "name": "EARTH",
+    "orbit_radius_km": null,
+    "primary": null,
+    "system_barycenter": "EARTH"
+  },
+  "pareto_front": [
+    "route_0d2b2c5634c4c1",
+    "route_12a8b5753f0a5a",
+    "route_360cab946c0202",
+    "route_3a1673f6b2eac3",
+    "route_4f2e5702363048",
+    "route_55443dabbedea8",
+    "route_da892619bea14d",
+    "route_ea9b5405819713"
+  ],
+  "routes": [
+    {
+      "arrival_vinf_kms": 2.716245869853926,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 9.18214113116599,
+      "certificate_hash": "360cab946c0202388082dee3ac69be8d8929506dce1789dc971fb1abe2e42aa2",
+      "components": {
+        "c3_km2_s2": 9.18214113116599,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3633.7767237682933
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            117618062.26774947,
+            83214127.4140071,
+            36070626.08114957
+          ],
+          "epoch_utc": "2026-10-31T10:19:35.523",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-08-19T18:10:53.518",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 2.716245869853926
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_optimized",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 2.716245869853926,
+        "c3": 9.18214113116599,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.030204800201793,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3633.7767237682933,
+        "et_arr": 871971122.7009401,
+        "et_dep": 846714044.7054574,
+        "tof_days": 292.3272916143833,
+        "total_ms": 3633.7767237682933,
+        "utc_arr": "2027-08-19T18:10:53.518",
+        "utc_dep": "2026-10-31T10:19:35.523"
+      },
+      "risk": 0.27054152899513084,
+      "route_id": "route_360cab946c0202",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 292.3272916143833,
+      "total_dv_ms": 3633.7767237682933,
+      "validations": [
+        "launch C3 9.182 km^2/s^2",
+        "arrival v_inf 2.716 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 2.778148243111514,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 11.081177034723648,
+      "certificate_hash": "182991ad071d1babdd089371075a73bfef97be74d298724a7e0cf8a1e7f5765c",
+      "components": {
+        "c3_km2_s2": 11.081177034723648,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3716.635541191946
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            140090478.63402408,
+            47237822.649477534,
+            20476228.718839504
+          ],
+          "epoch_utc": "2026-10-13T21:10:35.296",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-08-14T11:56:44.526",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 2.778148243111514
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_07",
+      "pareto_optimal": false,
+      "raw": {
+        "arr_vinf_kms": 2.778148243111514,
+        "c3": 11.081177034723648,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.328840193629554,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3716.635541191946,
+        "et_arr": 871516673.708807,
+        "et_dep": 845197904.4780377,
+        "tof_days": 304.61538461538464,
+        "total_ms": 3716.635541191946
+      },
+      "risk": 0.27260494143705044,
+      "route_id": "route_182991ad071d1b",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 304.61538461538464,
+      "total_dv_ms": 3716.635541191946,
+      "validations": [
+        "launch C3 11.081 km^2/s^2",
+        "arrival v_inf 2.778 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 2.8545075778929263,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 10.929656148559136,
+      "certificate_hash": "a44f44159e470fdc57ae82265432ff878925c5ecf91899e92746d6231aa87b59",
+      "components": {
+        "c3_km2_s2": 10.929656148559136,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3710.0463029253215
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-10-08T08:08:41.269",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 2.8545075778929263
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_08",
+      "pareto_optimal": false,
+      "raw": {
+        "arr_vinf_kms": 2.8545075778929263,
+        "c3": 10.929656148559136,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.3060030472700923,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3710.0463029253215,
+        "et_arr": 876254990.4508884,
+        "et_dep": 847942375.066273,
+        "tof_days": 327.6923076923077,
+        "total_ms": 3710.0463029253215
+      },
+      "risk": 0.2751502525964309,
+      "route_id": "route_a44f44159e470f",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 327.6923076923077,
+      "total_dv_ms": 3710.0463029253215,
+      "validations": [
+        "launch C3 10.930 km^2/s^2",
+        "arrival v_inf 2.855 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 3.105190407245941,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 11.76378916626027,
+      "certificate_hash": "55443dabbedea8ed2fda3056f4ba9b13411c9f9db5aeb1df7805f25d9463cb6d",
+      "components": {
+        "c3_km2_s2": 11.76378916626027,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3746.2738246318822
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-07-31T02:36:22.806",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 3.105190407245941
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_06",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 3.105190407245941,
+        "c3": 11.76378916626027,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.429838067060932,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3746.2738246318822,
+        "et_arr": 870273451.9893498,
+        "et_dep": 847942375.066273,
+        "tof_days": 258.46153846153845,
+        "total_ms": 3746.2738246318822
+      },
+      "risk": 0.28350634690819804,
+      "route_id": "route_55443dabbedea8",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 258.46153846153845,
+      "total_dv_ms": 3746.2738246318822,
+      "validations": [
+        "launch C3 11.764 km^2/s^2",
+        "arrival v_inf 3.105 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 3.3288944518528236,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 10.414212417260643,
+      "certificate_hash": "3aba93786458ab0c80ddbb8a44396ced711c795dadb18709fcb0b1056c45ab9d",
+      "components": {
+        "c3_km2_s2": 10.414212417260643,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3687.602696609873
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-10-31T09:59:27.422",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 3.3288944518528236
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_grid_best",
+      "pareto_optimal": false,
+      "raw": {
+        "arr_vinf_kms": 3.3288944518528236,
+        "c3": 10.414212417260643,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.2271058887586324,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3687.602696609873,
+        "et_arr": 878248836.6047345,
+        "et_dep": 847942375.066273,
+        "tof_days": 350.7692307692308,
+        "total_ms": 3687.602696609873
+      },
+      "risk": 0.29096314839509413,
+      "route_id": "route_3aba93786458ab",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 350.7692307692308,
+      "total_dv_ms": 3687.602696609873,
+      "validations": [
+        "launch C3 10.414 km^2/s^2",
+        "arrival v_inf 3.329 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 3.3288944518528236,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 10.414212417260643,
+      "certificate_hash": "b4623ccb507a80a9eed2d16d95b718b7c298d26c7322b3b5034846fc5eb822a7",
+      "components": {
+        "c3_km2_s2": 10.414212417260643,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3687.602696609873
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-10-31T09:59:27.422",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 3.3288944518528236
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_09",
+      "pareto_optimal": false,
+      "raw": {
+        "arr_vinf_kms": 3.3288944518528236,
+        "c3": 10.414212417260643,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.2271058887586324,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3687.602696609873,
+        "et_arr": 878248836.6047345,
+        "et_dep": 847942375.066273,
+        "tof_days": 350.7692307692308,
+        "total_ms": 3687.602696609873
+      },
+      "risk": 0.29096314839509413,
+      "route_id": "route_b4623ccb507a80",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 350.7692307692308,
+      "total_dv_ms": 3687.602696609873,
+      "validations": [
+        "launch C3 10.414 km^2/s^2",
+        "arrival v_inf 3.329 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 3.8937110326867606,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 12.565346732086883,
+      "certificate_hash": "0d2b2c5634c4c1d488776f562920829a4d0437ee090895e11eb67e5803924d1f",
+      "components": {
+        "c3_km2_s2": 12.565346732086883,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3780.9796313154316
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-07-08T00:45:36.652",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 3.8937110326867606
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_05",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 3.8937110326867606,
+        "c3": 12.565346732086883,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.544763282941032,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3780.9796313154316,
+        "et_arr": 868279605.8355037,
+        "et_dep": 847942375.066273,
+        "tof_days": 235.3846153846154,
+        "total_ms": 3780.9796313154316
+      },
+      "risk": 0.30979036775622537,
+      "route_id": "route_0d2b2c5634c4c1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 235.3846153846154,
+      "total_dv_ms": 3780.9796313154316,
+      "validations": [
+        "launch C3 12.565 km^2/s^2",
+        "arrival v_inf 3.894 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 5.036099525697785,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 13.70859582006064,
+      "certificate_hash": "ea9b540581971395826db8aa9d444696361d63c390b909d3c9e58bab29672315",
+      "components": {
+        "c3_km2_s2": 13.70859582006064,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3830.300544909606
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-06-14T22:54:50.497",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 5.036099525697785
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_04",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 5.036099525697785,
+        "c3": 13.70859582006064,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 3.7025120958695923,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3830.300544909606,
+        "et_arr": 866285759.6816576,
+        "et_dep": 847942375.066273,
+        "tof_days": 212.30769230769232,
+        "total_ms": 3830.300544909606
+      },
+      "risk": 0.34786998418992615,
+      "route_id": "route_ea9b5405819713",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 212.30769230769232,
+      "total_dv_ms": 3830.300544909606,
+      "validations": [
+        "launch C3 13.709 km^2/s^2",
+        "arrival v_inf 5.036 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 6.55974030932064,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 16.39580705813856,
+      "certificate_hash": "3a1673f6b2eac363661d1eb967932a3447918b43e2b0fdb1714ccb87d3766fd6",
+      "components": {
+        "c3_km2_s2": 16.39580705813856,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 3945.4129494556696
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-05-22T21:04:04.343",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 6.55974030932064
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_knee",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 6.55974030932064,
+        "c3": 16.39580705813856,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 4.049173626573521,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 3945.4129494556696,
+        "et_arr": 864291913.5278114,
+        "et_dep": 847942375.066273,
+        "tof_days": 189.23076923076923,
+        "total_ms": 3945.4129494556696
+      },
+      "risk": 0.398658010310688,
+      "route_id": "route_3a1673f6b2eac3",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 189.23076923076923,
+      "total_dv_ms": 3945.4129494556696,
+      "validations": [
+        "launch C3 16.396 km^2/s^2",
+        "arrival v_inf 6.560 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 8.560759892883523,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 22.878520488826293,
+      "certificate_hash": "da892619bea14d083586ab02c3f6b68dfe7f869d5e59771c75e13ea52d4805d3",
+      "components": {
+        "c3_km2_s2": 22.878520488826293,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 4218.570499951279
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-04-29T19:13:18.188",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 8.560759892883523
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_02",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 8.560759892883523,
+        "c3": 22.878520488826293,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 4.783149641065633,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 4218.570499951279,
+        "et_arr": 862298067.3739653,
+        "et_dep": 847942375.066273,
+        "tof_days": 166.15384615384616,
+        "total_ms": 4218.570499951279
+      },
+      "risk": 0.4653586630961174,
+      "route_id": "route_da892619bea14d",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 166.15384615384616,
+      "total_dv_ms": 4218.570499951279,
+      "validations": [
+        "launch C3 22.879 km^2/s^2",
+        "arrival v_inf 8.561 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 11.222153060509065,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 37.97012135259262,
+      "certificate_hash": "4f2e5702363048a4c5b2c8e5dfdec88e7a59884cf9957f2cd143a2c6b23a1ef8",
+      "components": {
+        "c3_km2_s2": 37.97012135259262,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 4831.584752006211
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            91321663.0007078,
+            106871489.21612723,
+            46326268.03950363
+          ],
+          "epoch_utc": "2026-11-14T15:31:45.884",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-04-06T17:22:32.034",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 11.222153060509065
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_01",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 11.222153060509065,
+        "c3": 37.97012135259262,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 6.161990048076402,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 4831.584752006211,
+        "et_arr": 860304221.2201191,
+        "et_dep": 847942375.066273,
+        "tof_days": 143.07692307692307,
+        "total_ms": 4831.584752006211
+      },
+      "risk": 0.5540717686836355,
+      "route_id": "route_4f2e5702363048",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 143.07692307692307,
+      "total_dv_ms": 4831.584752006211,
+      "validations": [
+        "launch C3 37.970 km^2/s^2",
+        "arrival v_inf 11.222 km/s"
+      ]
+    },
+    {
+      "arrival_vinf_kms": 11.141019406154285,
+      "assumptions": [
+        "heliocentric Lambert arc on real ephemerides",
+        "capture cost included only for bodies with configured capture model"
+      ],
+      "c3_km2_s2": 47.77325517809634,
+      "certificate_hash": "12a8b5753f0a5acbe4f7a6124184fc00200aa8d9212b35715e327fa264e0a0a9",
+      "components": {
+        "c3_km2_s2": 47.77325517809634,
+        "dv_arrival_ms": 0.0,
+        "dv_depart_ms": 5214.304203071488
+      },
+      "engine": "porkchop.optimize_window",
+      "events": [
+        {
+          "body": "EARTH",
+          "coordinates_km": [
+            15202701.893915817,
+            134366534.31323242,
+            58244764.492957614
+          ],
+          "epoch_utc": "2026-12-16T09:52:56.471",
+          "notes": "",
+          "role": "departure",
+          "vinf_kms": null
+        },
+        {
+          "body": "MARS BARYCENTER",
+          "coordinates_km": null,
+          "epoch_utc": "2027-04-15T09:52:56.469",
+          "notes": "",
+          "role": "arrival",
+          "vinf_kms": 11.141019406154285
+        }
+      ],
+      "feasible": true,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_00",
+      "pareto_optimal": true,
+      "raw": {
+        "arr_vinf_kms": 11.141019406154285,
+        "c3": 47.77325517809634,
+        "dep_body": "EARTH",
+        "dep_vinf_kms": 6.911819961348555,
+        "dv_arr_ms": 0.0,
+        "dv_dep_ms": 5214.304203071488,
+        "et_arr": 861054845.6545082,
+        "et_dep": 850686845.6545082,
+        "tof_days": 120.0,
+        "total_ms": 5214.304203071488
+      },
+      "risk": 0.5513673135384762,
+      "route_id": "route_12a8b5753f0a5a",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "target": "MARS",
+      "tof_days": 120.0,
+      "total_dv_ms": 5214.304203071488,
+      "validations": [
+        "launch C3 47.773 km^2/s^2",
+        "arrival v_inf 11.141 km/s"
+      ]
+    }
+  ],
+  "schema": "ariadne.solar_system_navigator.v1",
+  "target": {
+    "body_radius_km": null,
+    "ephemeris_name": "MARS BARYCENTER",
+    "gm_km3_s2": null,
+    "kind": "planet",
+    "name": "MARS",
+    "orbit_radius_km": null,
+    "primary": null,
+    "system_barycenter": "MARS BARYCENTER"
+  },
+  "weights": {
+    "arrival_vinf": 0.25,
+    "c3": 0.04,
+    "dv": 1.0,
+    "fidelity_bonus": 0.25,
+    "risk": 1.0,
+    "tof": 0.002
+  }
+}

@@ -1,7 +1,7 @@
 {
   "inference": {
     "n_cases": 14,
-    "elapsed_s": 0.06167244911193848,
+    "elapsed_s": 0.060362815856933594,
     "accuracy": 0.9285714285714286,
     "macro_precision": 0.6818181818181818,
     "macro_recall": 0.7272727272727273,
@@ -36,36 +36,36 @@
   },
   "sensitivity": {
     "n_injected": 30,
-    "n_recovered": 19,
+    "n_recovered": 30,
     "n_false_positives": 0,
-    "recovery_rate": 0.6333333333333333,
-    "median_rms_arcsec": 0.11544960888118967,
+    "recovery_rate": 1.0,
+    "median_rms_arcsec": 0.11553193747420329,
     "median_arc_days": 3.1666666666642413,
     "by_magnitude": {
       "18-19": {
         "n_injected": 3,
-        "n_recovered": 2,
-        "rate": 0.6666666666666666
+        "n_recovered": 3,
+        "rate": 1.0
       },
       "19-20": {
         "n_injected": 7,
-        "n_recovered": 3,
-        "rate": 0.42857142857142855
+        "n_recovered": 7,
+        "rate": 1.0
       },
       "20-21": {
         "n_injected": 11,
-        "n_recovered": 7,
-        "rate": 0.6363636363636364
+        "n_recovered": 11,
+        "rate": 1.0
       },
       "21-22": {
         "n_injected": 6,
-        "n_recovered": 5,
-        "rate": 0.8333333333333334
+        "n_recovered": 6,
+        "rate": 1.0
       },
       "22-22.5": {
         "n_injected": 1,
-        "n_recovered": 0,
-        "rate": 0.0
+        "n_recovered": 1,
+        "rate": 1.0
       },
       "22.5-23.0": {
         "n_injected": 2,
@@ -76,10 +76,10 @@
     "by_rate": {
       "3.0-10.0": {
         "n_injected": 30,
-        "n_recovered": 19,
-        "rate": 0.6333333333333333
+        "n_recovered": 30,
+        "rate": 1.0
       }
     },
-    "elapsed_s": 405.6749038696289
+    "elapsed_s": 1569.8121192455292
   }
 }
