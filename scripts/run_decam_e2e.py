@@ -64,9 +64,20 @@ def main():
             ra=180.0, dec=20.0, n_images=2,
             n_objects_per_image=80, n_real_moving=3,
             mjd_nights=[60450.0, 60453.0, 60456.0],
-            out_dir=str(workdir), kepler_orbits=True)
+            out_dir=str(workdir), kepler_orbits=True,
+            emit_truth_catalog=True)
         print(f"    SYNTH produced {len(fits_images)} FITS files (Keplerian)")
     print(f"    using {'REAL' if use_real else 'SYNTHETIC'} data")
+
+    # Load the truth catalog so we can measure precision/recall on chains
+    truth_catalog = None
+    truth_path = workdir / "truth_catalog.json"
+    if truth_path.exists():
+        from ariadne.discovery.imaging.synthetic_truth import TruthCatalog
+        truth_catalog = TruthCatalog.load(truth_path)
+        print(f"    truth catalog loaded: {len(truth_catalog.entries)} "
+               f"planted detections covering {len(truth_catalog.truth_ids)} truth objects",
+               flush=True)
 
     # 2. Source extraction on every frame
     print(f"\n[2] source extraction")
@@ -148,24 +159,82 @@ def main():
           f"probabilistic {len(prob_chains)} | multipass {len(multi_chains)} | "
           f"helio_linc {len(helio_chains)} | merged {len(chains)}")
 
-    # 7. Chain sanity filter
+    # 7a. Baseline sanity filter (the legacy one)
     from ariadne.discovery.realtime import filter_chain_sanity
     sane_chains = filter_chain_sanity(chains)
-    print(f"\n[7] {len(sane_chains)} chains survived sanity filter")
+    print(f"\n[7a] {len(sane_chains)} chains survived legacy sanity filter")
 
-    # 8. Ensemble IOD on every sane chain
-    print(f"\n[8] ensemble IOD")
-    from ariadne.discovery import iod_advanced as IODA
+    # 7b. NEW: chain-quality battery (rate / photometric / epoch / arc)
+    from ariadne.discovery.imaging.chain_quality import filter_chains
+    kept_chains, dropped_chains, verdicts = filter_chains(
+        sane_chains,
+        max_rate_spread=0.5, max_mag_std=0.6,
+        min_unique_epochs=3, min_arc_hours=12.0)
+    print(f"[7b] chain-quality battery: {len(kept_chains)} kept, "
+          f"{len(dropped_chains)} dropped (epoch / rate / arc / photometry)",
+          flush=True)
+    # Show top reasons for drops -- Counter already imported at module top
+    reasons_counter = Counter(r.split()[0] for v in verdicts
+                                if not v.passes_all for r in v.reasons)
+    if reasons_counter:
+        for kind, n in reasons_counter.most_common():
+            print(f"     dropped on {kind!r}: {n}", flush=True)
+
+    # 7b'. Bayesian chain-likelihood rerank/cap so we spend MC-IOD budget
+    # on the top-K most-promising chains only.
+    from ariadne.discovery.imaging.bayesian_linker import (
+        filter_chains_by_likelihood)
+    if kept_chains:
+        ranked_chains, ranked_scores = filter_chains_by_likelihood(
+            kept_chains, log_l_threshold=-1e9, max_chains=10)
+        kept_chains = ranked_chains
+        print(f"     bayesian rerank: top {len(kept_chains)} by log-L",
+              flush=True)
+        for sc in ranked_scores[:min(5, len(ranked_scores))]:
+            print(f"       chain[{sc.chain_idx}]: log_L={sc.log_likelihood:8.1f}  "
+                  f"orbit={sc.dominant_orbital_class:10s}  "
+                  f"epochs={sc.n_unique_epochs}  arc={sc.arc_hours:.1f}h  "
+                  f"rate={sc.median_rate:.2f}\"/hr", flush=True)
+
+    # 7c. Measure linker precision/recall against truth if catalog present
+    linker_quality = None
+    if truth_catalog is not None:
+        from ariadne.discovery.imaging.synthetic_truth import (
+            measure_linker_quality)
+        before = measure_linker_quality(chains, truth_catalog)
+        after = measure_linker_quality(kept_chains, truth_catalog)
+        linker_quality = {"before_filters": before, "after_filters": after}
+        print(f"\n[7c] linker quality vs truth:", flush=True)
+        print(f"     BEFORE filters: precision={before['precision']:.2f}  "
+              f"recall={before['recall']:.2f}  "
+              f"F1={before['f1']:.2f}  "
+              f"{before['n_pure_chains']}/{before['n_chains']} pure  "
+              f"({before['n_truth_covered']}/{before['n_truth_total']} truths covered)",
+              flush=True)
+        print(f"     AFTER  filters: precision={after['precision']:.2f}  "
+              f"recall={after['recall']:.2f}  "
+              f"F1={after['f1']:.2f}  "
+              f"{after['n_pure_chains']}/{after['n_chains']} pure  "
+              f"({after['n_truth_covered']}/{after['n_truth_total']} truths covered)",
+              flush=True)
+
+    # 8. ROBUST IOD on every quality-kept chain
+    print(f"\n[8] robust ensemble IOD (Monte Carlo + rate-class-aware)",
+          flush=True)
+    from ariadne.discovery.iod_robust import robust_iod
     fitted = []
-    for ch in sane_chains[:20]:           # cap at 20 for wall-clock sanity
-        ens = IODA.fit_candidate_ensemble(
-            ch, rms_acceptance_arcsec=10.0,
-            cheap_first=True, early_exit_rms_arcsec=0.5)
+    for ch in kept_chains[:10]:           # cap for wall-clock sanity
+        ens = robust_iod(
+            ch, n_draws=5, sigma_arcsec=None,
+            rms_acceptance_arcsec=10.0,
+            use_monte_carlo=True, use_rate_class=True)
         fitted.append(ens)
     accepted = [f for f in fitted if f.success]
-    print(f"    {len(accepted)}/{len(fitted)} chains have a successful IOD fit")
+    print(f"    {len(accepted)}/{len(fitted)} chains have a successful "
+          f"robust IOD fit", flush=True)
     for ens in accepted[:5]:
-        print(f"    -> RMS {ens.rms_arcsec:.2f}\", strategy {ens.winning_strategy}")
+        print(f"    -> RMS {ens.rms_arcsec:.2f}\"  strategy {ens.winning_strategy}",
+              flush=True)
 
     # 9. Smart annotate + grade-A MCMC requirement
     print(f"\n[9] smart annotation + grade-A MCMC gating")
@@ -209,15 +278,16 @@ def main():
         "n_tracklets": len(tracklets),
         "n_chains": len(chains),
         "n_sane_chains": len(sane_chains),
+        "n_quality_kept_chains": len(kept_chains),
         "n_iod_attempts": len(fitted),
         "n_iod_success": len(accepted),
-        "winning_strategies": Counter(
-            ens.winning_strategy for ens in accepted),
+        "winning_strategies": dict(Counter(
+            ens.winning_strategy for ens in accepted)),
         "n_smart_annotated": len(annotated),
         "n_grade_a": n_grade_a,
         "n_mcmc": n_mcmc,
+        "linker_quality": linker_quality,    # may be None if no truth catalog
     }
-    report["winning_strategies"] = dict(report["winning_strategies"])
     (out_root / "report.json").write_text(
         json.dumps(report, indent=2, default=str))
     print(f"\n[10] report -> {out_root / 'report.json'}")

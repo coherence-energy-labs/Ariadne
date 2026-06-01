@@ -171,7 +171,8 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
                           n_real_moving: int = 3,
                           mjd_nights: list[float] | None = None,
                           out_dir: str | Path = "data/decam_synth",
-                          kepler_orbits: bool = True) -> list[FitsImage]:
+                          kepler_orbits: bool = True,
+                          emit_truth_catalog: bool = True) -> list[FitsImage]:
     """Create synthetic FITS images with planted moving sources, for offline testing.
 
     `kepler_orbits=True` (default): plants objects with REAL Keplerian heliocentric
@@ -181,7 +182,15 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
     `kepler_orbits=False`: plants objects with constant-velocity sky motion; tests
     source extraction + tracklet/chain logic but IOD+LM will REJECT (correct
     behaviour for non-Keplerian, also a useful filter-sanity test).
+
+    When `emit_truth_catalog=True` (default), writes a `truth_catalog.json`
+    sidecar next to the FITS images that records (truth_id, image_id, mjd,
+    ra, dec, x_pix, y_pix, mag, family) for every planted moving object.
+    Downstream code can load it via `TruthCatalog.load()` and use
+    `measure_linker_quality()` to score chain precision/recall.
     """
+    from .synthetic_truth import TruthCatalog, TruthEntry
+    truth_entries: list[TruthEntry] = []
     try:
         import numpy as np
         from astropy.io import fits
@@ -196,27 +205,71 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
     npix = 512
     pixscale_arcsec = 1.0
     pixscale_deg = pixscale_arcsec / 3600.0
+    SEC_PER_DAY = 86400.0    # reused below in the per-epoch loop too
 
     # Plant moving objects -- either Keplerian heliocentric orbits or constant-velocity
     if kepler_orbits:
+        import math
         from ...dynamics.secular import kepler_step, elements_to_state
-        from ...data.constants import GM_SUN
+        from ...data.constants import GM_SUN, AU_KM
         from ...data.ephemeris import body_state
-        # Random TNO-like elements; positions roughly in the (ra, dec) sky cone
+        # Build initial state ON THE TARGET LINE OF SIGHT so the object
+        # is GUARANTEED to be inside the image cone at t = mjd_nights[0].
+        # Velocity is chosen to give a near-circular bound orbit at that
+        # heliocentric distance.
         kepler_objects = []
+        t0 = mjd_nights[0] if mjd_nights else 60000.0
+        et0 = ((t0 + 2400000.5) - 2451545.0) * SEC_PER_DAY
+        R_e_t0 = np.array(body_state("EARTH", et0, "J2000", "SUN")[:3],
+                            dtype=float)
+        ra_rad = math.radians(ra)
+        dec_rad = math.radians(dec)
+        d_sky = np.array([math.cos(dec_rad) * math.cos(ra_rad),
+                           math.cos(dec_rad) * math.sin(ra_rad),
+                           math.sin(dec_rad)])
         for k in range(n_real_moving):
-            a_au = float(rng.uniform(40, 80))
-            e = float(rng.uniform(0, 0.2))
-            i_deg = float(rng.uniform(5, 25))
-            Omega = float(rng.uniform(0, 360))
-            omega = float(rng.uniform(0, 360))
-            M = float(rng.uniform(0, 360))
-            r0, v0 = elements_to_state(a_au, e, i_deg, Omega, omega, M)
-            kepler_objects.append({"r0": np.asarray(r0), "v0": np.asarray(v0)})
+            # Heliocentric distance: random TNO-class
+            rho_km = float(rng.uniform(40, 80)) * AU_KM
+            # Spread the 3 objects spatially within the image cone so they
+            # don't all stack on top of each other at the same pixel. Each
+            # object gets a small (dRA, dDec) jitter of ~0.03 deg.
+            ra_jit = float(rng.uniform(-0.04, 0.04))
+            dec_jit = float(rng.uniform(-0.04, 0.04))
+            ra_obj_rad = math.radians(ra + ra_jit / math.cos(dec_rad))
+            dec_obj_rad = math.radians(dec + dec_jit)
+            d_sky_obj = np.array([math.cos(dec_obj_rad) * math.cos(ra_obj_rad),
+                                    math.cos(dec_obj_rad) * math.sin(ra_obj_rad),
+                                    math.sin(dec_obj_rad)])
+            r0 = R_e_t0 + rho_km * d_sky_obj
+            r0_norm = float(np.linalg.norm(r0))
+            # Near-circular velocity perpendicular to r0, in the ecliptic
+            v_circ = math.sqrt(GM_SUN / r0_norm)
+            # Build an arbitrary unit vector orthogonal to r0
+            r_hat = r0 / r0_norm
+            up = np.array([0.0, 0.0, 1.0])
+            if abs(np.dot(r_hat, up)) > 0.95:
+                up = np.array([1.0, 0.0, 0.0])
+            tangent = np.cross(r_hat, up)
+            tangent = tangent / np.linalg.norm(tangent)
+            # Slight random kick to give each object a different orbit shape
+            tilt_deg = float(rng.uniform(-15, 15))
+            tilt = math.radians(tilt_deg)
+            v0_dir = (math.cos(tilt) * tangent
+                       + math.sin(tilt) * np.cross(r_hat, tangent))
+            v0 = v_circ * v0_dir
+            kepler_objects.append({
+                "truth_id": f"kepler_obj_{k:03d}",
+                "family": "kepler_tno",
+                "r0": np.asarray(r0), "v0": np.asarray(v0),
+                "a_au": r0_norm / AU_KM, "e": 0.0, "i_deg": tilt_deg,
+                "Omega": 0.0, "omega": 0.0, "M": 0.0,
+            })
     else:
         moving = []
         for k in range(n_real_moving):
             moving.append({
+                "truth_id": f"linear_obj_{k:03d}",
+                "family": "linear_sky_motion",
                 "ra0": ra + (rng.random() - 0.5) * 0.05,
                 "dec0": dec + (rng.random() - 0.5) * 0.05,
                 "rate_arcsec_hr": float(rng.uniform(0.5, 3.0)),
@@ -225,7 +278,6 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
 
     fits_records = []
     img_idx = 0
-    SEC_PER_DAY = 86400.0
     for night_idx, mjd0 in enumerate(mjd_nights):
         for half in (0.0, 2.0):
             t = mjd0 + half / 24.0
@@ -234,6 +286,12 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
                 xi, yi = rng.uniform(5, npix - 5, 2)
                 amp = rng.uniform(500, 5000)
                 _stamp_gaussian(data, xi, yi, amp, sigma=1.5)
+            # Build the image_id we will record into the truth catalog.
+            # IMPORTANT: must match what the source-extraction step passes
+            # as `image_id` later (see scripts/run_decam_e2e.py [2]), which
+            # is `str(fi.path)` -- the full FITS path. Use the same string
+            # so per-source truth matching works downstream.
+            this_image_id = str(out_dir / f"synth_n{night_idx}_e{int(half)}.fits")
             if kepler_orbits:
                 # Propagate each Keplerian object to this epoch and project to sky
                 et = ((t + 2400000.5) - 2451545.0) * SEC_PER_DAY
@@ -250,20 +308,44 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
                     dra = (ra_obj - ra) * _m.cos(_m.radians(dec))
                     if abs(dra) > 0.07 or abs(dec_obj - dec) > 0.07:
                         continue
-                    xi = npix / 2 + dra / pixscale_deg
+                    # Use the WCS to compute pixel coords from world coords.
+                    # The image WCS has CD11 = -pixscale_deg meaning RA
+                    # decreases with increasing pixel-x; using a hand-rolled
+                    # `xi = npix/2 + dra/pixscale_deg` (no sign flip) was a
+                    # longstanding bug that placed objects at WCS-inconsistent
+                    # positions, so source-extraction recovered different
+                    # (ra, dec) than the synth's "ra_obj/dec_obj" and the
+                    # truth catalog stored wrong RA/Dec relative to what
+                    # the chain extraction would see.
+                    xi = npix / 2 - dra / pixscale_deg
                     yi = npix / 2 + (dec_obj - dec) / pixscale_deg
                     if 5 < xi < npix - 5 and 5 < yi < npix - 5:
                         _stamp_gaussian(data, xi, yi, amplitude=3000.0, sigma=1.5)
+                        truth_entries.append(TruthEntry(
+                            truth_id=o["truth_id"], image_id=this_image_id,
+                            mjd=t, ra=ra_obj, dec=dec_obj,
+                            x_pix=float(xi), y_pix=float(yi),
+                            mag=float(-2.5 * _m.log10(3000.0 / 100.0) + 25.0),
+                            family=o["family"],
+                            extras={"a_au": o["a_au"], "e": o["e"],
+                                     "i_deg": o["i_deg"], "rho_au": rho}))
             else:
                 for m in moving:
                     dt_days = t - mjd_nights[0]
                     ra_obj = m["ra0"] + (m["rate_arcsec_hr"] * np.cos(m["theta"]) * 24.0 / 3600.0
                                          / np.cos(np.radians(dec))) * dt_days
                     dec_obj = m["dec0"] + (m["rate_arcsec_hr"] * np.sin(m["theta"]) * 24.0 / 3600.0) * dt_days
-                    xi = npix / 2 + (ra_obj - ra) * np.cos(np.radians(dec)) / pixscale_deg
+                    # Same sign-flip fix as the kepler branch: RA decreases with pixel-x
+                    xi = npix / 2 - (ra_obj - ra) * np.cos(np.radians(dec)) / pixscale_deg
                     yi = npix / 2 + (dec_obj - dec) / pixscale_deg
                     if 5 < xi < npix - 5 and 5 < yi < npix - 5:
                         _stamp_gaussian(data, xi, yi, amplitude=3000.0, sigma=1.5)
+                        truth_entries.append(TruthEntry(
+                            truth_id=m["truth_id"], image_id=this_image_id,
+                            mjd=t, ra=float(ra_obj), dec=float(dec_obj),
+                            x_pix=float(xi), y_pix=float(yi),
+                            mag=float(-2.5 * np.log10(3000.0 / 100.0) + 25.0),
+                            family=m["family"]))
             # write FITS with simple TAN WCS
             w = WCS(naxis=2)
             w.wcs.crpix = [npix / 2, npix / 2]
@@ -281,6 +363,11 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
                 ra_center=ra, dec_center=dec, band="r", exptime=90.0,
                 image_id=path.stem, meta={"n_planted_moving": n_real_moving}))
             img_idx += 1
+
+    if emit_truth_catalog and truth_entries:
+        catalog = TruthCatalog(truth_entries)
+        catalog.save(out_dir / "truth_catalog.json")
+
     return fits_records
 
 
