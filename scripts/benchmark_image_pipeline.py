@@ -126,6 +126,33 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
             truth_tracklet_counts[list(tids)[0]] += 1
 
     chains = discover_in_images_chains(trks, use_nbody_grow=True)
+
+    # NEW: shift-and-stack synthetic tracking discovers moving objects
+    # that are sub-threshold per image but pile up in the coadd.
+    # Threshold scaling: N_hyp = 16x12 = 192 rate/PA cells, N_pix ~ 1e6
+    # per image. Effective trials = 192 * 1e6 = 2e8. For < 1 expected FP
+    # at SNR threshold T, need T > sqrt(2 ln 2e8) ~ 5.8. Use 7.0 to be safe.
+    from ariadne.discovery.imaging.synthetic_tracking import (
+        fast_synthetic_tracking, synthetic_candidate_to_chain)
+    synth_candidates = []
+    try:
+        synth_candidates = fast_synthetic_tracking(
+            imgs, wcs_list, [fi.mjd for fi in fits],
+            rate_min_arcsec_hr=0.3, rate_max_arcsec_hr=8.0,
+            n_rates=12, n_pa=8,
+            snr_threshold=7.0, pixscale_arcsec=1.0,
+            n_top_per_hypothesis=2)
+        # Only keep candidates with strong per-image consensus
+        n_min_imgs = len(imgs)
+        synth_candidates = [c for c in synth_candidates
+                              if c.consensus_count >= max(4, n_min_imgs - 1)]
+        for sc in synth_candidates:
+            ch = synthetic_candidate_to_chain(
+                sc, [fi.mjd for fi in fits], pixscale_arcsec=1.0)
+            chains.append(ch)
+    except Exception:
+        pass
+
     # Loosened filters: at scale (10+ true objects) many real chains get
     # mis-linked with each other and inflate rate spread; tight defaults
     # rejected too many genuine chains. Loosened to recover recall.
