@@ -46,7 +46,9 @@ def _percentile_ci(values, p_lo=2.5, p_hi=97.5):
 
 def run_single_seed(seed: int, n_truths: int, npix: int,
                       skip_iod: bool, mc_draws: int,
-                      iod_chain_cap: int = 10) -> dict:
+                      iod_chain_cap: int = 10,
+                      arc_days: float = 6.0,
+                      n_nights: int = 3) -> dict:
     """Run the pipeline once with the given seed; return per-stage stats."""
     from ariadne.discovery.imaging import archive_fetch
     from ariadne.discovery.imaging.synthetic_truth import (
@@ -63,10 +65,17 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
 
     t_start = time.time()
     workdir = Path(tempfile.mkdtemp(prefix=f"benchmark_seed{seed}_"))
+    # Build mjd_nights evenly spaced over arc_days
+    mjd_start = 60450.0
+    if n_nights >= 2:
+        spacing = arc_days / (n_nights - 1)
+    else:
+        spacing = 0.0
+    mjd_nights = [mjd_start + k * spacing for k in range(n_nights)]
     fits = archive_fetch.synthesise_decam_tile(
         ra=180.0, dec=20.0, n_images=2,
         n_objects_per_image=80, n_real_moving=n_truths,
-        mjd_nights=[60450.0, 60453.0, 60456.0],
+        mjd_nights=mjd_nights,
         out_dir=str(workdir), kepler_orbits=True, emit_truth_catalog=True,
         seed=seed, npix=npix, cone_radius_deg=0.04)
     cat_path = workdir / "truth_catalog.json"
@@ -427,6 +436,10 @@ def main():
                           help="Monte Carlo draws per IOD attempt")
     parser.add_argument("--iod-chain-cap", type=int, default=30,
                           help="Max chains per run to feed to IOD")
+    parser.add_argument("--arc-days", type=float, default=6.0,
+                          help="Total observing arc in days (spans the n_nights evenly)")
+    parser.add_argument("--n-nights", type=int, default=3,
+                          help="Number of distinct observing nights")
     parser.add_argument("--skip-iod", action="store_true",
                           help="Skip step 8/8b (faster; linker-only metrics)")
     parser.add_argument("--out", default="data/decam_benchmark",
@@ -448,7 +461,9 @@ def main():
             row = run_single_seed(seed=seed, n_truths=args.n_truths,
                                      npix=args.npix, skip_iod=args.skip_iod,
                                      mc_draws=args.mc_draws,
-                                     iod_chain_cap=args.iod_chain_cap)
+                                     iod_chain_cap=args.iod_chain_cap,
+                                     arc_days=args.arc_days,
+                                     n_nights=args.n_nights)
         except Exception as e:
             row = {"seed": seed, "error": str(e)[:160]}
         per_run.append(row)

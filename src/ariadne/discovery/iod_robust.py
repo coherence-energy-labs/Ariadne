@@ -298,7 +298,7 @@ def robust_iod(chain: Sequence[dict], *,
             try:
                 from .iod_bayesian import bayesian_iod
                 bres = bayesian_iod(
-                    chain, n_seeds_per_class=4,
+                    chain, n_seeds_per_class=2,
                     rms_acceptance_arcsec=rms_acceptance_arcsec,
                     seed=seed)
                 if bres.success:
@@ -314,11 +314,12 @@ def robust_iod(chain: Sequence[dict], *,
     if not mc.success:
         # MC ensemble failed: try Bayesian IOD (orbital-class priors)
         # as a fallback for short-arc / noisy chains where pure-geometry
-        # methods diverge.
+        # methods diverge. Tight seed budget (2 per class x 6 classes = 12
+        # LM calls) keeps wall time bounded.
         try:
             from .iod_bayesian import bayesian_iod
             bres = bayesian_iod(
-                chain, n_seeds_per_class=4,
+                chain, n_seeds_per_class=2,
                 rms_acceptance_arcsec=rms_acceptance_arcsec,
                 seed=seed)
             if bres.success:
