@@ -510,13 +510,113 @@ def _grow_from_seed(seed_chain, all_tracklets, rms_acceptance, max_len):
     return sorted(current, key=lambda t: t.get("t", 0))
 
 
+def multi_hypothesis_chain(tracklets: list[dict],
+                             *, max_nights_gap: int = 14,
+                             position_sigma_arcsec: float = 30.0,
+                             rate_sigma_pct: float = 30.0,
+                             log_likelihood_threshold: float = -10.0,
+                             max_matches_per_tracklet: int = 4,
+                             ) -> list[list[dict]]:
+    """Multi-hypothesis linker: for each tracklet, generate up to
+    `max_matches_per_tracklet` candidate next-night matches above the
+    log-likelihood threshold (NOT the single Hungarian best).
+
+    This is the antidote to the Hungarian one-to-one assignment failure
+    mode in dense fields with many similar-rate objects: with N truths
+    at similar rates, Hungarian assigns each night-N tracklet to
+    EXACTLY ONE night-N+1 tracklet, which loses recall when two truth
+    objects' projections happen to overlap.
+
+    Higher chain count, lower precision per chain -- the downstream
+    quality filter + bayesian rerank cull the noise.
+
+    Returns one chain per (tracklet, match) sequence that survives
+    to >=2 distinct nights.
+    """
+    if not tracklets:
+        return []
+    by_night = defaultdict(list)
+    for t in tracklets:
+        by_night[t["night"]].append(t)
+    nights = sorted(by_night)
+    if len(nights) < 2:
+        return []
+
+    # For each tracklet, store the list of high-likelihood next-night
+    # candidate matches (instead of just the one Hungarian-best).
+    matches = defaultdict(list)   # id(tracklet) -> [next-night-tracklets]
+    for k in range(len(nights) - 1):
+        night_a = nights[k]
+        # Look at multiple gaps (1 night, 2 nights) for cross-night reach
+        for offset in range(1, min(max_nights_gap,
+                                       len(nights) - k - 1) + 1):
+            night_b = nights[k + offset]
+            ts_a = by_night[night_a]
+            ts_b = by_night[night_b]
+            if not ts_a or not ts_b:
+                continue
+            for a in ts_a:
+                scored = []
+                for b in ts_b:
+                    ll = _pair_log_likelihood(
+                        a, b,
+                        position_sigma_arcsec=position_sigma_arcsec,
+                        rate_sigma_pct=rate_sigma_pct)
+                    if ll > log_likelihood_threshold:
+                        scored.append((ll, b))
+                # Keep top-K matches per source tracklet
+                scored.sort(key=lambda x: -x[0])
+                for _, b in scored[:max_matches_per_tracklet]:
+                    matches[id(a)].append(b)
+
+    # Build chains by depth-first walk from each tracklet through its
+    # match graph. A chain is one path through the graph.
+    by_id = {id(t): t for t in tracklets}
+    chains = []
+    visited_paths = set()
+
+    def _walk(path):
+        last = path[-1]
+        nxt = matches.get(id(last), [])
+        if not nxt:
+            if len({t["night"] for t in path}) >= 2:
+                sig = tuple(id(p) for p in path)
+                if sig not in visited_paths:
+                    visited_paths.add(sig)
+                    chains.append(sorted(path, key=lambda t: t["t"]))
+            return
+        # Extend by each match
+        any_extended = False
+        for b in nxt:
+            if id(b) in {id(p) for p in path}:
+                continue   # cycle
+            any_extended = True
+            _walk(path + [b])
+        if not any_extended and len({t["night"] for t in path}) >= 2:
+            sig = tuple(id(p) for p in path)
+            if sig not in visited_paths:
+                visited_paths.add(sig)
+                chains.append(sorted(path, key=lambda t: t["t"]))
+
+    for t in tracklets:
+        # Only start walks from tracklets in the EARLIEST night --
+        # subsequent-night tracklets get reached via walks from earlier
+        # ones.
+        if t["night"] != nights[0]:
+            continue
+        if id(t) in matches and matches[id(t)]:
+            _walk([t])
+    return chains
+
+
 def discover_in_images_chains(tracklets: list[dict], *,
                                 use_greedy: bool = True,
                                 use_probabilistic: bool = True,
                                 use_multipass: bool = True,
                                 use_helio_linc: bool = False,
                                 use_orbit_grow: bool = False,
-                                use_nbody_grow: bool = False
+                                use_nbody_grow: bool = False,
+                                use_multi_hypothesis: bool = True
                                 ) -> list[list[dict]]:
     """Run every available linking strategy on image tracklets + merge.
 
@@ -570,6 +670,11 @@ def discover_in_images_chains(tracklets: list[dict], *,
             # difference vs full N-body is sub-arcsec for 6-day arcs.
             # Switch to use_nbody=True when arcs span >1 month.
             chain_lists.append(nbody_grow_chain(tracklets, use_nbody=False))
+        except Exception:
+            pass
+    if use_multi_hypothesis:
+        try:
+            chain_lists.append(multi_hypothesis_chain(tracklets))
         except Exception:
             pass
     return _merge_chain_lists(chain_lists)
