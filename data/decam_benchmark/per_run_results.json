@@ -1,0 +1,247 @@
+[
+  {
+    "iod_rows": [
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.008732080459594727
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.007915258407592773
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.00969552993774414
+      },
+      {
+        "rms_arcsec": 0.23211715839724145,
+        "snr_boost": 0.0,
+        "strategy": "mc_bernstein_khushalani",
+        "success": true,
+        "validated": false,
+        "wall_s": 0.6111421585083008
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.008081912994384766
+      }
+    ],
+    "iod_strategy_counts": {
+      "mc_bernstein_khushalani": 1
+    },
+    "iod_wall_s": 0.6455669403076172,
+    "linker_quality_filtered": {
+      "f1": 0.2978723404255319,
+      "n_pure_chains": 7,
+      "n_truth_covered": 7,
+      "precision": 0.4117647058823529,
+      "recall": 0.23333333333333334
+    },
+    "linker_quality_raw": {
+      "f1": 0.2857142857142857,
+      "n_pure_chains": 7,
+      "n_truth_covered": 7,
+      "precision": 0.3684210526315789,
+      "recall": 0.23333333333333334
+    },
+    "n_chains_dropped": 2,
+    "n_chains_kept": 17,
+    "n_chains_raw": 19,
+    "n_iod_attempts": 5,
+    "n_iod_success": 1,
+    "n_pixel_validated": 0,
+    "n_point_srcs": 537,
+    "n_raw_sources": 583,
+    "n_tracklets": 64,
+    "n_truths_planted": 30,
+    "per_stage_truth_attrition": {
+      "n_truth_detected": 27,
+      "n_truth_in_filtered_chain": 7,
+      "n_truth_in_raw_chain": 7,
+      "n_truth_in_tracklet": 19,
+      "n_truth_planted": 30
+    },
+    "seed": 1000,
+    "truth_family_distribution": {
+      "kepler_centaur": 18,
+      "kepler_mba": 6,
+      "kepler_neo": 2,
+      "kepler_tno": 86
+    },
+    "truth_source_coverage_pct": 0.9,
+    "truth_tracklet_coverage_pct": 0.6333333333333333,
+    "wall_s_total": 8.854103803634644
+  },
+  {
+    "iod_rows": [
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.008102178573608398
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.00836944580078125
+      },
+      {
+        "rms_arcsec": 0.13536373773916827,
+        "snr_boost": 0.0,
+        "strategy": "mc_bernstein_khushalani",
+        "success": true,
+        "validated": false,
+        "wall_s": 0.3767225742340088
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.008493661880493164
+      },
+      {
+        "rms_arcsec": 0.17262578903612963,
+        "snr_boost": 1.7274581977621462,
+        "strategy": "mc_bernstein_khushalani",
+        "success": true,
+        "validated": true,
+        "wall_s": 0.4120516777038574
+      }
+    ],
+    "iod_strategy_counts": {
+      "mc_bernstein_khushalani": 2
+    },
+    "iod_wall_s": 0.813739538192749,
+    "linker_quality_filtered": {
+      "f1": 0.5185185185185185,
+      "n_pure_chains": 14,
+      "n_truth_covered": 12,
+      "precision": 0.7368421052631579,
+      "recall": 0.4
+    },
+    "linker_quality_raw": {
+      "f1": 0.5042016806722689,
+      "n_pure_chains": 15,
+      "n_truth_covered": 12,
+      "precision": 0.6818181818181818,
+      "recall": 0.4
+    },
+    "n_chains_dropped": 3,
+    "n_chains_kept": 19,
+    "n_chains_raw": 22,
+    "n_iod_attempts": 5,
+    "n_iod_success": 2,
+    "n_pixel_validated": 1,
+    "n_point_srcs": 562,
+    "n_raw_sources": 597,
+    "n_tracklets": 84,
+    "n_truths_planted": 30,
+    "per_stage_truth_attrition": {
+      "n_truth_detected": 30,
+      "n_truth_in_filtered_chain": 12,
+      "n_truth_in_raw_chain": 12,
+      "n_truth_in_tracklet": 26,
+      "n_truth_planted": 30
+    },
+    "seed": 1001,
+    "truth_family_distribution": {
+      "kepler_centaur": 14,
+      "kepler_mba": 2,
+      "kepler_neo": 2,
+      "kepler_tno": 107
+    },
+    "truth_source_coverage_pct": 1.0,
+    "truth_tracklet_coverage_pct": 0.8666666666666667,
+    "wall_s_total": 4.449198246002197
+  },
+  {
+    "iod_rows": [
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.008129119873046875
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.0077648162841796875
+      },
+      {
+        "rms_arcsec": 0.13145446408905231,
+        "snr_boost": 0.0,
+        "strategy": "mc_bernstein_khushalani",
+        "success": true,
+        "validated": false,
+        "wall_s": 0.5497438907623291
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.007967948913574219
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.008249044418334961
+      }
+    ],
+    "iod_strategy_counts": {
+      "mc_bernstein_khushalani": 1
+    },
+    "iod_wall_s": 0.5818548202514648,
+    "linker_quality_filtered": {
+      "f1": 0.27906976744186046,
+      "n_pure_chains": 6,
+      "n_truth_covered": 6,
+      "precision": 0.46153846153846156,
+      "recall": 0.2
+    },
+    "linker_quality_raw": {
+      "f1": 0.354679802955665,
+      "n_pure_chains": 9,
+      "n_truth_covered": 8,
+      "precision": 0.5294117647058824,
+      "recall": 0.26666666666666666
+    },
+    "n_chains_dropped": 4,
+    "n_chains_kept": 13,
+    "n_chains_raw": 17,
+    "n_iod_attempts": 5,
+    "n_iod_success": 1,
+    "n_pixel_validated": 0,
+    "n_point_srcs": 555,
+    "n_raw_sources": 594,
+    "n_tracklets": 75,
+    "n_truths_planted": 30,
+    "per_stage_truth_attrition": {
+      "n_truth_detected": 26,
+      "n_truth_in_filtered_chain": 6,
+      "n_truth_in_raw_chain": 8,
+      "n_truth_in_tracklet": 20,
+      "n_truth_planted": 30
+    },
+    "seed": 1002,
+    "truth_family_distribution": {
+      "kepler_centaur": 22,
+      "kepler_mba": 2,
+      "kepler_neo": 5,
+      "kepler_tno": 88
+    },
+    "truth_source_coverage_pct": 0.8666666666666667,
+    "truth_tracklet_coverage_pct": 0.6666666666666666,
+    "wall_s_total": 3.933887481689453
+  }
+]

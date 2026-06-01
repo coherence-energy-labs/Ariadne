@@ -1,0 +1,12 @@
+{
+  "data_source": "MAST/PanSTARRS",
+  "n_fits": 4,
+  "n_images_loaded": 4,
+  "n_sources": 549,
+  "n_point": 14,
+  "n_tracklets": 0,
+  "n_chains_raw": 0,
+  "n_chains_kept": 0,
+  "n_iod_success": 0,
+  "n_pixel_validated": 0
+}

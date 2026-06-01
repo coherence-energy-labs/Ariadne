@@ -207,7 +207,10 @@ def nbody_grow_chain(tracklets: Sequence[dict],
                       *, rms_acceptance_arcsec: float = 5.0,
                       max_chain_length: int = 12,
                       use_nbody: bool = True,
-                      integrator: str = "leapfrog") -> list[list[dict]]:
+                      integrator: str = "leapfrog",
+                      max_seed_pairs: int = 4000,
+                      max_rate_diff_arcsec_hr: float = 30.0,
+                      ) -> list[list[dict]]:
     """Chain-grow with N-body propagation.
 
     For each pair of 2-night seed tracklets:
@@ -217,6 +220,12 @@ def nbody_grow_chain(tracklets: Sequence[dict],
       3. Find the closest tracklet to the prediction within
          rms_acceptance_arcsec; if found, extend the chain.
       4. Repeat until no more matches OR max_chain_length reached.
+
+    `max_seed_pairs` caps the total seed-pair work to keep wall time
+    bounded on dense fields. `max_rate_diff_arcsec_hr` rate-prefilters
+    pairs: only consider (t_a, t_b) whose rate estimates agree within
+    this tolerance (a constant-velocity object has constant rate
+    across nights, modulo measurement noise).
 
     Returns deduped list of chains; longer chains are preferred when
     two candidates have a shared seed.
@@ -232,10 +241,26 @@ def nbody_grow_chain(tracklets: Sequence[dict],
     night_days = sorted(by_night.keys())
 
     chains: list[list[dict]] = []
+    n_pairs_tried = 0
     for i, d_a in enumerate(night_days[:-2]):
         for d_b in night_days[i + 1:i + 3]:
+            if n_pairs_tried >= max_seed_pairs:
+                break
             for t_a in by_night[d_a]:
+                if n_pairs_tried >= max_seed_pairs:
+                    break
+                rate_a = float(t_a.get("rate_arcsec_hr", 0.0))
                 for t_b in by_night[d_b]:
+                    if n_pairs_tried >= max_seed_pairs:
+                        break
+                    # Rate prefilter: a real object has roughly constant
+                    # rate across nights. If the two tracklets disagree
+                    # by more than `max_rate_diff_arcsec_hr` they can't
+                    # be the same object -- skip cheaply.
+                    rate_b = float(t_b.get("rate_arcsec_hr", 0.0))
+                    if abs(rate_b - rate_a) > max_rate_diff_arcsec_hr:
+                        continue
+                    n_pairs_tried += 1
                     seed = _seed_orbit_from_pair(t_a, t_b)
                     if seed is None:
                         continue

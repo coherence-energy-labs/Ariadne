@@ -226,12 +226,19 @@ def _strategy_gauss(tracklets, t_ref: float) -> StrategyResult:
 
 def _strategy_adaptive_helio_linc(tracklets, t_ref: float,
                                    n_retries: int = 3,
-                                   seed: int = 0) -> list[StrategyResult]:
+                                   seed: int = 0,
+                                   stop_on_first_success: bool = False
+                                   ) -> list[StrategyResult]:
     """Refined hypothesis search with smaller grid spacing + retries.
 
     On the first pass, use a denser-than-default grid (fewer dropped
     basins). On each retry, perturb the rtdot grid slightly and re-run --
     this catches edge-of-grid basins the original search missed.
+
+    When `stop_on_first_success=True`, returns as soon as ONE retry
+    succeeds (massive wall-time savings when the first hypothesis
+    search already finds a basin -- caller typically only needs one
+    good seed to feed LM).
 
     Returns ONE StrategyResult per retry.
     """
@@ -274,6 +281,8 @@ def _strategy_adaptive_helio_linc(tracklets, t_ref: float,
             scatter_km=seed_dict["scatter_km"],
             notes=f"jitter r={r_jitter:+.2f}, rdot={rdot_jitter:+.03f}",
         ))
+        if stop_on_first_success:
+            break
     return results
 
 
@@ -550,9 +559,16 @@ def fit_candidate_ensemble(tracklets, *, t_ref: float | None = None,
         if strat == "gauss":
             early = _try_strategy_results([_strategy_gauss(tracklets, t_ref)])
         elif strat == "adaptive_linker":
+            # When the caller requested a single retry, also stop the
+            # inner hypothesis search on its first basin -- saves the
+            # second / third 7600-point grid sweep when retry 0 finds
+            # something. Caller can still pass n_linker_retries>=2 to
+            # exercise multiple jittered grids.
+            stop_inner = (n_linker_retries <= 1)
             early = _try_strategy_results(
                 _strategy_adaptive_helio_linc(tracklets, t_ref,
-                                                n_retries=n_linker_retries))
+                                                n_retries=n_linker_retries,
+                                                stop_on_first_success=stop_inner))
         elif strat == "vaisala":
             # Cheap-first: skip if cheap strategies already produced an
             # acceptable RMS (Vaisala is a 2-tracklet fallback)

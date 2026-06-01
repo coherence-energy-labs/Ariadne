@@ -282,6 +282,11 @@ def robust_iod(chain: Sequence[dict], *,
         ensemble_kwargs.setdefault("cheap_first", False)
         ensemble_kwargs.setdefault("early_exit_rms_arcsec",
                                       rms_acceptance_arcsec * 0.7)
+        # Default to 1 linker retry rather than 3 -- the multi-strategy
+        # ensemble + Monte-Carlo wrapping already provides robustness;
+        # extra grid-search retries dominate wall time without commensurate
+        # success-rate improvement.
+        ensemble_kwargs.setdefault("n_linker_retries", 1)
 
     if not use_monte_carlo:
         return IODA.fit_candidate_ensemble(

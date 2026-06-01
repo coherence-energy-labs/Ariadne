@@ -128,11 +128,19 @@ def _fetch_noirlab(ra, dec, radius_deg, mjd_start, mjd_end, out_dir,
 
 def _fetch_panstarrs(ra, dec, radius_deg, mjd_start, mjd_end, out_dir,
                      max_images, band) -> list[FitsImage]:
-    """Fallback: PanSTARRS DR2 warps via MAST."""
+    """Fallback: PanSTARRS DR2 stacks via MAST.
+
+    PS1 metadata rows carry a `dataURL` pointing to the FITS file at
+    ps1images.stsci.edu. We download those directly via urllib --
+    cleaner than wrestling with Observations.download_products(), which
+    drops files into a mastDownload/ subtree with hard-to-predict names.
+    """
     try:
         from astroquery.mast import Observations
     except ImportError:
         raise RuntimeError("astroquery.mast not available")
+    import urllib.request
+
     obs = Observations.query_criteria(
         coordinates=f"{ra} {dec}",
         radius=f"{radius_deg} deg",
@@ -142,18 +150,38 @@ def _fetch_panstarrs(ra, dec, radius_deg, mjd_start, mjd_end, out_dir,
     )
     if obs is None or len(obs) == 0:
         return []
-    rows = obs[:max_images]
-    products = Observations.get_product_list(rows)
-    fits = [p for p in products if p["productType"] == "SCIENCE"
-            and p["productSubGroupDescription"] == "FITS"]
-    fits = fits[:max_images]
-    if not fits:
-        return []
-    Observations.download_products(fits, download_dir=str(out_dir))
+
+    # Filter by band + mjd if requested
+    rows = list(obs)
+    if band:
+        rows = [r for r in rows
+                if band in str(r.get("filters", "")).split(",")
+                or str(r.get("filters", "")) == band]
+    if mjd_start is not None:
+        rows = [r for r in rows
+                if float(r.get("t_min", 0.0)) >= mjd_start]
+    if mjd_end is not None:
+        rows = [r for r in rows
+                if float(r.get("t_min", 0.0)) <= mjd_end]
+    rows = rows[:max_images]
+
     out = []
     for i, row in enumerate(rows):
+        data_url = str(row.get("dataURL", "")).strip()
+        if not data_url:
+            continue
+        # Save under a stable filename
+        local_name = f"ps1_{i}_{str(row.get('obs_id', '')).replace('.', '_')}.fits"
+        local_path = out_dir / local_name
+        if not local_path.exists() or local_path.stat().st_size == 0:
+            try:
+                urllib.request.urlretrieve(data_url, str(local_path))
+            except Exception:
+                continue
+        if not local_path.exists() or local_path.stat().st_size == 0:
+            continue
         out.append(FitsImage(
-            path=out_dir / f"ps1_{i}.fits",
+            path=local_path,
             archive="MAST/PanSTARRS",
             mjd=float(row.get("t_min", 0.0)),
             ra_center=float(row.get("s_ra", ra)),
@@ -161,7 +189,7 @@ def _fetch_panstarrs(ra, dec, radius_deg, mjd_start, mjd_end, out_dir,
             band=str(row.get("filters", "")),
             exptime=float(row.get("t_exptime", 0.0)),
             image_id=str(row.get("obs_id", f"ps1_{i}")),
-            meta={},
+            meta={"data_url": data_url},
         ))
     return out
 
@@ -172,7 +200,12 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
                           mjd_nights: list[float] | None = None,
                           out_dir: str | Path = "data/decam_synth",
                           kepler_orbits: bool = True,
-                          emit_truth_catalog: bool = True) -> list[FitsImage]:
+                          emit_truth_catalog: bool = True,
+                          seed: int = 0,
+                          npix: int = 512,
+                          pixscale_arcsec: float = 1.0,
+                          family_mix: dict | None = None,
+                          cone_radius_deg: float = 0.04) -> list[FitsImage]:
     """Create synthetic FITS images with planted moving sources, for offline testing.
 
     `kepler_orbits=True` (default): plants objects with REAL Keplerian heliocentric
@@ -201,11 +234,12 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
     if mjd_nights is None:
         mjd_nights = [60000.0, 60003.0, 60006.0]
-    rng = np.random.default_rng(0)
-    npix = 512
-    pixscale_arcsec = 1.0
+    rng = np.random.default_rng(seed)
     pixscale_deg = pixscale_arcsec / 3600.0
     SEC_PER_DAY = 86400.0    # reused below in the per-epoch loop too
+    # Default family mix: 60% TNO scattered, 25% Centaur, 10% MBA-outer, 5% NEO
+    if family_mix is None:
+        family_mix = {"tno": 0.60, "centaur": 0.25, "mba": 0.10, "neo": 0.05}
 
     # Plant moving objects -- either Keplerian heliocentric orbits or constant-velocity
     if kepler_orbits:
@@ -227,14 +261,30 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
         d_sky = np.array([math.cos(dec_rad) * math.cos(ra_rad),
                            math.cos(dec_rad) * math.sin(ra_rad),
                            math.sin(dec_rad)])
+        # Build a family lookup so we can sample heliocentric distances
+        # from a realistic mixture. Distances in AU per orbital family.
+        family_au_ranges = {
+            "neo":     (0.8, 1.5),
+            "mba":     (2.0, 3.5),
+            "centaur": (8.0, 20.0),
+            "tno":     (40.0, 80.0),
+        }
+        # Build a CDF for sampling
+        fam_names = list(family_mix.keys())
+        fam_weights = np.array([family_mix[n] for n in fam_names], dtype=float)
+        fam_weights /= fam_weights.sum()
+        fam_cdf = np.cumsum(fam_weights)
+
         for k in range(n_real_moving):
-            # Heliocentric distance: random TNO-class
-            rho_km = float(rng.uniform(40, 80)) * AU_KM
-            # Spread the 3 objects spatially within the image cone so they
-            # don't all stack on top of each other at the same pixel. Each
-            # object gets a small (dRA, dDec) jitter of ~0.03 deg.
-            ra_jit = float(rng.uniform(-0.04, 0.04))
-            dec_jit = float(rng.uniform(-0.04, 0.04))
+            # Sample family from the mixture
+            u = float(rng.random())
+            fam_idx = int(np.searchsorted(fam_cdf, u))
+            fam = fam_names[min(fam_idx, len(fam_names) - 1)]
+            lo, hi = family_au_ranges.get(fam, (40.0, 80.0))
+            rho_km = float(rng.uniform(lo, hi)) * AU_KM
+            # Spread the objects across the image cone
+            ra_jit = float(rng.uniform(-cone_radius_deg, cone_radius_deg))
+            dec_jit = float(rng.uniform(-cone_radius_deg, cone_radius_deg))
             ra_obj_rad = math.radians(ra + ra_jit / math.cos(dec_rad))
             dec_obj_rad = math.radians(dec + dec_jit)
             d_sky_obj = np.array([math.cos(dec_obj_rad) * math.cos(ra_obj_rad),
@@ -258,8 +308,8 @@ def synthesise_decam_tile(ra: float, dec: float, n_images: int = 6,
                        + math.sin(tilt) * np.cross(r_hat, tangent))
             v0 = v_circ * v0_dir
             kepler_objects.append({
-                "truth_id": f"kepler_obj_{k:03d}",
-                "family": "kepler_tno",
+                "truth_id": f"kepler_{fam}_{k:04d}",
+                "family": f"kepler_{fam}",
                 "r0": np.asarray(r0), "v0": np.asarray(v0),
                 "a_au": r0_norm / AU_KM, "e": 0.0, "i_deg": tilt_deg,
                 "Omega": 0.0, "omega": 0.0, "M": 0.0,
