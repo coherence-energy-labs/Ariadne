@@ -395,14 +395,16 @@ def _merge_chain_lists(chain_lists: list[list[list[dict]]]) -> list[list[dict]]:
     kept = []
     kept_sigs = []
     for ch, sig, n_nights, n_members in all_chains:
-        # Drop only when this chain's sources are a proper subset of an
-        # already-kept chain (the kept one is at least as long).
-        is_subset = False
+        # Drop when this chain is EQUAL to an already-kept chain (exact
+        # duplicate) OR a proper subset of one (a shorter version was
+        # found by another linker). Keep partial-overlap chains -- they
+        # may be siblings of the same arc that IOD will rank separately.
+        is_subset_or_equal = False
         for ks in kept_sigs:
-            if sig and ks and sig.issubset(ks) and len(sig) < len(ks):
-                is_subset = True
+            if sig and ks and sig.issubset(ks):
+                is_subset_or_equal = True
                 break
-        if not is_subset:
+        if not is_subset_or_equal:
             kept.append(ch)
             kept_sigs.append(sig)
     return kept
@@ -513,7 +515,8 @@ def discover_in_images_chains(tracklets: list[dict], *,
                                 use_probabilistic: bool = True,
                                 use_multipass: bool = True,
                                 use_helio_linc: bool = False,
-                                use_orbit_grow: bool = False
+                                use_orbit_grow: bool = False,
+                                use_nbody_grow: bool = False
                                 ) -> list[list[dict]]:
     """Run every available linking strategy on image tracklets + merge.
 
@@ -526,6 +529,9 @@ def discover_in_images_chains(tracklets: list[dict], *,
         from both nights and re-searching with tighter tolerance.
       * HelioLinC: heliocentric-geometry-aware linker that handles
         long arcs across many weeks where extrapolation accumulates error.
+      * nbody_grow: Pan-STARRS MOF-style seed-and-grow with Sun + Jupiter
+        + Saturn perturbations; catches long-arc chains (months) where
+        2-body propagation drifts enough to miss real detections.
 
     Returns the UNION of chains found, with duplicates merged when they
     share >= 50% of their underlying source detections.
@@ -555,6 +561,15 @@ def discover_in_images_chains(tracklets: list[dict], *,
     if use_orbit_grow:
         try:
             chain_lists.append(orbit_grow_chain(tracklets))
+        except Exception:
+            pass
+    if use_nbody_grow:
+        try:
+            from .nbody_chain_grow import nbody_grow_chain
+            # Kepler-only (use_nbody=False) is much faster and the
+            # difference vs full N-body is sub-arcsec for 6-day arcs.
+            # Switch to use_nbody=True when arcs span >1 month.
+            chain_lists.append(nbody_grow_chain(tracklets, use_nbody=False))
         except Exception:
             pass
     return _merge_chain_lists(chain_lists)

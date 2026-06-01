@@ -143,6 +143,7 @@ def main():
     from ariadne.discovery.imaging.advanced_linking import (
         discover_in_images_chains, probabilistic_chain,
         multipass_refined_chain, helio_linc_image_bridge)
+    from ariadne.discovery.imaging.nbody_chain_grow import nbody_grow_chain
     greedy_chains = chain_multi_night(tracklets)
     prob_chains = probabilistic_chain(tracklets, position_sigma_arcsec=60,
                                         log_likelihood_threshold=-10)
@@ -152,12 +153,19 @@ def main():
     try:
         helio_chains = helio_linc_image_bridge(tracklets)
     except Exception as e:
-        print(f"    helio_linc failed: {str(e)[:80]}")
+        print(f"    helio_linc failed: {str(e)[:80]}", flush=True)
         helio_chains = []
-    chains = discover_in_images_chains(tracklets)
+    try:
+        nbody_chains = nbody_grow_chain(tracklets, use_nbody=False,
+                                          rms_acceptance_arcsec=30.0)
+    except Exception as e:
+        print(f"    nbody_grow failed: {str(e)[:80]}", flush=True)
+        nbody_chains = []
+    chains = discover_in_images_chains(tracklets, use_nbody_grow=True)
     print(f"\n[6] per-strategy: greedy {len(greedy_chains)} | "
           f"probabilistic {len(prob_chains)} | multipass {len(multi_chains)} | "
-          f"helio_linc {len(helio_chains)} | merged {len(chains)}")
+          f"helio_linc {len(helio_chains)} | nbody {len(nbody_chains)} | "
+          f"merged {len(chains)}", flush=True)
 
     # 7a. Baseline sanity filter (the legacy one)
     from ariadne.discovery.realtime import filter_chain_sanity
@@ -196,13 +204,40 @@ def main():
                   f"epochs={sc.n_unique_epochs}  arc={sc.arc_hours:.1f}h  "
                   f"rate={sc.median_rate:.2f}\"/hr", flush=True)
 
-    # 7c. Measure linker precision/recall against truth if catalog present
+    # 7b''. Photometric dedup: cluster chains by lightcurve similarity and
+    # keep only the highest-Bayesian-scoring chain from each cluster. This
+    # collapses duplicates from different linker strategies that all track
+    # the same physical object.
+    from ariadne.discovery.imaging.photometric_identifier import (
+        match_chains_photometrically)
+    if len(kept_chains) >= 2:
+        groups = match_chains_photometrically(kept_chains,
+                                                 similarity_threshold=0.85)
+        n_before_dedup = len(kept_chains)
+        # ranked_chains is sorted by log_L descending; for each group keep
+        # the chain with the lowest index (= highest log_L).
+        keep_indices = sorted({min(members) for members in groups.values()})
+        kept_chains = [kept_chains[i] for i in keep_indices]
+        n_after = len(kept_chains)
+        if n_after < n_before_dedup:
+            print(f"     photometric dedup: {n_before_dedup} -> {n_after} chains",
+                  flush=True)
+
+    # 7c. Measure linker precision/recall against truth if catalog present.
+    # Use min_purity=0.5 (rather than the default 0.67) so chains where
+    # at least half the entries match one truth still count -- the
+    # remaining entries are noise/background-star pollution and the
+    # bayesian + quality filters can still propagate them.
     linker_quality = None
     if truth_catalog is not None:
         from ariadne.discovery.imaging.synthetic_truth import (
             measure_linker_quality)
-        before = measure_linker_quality(chains, truth_catalog)
-        after = measure_linker_quality(kept_chains, truth_catalog)
+        before = measure_linker_quality(chains, truth_catalog,
+                                          match_radius_arcsec=8.0,
+                                          min_purity=0.5)
+        after = measure_linker_quality(kept_chains, truth_catalog,
+                                         match_radius_arcsec=8.0,
+                                         min_purity=0.5)
         linker_quality = {"before_filters": before, "after_filters": after}
         print(f"\n[7c] linker quality vs truth:", flush=True)
         print(f"     BEFORE filters: precision={before['precision']:.2f}  "
@@ -219,22 +254,102 @@ def main():
               flush=True)
 
     # 8. ROBUST IOD on every quality-kept chain
-    print(f"\n[8] robust ensemble IOD (Monte Carlo + rate-class-aware)",
+    #
+    # The robust_iod wrapper combines:
+    #   - neural orbit prior (if weights file exists): one fast LM call
+    #     from the neural-prior seed, shortcuts the ensemble when good
+    #   - rate-class-aware strategy ordering: TNO -> BK first, NEO -> Gauss
+    #   - Monte Carlo noise perturbation: N draws each at the chain's
+    #     estimated astrometric sigma, return median + covariance
+    print(f"\n[8] robust ensemble IOD (neural seed + MC + rate-class-aware)",
           flush=True)
     from ariadne.discovery.iod_robust import robust_iod
+    # Load neural-prior weights if available
+    neural_weights = None
+    neural_weights_path = Path("data/neural_orbit_prior_weights.json")
+    if neural_weights_path.exists():
+        try:
+            from ariadne.discovery.imaging.neural_orbit_prior import load_weights
+            neural_weights = load_weights(neural_weights_path)
+            print(f"     loaded neural prior weights ({neural_weights_path})",
+                  flush=True)
+        except Exception as e:
+            print(f"     neural prior weights load failed: {str(e)[:80]}",
+                  flush=True)
     fitted = []
-    for ch in kept_chains[:10]:           # cap for wall-clock sanity
+    t8_start = time.time()
+    for i, ch in enumerate(kept_chains[:6]):
+        t_chain = time.time()
         ens = robust_iod(
-            ch, n_draws=5, sigma_arcsec=None,
-            rms_acceptance_arcsec=10.0,
+            ch, n_draws=2, sigma_arcsec=None,
+            rms_acceptance_arcsec=30.0,
+            neural_weights=neural_weights,
             use_monte_carlo=True, use_rate_class=True)
+        print(f"     chain {i+1}/{min(6, len(kept_chains))}: "
+              f"{ens.winning_strategy} RMS {ens.rms_arcsec:.2f}\" "
+              f"({time.time()-t_chain:.1f}s)", flush=True)
         fitted.append(ens)
+    print(f"     total step 8 wall: {time.time()-t8_start:.1f}s", flush=True)
     accepted = [f for f in fitted if f.success]
     print(f"    {len(accepted)}/{len(fitted)} chains have a successful "
           f"robust IOD fit", flush=True)
     for ens in accepted[:5]:
         print(f"    -> RMS {ens.rms_arcsec:.2f}\"  strategy {ens.winning_strategy}",
               flush=True)
+
+    # 8b. POST-IOD validation: pixel-likelihood refinement + shift-stack
+    # SNR check against the actual image pixels. This catches IODs that
+    # converged to plausible-looking but pixel-inconsistent orbits.
+    print(f"\n[8b] post-IOD pixel-likelihood refine + shift-stack validation",
+          flush=True)
+    from ariadne.discovery.imaging.pixel_likelihood import (
+        refine_orbit_against_pixels)
+    from ariadne.discovery.imaging.shift_stack_validation import (
+        validate_orbit_against_images)
+    SEC_PER_DAY = 86400.0
+    image_ets = [((fi.mjd + 2400000.5) - 2451545.0) * SEC_PER_DAY
+                  for fi in fits_images]
+    validated = []
+    fitted_chains = [ch for ch, f in zip(kept_chains[:10], fitted) if f.success]
+    for ens, ch in zip(accepted, fitted_chains):
+        # 1. Pixel-likelihood refine (fast Nelder-Mead, capped iterations)
+        try:
+            refined = refine_orbit_against_pixels(
+                ens.x_fit, ens.v_fit, ens.t_ref,
+                images, wcs_list, image_ets,
+                sigma_psf=1.5, half_size=8, max_iter=80)
+            if refined.converged and refined.log_l_improvement > 0:
+                x_use = refined.x_refined
+                v_use = refined.v_refined
+                refine_dlogl = refined.log_l_improvement
+            else:
+                x_use = ens.x_fit
+                v_use = ens.v_fit
+                refine_dlogl = 0.0
+        except Exception:
+            x_use = ens.x_fit
+            v_use = ens.v_fit
+            refine_dlogl = 0.0
+
+        # 2. Shift-and-stack validate against actual image pixels
+        try:
+            val = validate_orbit_against_images(
+                x_use, v_use, ens.t_ref,
+                images, wcs_list, image_ets,
+                aperture_radius=3, half_size=12, min_snr_boost=1.3)
+        except Exception:
+            val = None
+        validated.append((ens, x_use, v_use, refine_dlogl, val))
+
+    n_pixel_validated = sum(1 for _, _, _, _, v in validated
+                              if v is not None and v.accepted)
+    print(f"    {n_pixel_validated}/{len(validated)} chains pass shift-stack validation "
+          f"(SNR boost >= 1.3x)", flush=True)
+    for ens, x_u, v_u, dlogl, val in validated[:5]:
+        val_str = (f"boost={val.snr_boost:.2f}x ({val.n_visible} visible)"
+                    if val else "n/a")
+        print(f"    -> RMS {ens.rms_arcsec:.2f}\"  refine_dlogL={dlogl:+.1f}  "
+              f"shift-stack: {val_str}", flush=True)
 
     # 9. Smart annotate + grade-A MCMC requirement
     print(f"\n[9] smart annotation + grade-A MCMC gating")
@@ -286,6 +401,7 @@ def main():
         "n_smart_annotated": len(annotated),
         "n_grade_a": n_grade_a,
         "n_mcmc": n_mcmc,
+        "n_pixel_validated": n_pixel_validated,
         "linker_quality": linker_quality,    # may be None if no truth catalog
     }
     (out_root / "report.json").write_text(

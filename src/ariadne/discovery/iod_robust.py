@@ -205,12 +205,47 @@ def monte_carlo_iod(chain: Sequence[dict], *,
     )
 
 
+def _try_neural_seed(chain: Sequence[dict], *,
+                       neural_weights: dict,
+                       rms_acceptance_arcsec: float) -> IODA.EnsembleFit | None:
+    """Try LM refining the neural-prior prediction as a single seed.
+
+    Returns an EnsembleFit if the refinement succeeded (RMS <= acceptance),
+    else None so the caller falls through to the multi-strategy ensemble.
+    """
+    try:
+        from .imaging.neural_orbit_prior import (
+            build_chain_features, predict_initial_state_normalised)
+    except Exception:
+        return None
+    feats = build_chain_features(chain)
+    try:
+        x_init, v_init = predict_initial_state_normalised(feats, neural_weights)
+    except Exception:
+        return None
+    t_ref = float(np.median([t["t"] for t in chain]))
+    try:
+        rms, x_fit, v_fit, nfev, ok = IODA._refine_with_lm(
+            chain, t_ref, x_init, v_init)
+    except Exception:
+        return None
+    if not ok or rms > rms_acceptance_arcsec:
+        return None
+    return IODA.EnsembleFit(
+        success=True, x_fit=x_fit, v_fit=v_fit,
+        rms_arcsec=float(rms), t_ref=float(t_ref),
+        winning_strategy="neural_prior", strategy_results=[],
+        seed_rms_arcsec=float(rms), nfev=int(nfev),
+        notes="seeded by neural orbit prior")
+
+
 def robust_iod(chain: Sequence[dict], *,
                 n_draws: int = 16,
                 sigma_arcsec: float | None = None,
                 rms_acceptance_arcsec: float = 5.0,
                 use_monte_carlo: bool = True,
                 use_rate_class: bool = True,
+                neural_weights: dict | None = None,
                 seed: int = 0,
                 **ensemble_kwargs) -> IODA.EnsembleFit:
     """Top-level robust-IOD entry point.
@@ -227,6 +262,16 @@ def robust_iod(chain: Sequence[dict], *,
     wrapped in a Monte Carlo loop with the chain's estimated astrometric
     sigma.
     """
+    # Step 0: try the neural prior as a single fast seed.
+    # When the prior is well-trained, this converges in one LM call
+    # without needing to grind through the 4-strategy ensemble.
+    if neural_weights is not None:
+        seeded = _try_neural_seed(chain,
+                                    neural_weights=neural_weights,
+                                    rms_acceptance_arcsec=rms_acceptance_arcsec)
+        if seeded is not None:
+            return seeded
+
     if use_rate_class:
         median_rate = chain_median_rate(chain)
         strategy_order = tuple(rate_class_strategy_order(median_rate))

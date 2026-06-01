@@ -171,6 +171,10 @@ def predict_initial_state(features: np.ndarray,
                             weights: dict | None = None) -> tuple[np.ndarray, np.ndarray]:
     """Forward-pass: features -> (x_km, v_km_s).
 
+    The MLP outputs are in BALANCED units (position in AU/50, velocity
+    in km/s/5) so position and velocity have comparable magnitudes
+    during training. We unscale here for the caller.
+
     If `weights` is None, fall back to a deterministic heuristic that
     places the seed at 50 AU heliocentric along the median sky direction,
     with a circular-orbit velocity. Useful when no trained weights are
@@ -180,11 +184,9 @@ def predict_initial_state(features: np.ndarray,
         return _heuristic_initial_state(features)
     y, _ = _forward(features, weights)
     y = y.squeeze()
-    # Output scaling: y is in (AU, AU/day) -- unscale to (km, km/s)
-    x_au = y[:3]
-    v_au_day = y[3:]
-    x_km = x_au * AU_KM
-    v_km_s = v_au_day * AU_KM / 86400.0
+    # Output unscaling: position in (AU/50) -> km, velocity in (km/s / 5) -> km/s
+    x_km = y[:3] * 50.0 * AU_KM
+    v_km_s = y[3:] * 5.0
     return x_km, v_km_s
 
 
@@ -273,8 +275,10 @@ def _generate_training_example(rng: np.random.Generator) -> tuple:
                           "mag": rng.uniform(20, 23)})
 
     features = build_chain_features(obs_dicts)
-    # Target = (x_au, v_au_per_day)
-    target = np.concatenate([r0 / AU_KM, v0 * 86400.0 / AU_KM])
+    # Target = (x_au/50, v_km_s/5)  -- both ~O(1) for balanced gradients
+    x_scaled = r0 / (50.0 * AU_KM)
+    v_scaled = v0 / 5.0
+    target = np.concatenate([x_scaled, v_scaled])
     return features, target.astype(np.float32)
 
 
