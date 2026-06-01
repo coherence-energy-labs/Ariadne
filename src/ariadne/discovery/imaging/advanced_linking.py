@@ -512,10 +512,10 @@ def _grow_from_seed(seed_chain, all_tracklets, rms_acceptance, max_len):
 
 def multi_hypothesis_chain(tracklets: list[dict],
                              *, max_nights_gap: int = 14,
-                             position_sigma_arcsec: float = 30.0,
-                             rate_sigma_pct: float = 30.0,
-                             log_likelihood_threshold: float = -10.0,
-                             max_matches_per_tracklet: int = 4,
+                             position_sigma_arcsec: float = 45.0,
+                             rate_sigma_pct: float = 40.0,
+                             log_likelihood_threshold: float = -15.0,
+                             max_matches_per_tracklet: int = 5,
                              ) -> list[list[dict]]:
     """Multi-hypothesis linker: for each tracklet, generate up to
     `max_matches_per_tracklet` candidate next-night matches above the

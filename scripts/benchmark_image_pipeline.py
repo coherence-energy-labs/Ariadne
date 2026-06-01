@@ -119,6 +119,26 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
                               max_rate_arcsec_hr=10.0,
                               min_pair_separation_arcsec=0.5,
                               max_per_night=1500)
+
+    # FORCED PHOTOMETRY at 3.5-sigma -- disabled in the default benchmark
+    # because at 30-truth scale it added more false positives (which
+    # polluted downstream chains) than it recovered. Will help on very
+    # sparse fields or when the standard pipeline misses the second
+    # detection per night. Enable by uncommenting:
+    # from ariadne.discovery.imaging.forced_photometry import (
+    #     enrich_sources_via_tracklets)
+    # try:
+    #     enriched = enrich_sources_via_tracklets(
+    #         imgs, wcs_list, [fi.mjd for fi in fits],
+    #         [str(fi.path) for fi in fits],
+    #         tracklets=trks, point_sources=point_srcs,
+    #         psf_sigma_pix=1.5, snr_threshold=3.5,
+    #         max_extrapolation_days=14.0)
+    #     if len(enriched) > len(point_srcs):
+    #         point_srcs = enriched
+    #         trks = nightly_tracklets(point_srcs, ...)
+    # except Exception:
+    #     pass
     # Per-truth tracklet coverage
     truth_tracklet_counts = Counter()
     for tr in trks:
@@ -166,7 +186,7 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
         chains, max_rate_spread=0.8, max_mag_std=1.0,
         min_unique_epochs=2, min_arc_hours=6.0)
     ranked, _ = filter_chains_by_likelihood(
-        kept, log_l_threshold=-1e9, max_chains=80)
+        kept, log_l_threshold=-1e9, max_chains=300)
     kept = ranked
 
     # Linker quality vs truth
