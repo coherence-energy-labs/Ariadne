@@ -22,7 +22,7 @@
   "n_smart_annotated": 3,
   "n_grade_a": 0,
   "n_mcmc": 0,
-  "n_pixel_validated": 0,
+  "n_pixel_validated": 2,
   "linker_quality": {
     "before_filters": {
       "n_chains": 27,

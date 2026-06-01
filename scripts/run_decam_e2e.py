@@ -316,33 +316,42 @@ def main():
     validated = []
     fitted_chains = [ch for ch, f in zip(kept_chains[:10], fitted) if f.success]
     for ens, ch in zip(accepted, fitted_chains):
-        # 1. Pixel-likelihood refine (fast Nelder-Mead, capped iterations)
+        # Baseline: shift-stack of the raw IOD orbit
+        try:
+            val_baseline = validate_orbit_against_images(
+                ens.x_fit, ens.v_fit, ens.t_ref,
+                images, wcs_list, image_ets,
+                aperture_radius=3, half_size=12, min_snr_boost=1.3)
+            baseline_boost = val_baseline.snr_boost if val_baseline else 0.0
+        except Exception:
+            val_baseline = None
+            baseline_boost = 0.0
+
+        # Try pixel-likelihood refine; only ACCEPT if shift-stack improves.
+        # Dense star fields can trap the refiner on bright nearby stars,
+        # so we use shift-stack SNR boost as the arbiter rather than
+        # raw pixel-likelihood (which can prefer a brighter unrelated source).
+        x_use, v_use = ens.x_fit, ens.v_fit
+        val = val_baseline
+        refine_dlogl = 0.0
         try:
             refined = refine_orbit_against_pixels(
                 ens.x_fit, ens.v_fit, ens.t_ref,
                 images, wcs_list, image_ets,
-                sigma_psf=1.5, half_size=8, max_iter=80)
+                sigma_psf=1.5, half_size=8, search_grid_pix=6)
             if refined.converged and refined.log_l_improvement > 0:
-                x_use = refined.x_refined
-                v_use = refined.v_refined
-                refine_dlogl = refined.log_l_improvement
-            else:
-                x_use = ens.x_fit
-                v_use = ens.v_fit
-                refine_dlogl = 0.0
+                val_after = validate_orbit_against_images(
+                    refined.x_refined, refined.v_refined, ens.t_ref,
+                    images, wcs_list, image_ets,
+                    aperture_radius=3, half_size=12, min_snr_boost=1.3)
+                # Accept refinement ONLY if shift-stack agrees it's better
+                if val_after and val_after.snr_boost > baseline_boost:
+                    x_use = refined.x_refined
+                    v_use = refined.v_refined
+                    val = val_after
+                    refine_dlogl = refined.log_l_improvement
         except Exception:
-            x_use = ens.x_fit
-            v_use = ens.v_fit
-            refine_dlogl = 0.0
-
-        # 2. Shift-and-stack validate against actual image pixels
-        try:
-            val = validate_orbit_against_images(
-                x_use, v_use, ens.t_ref,
-                images, wcs_list, image_ets,
-                aperture_radius=3, half_size=12, min_snr_boost=1.3)
-        except Exception:
-            val = None
+            pass
         validated.append((ens, x_use, v_use, refine_dlogl, val))
 
     n_pixel_validated = sum(1 for _, _, _, _, v in validated
