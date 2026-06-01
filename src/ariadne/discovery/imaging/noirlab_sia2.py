@@ -214,10 +214,31 @@ def query_decam_exposures(ra: float, dec: float,
             if rec.band != band:
                 continue
         out.append(rec)
-        if len(out) >= max_results:
+        if len(out) >= max_results * 3:
             break
-    out.sort(key=lambda r: r.obs_mjd)
-    return out
+    # De-duplicate observations that appear multiple times under different
+    # processing versions (CP marks files with _v1, _ls9, etc. suffixes
+    # AFTER the timestamp portion of the filename). The base observation
+    # is identified by the c4d_YYMMDD_HHMMSS prefix.
+    def _obs_key(rec: ExposureRecord) -> str:
+        fn = rec.archive_filename.split("/")[-1]
+        # c4d_YYMMDD_HHMMSS_ooi_..., grab through HHMMSS
+        parts = fn.split("_")
+        if len(parts) >= 3:
+            return "_".join(parts[:3])
+        return fn
+    seen_keys = set()
+    deduped: list[ExposureRecord] = []
+    for rec in out:
+        k = _obs_key(rec)
+        if k in seen_keys:
+            continue
+        seen_keys.add(k)
+        deduped.append(rec)
+        if len(deduped) >= max_results:
+            break
+    deduped.sort(key=lambda r: r.obs_mjd)
+    return deduped
 
 
 def download_decam_exposure(record: ExposureRecord,
