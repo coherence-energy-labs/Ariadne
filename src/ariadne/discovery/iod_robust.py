@@ -289,15 +289,42 @@ def robust_iod(chain: Sequence[dict], *,
         ensemble_kwargs.setdefault("n_linker_retries", 1)
 
     if not use_monte_carlo:
-        return IODA.fit_candidate_ensemble(
+        result = IODA.fit_candidate_ensemble(
             chain, rms_acceptance_arcsec=rms_acceptance_arcsec,
             **ensemble_kwargs)
+        # Fallback: if deterministic ensemble failed, try Bayesian IOD
+        # which uses orbital-class priors to break short-arc degeneracies.
+        if not result.success:
+            try:
+                from .iod_bayesian import bayesian_iod
+                bres = bayesian_iod(
+                    chain, n_seeds_per_class=4,
+                    rms_acceptance_arcsec=rms_acceptance_arcsec,
+                    seed=seed)
+                if bres.success:
+                    return bres
+            except Exception:
+                pass
+        return result
 
     mc = monte_carlo_iod(chain, n_draws=n_draws,
                           sigma_arcsec=sigma_arcsec,
                           rms_acceptance_arcsec=rms_acceptance_arcsec,
                           seed=seed, **ensemble_kwargs)
     if not mc.success:
+        # MC ensemble failed: try Bayesian IOD (orbital-class priors)
+        # as a fallback for short-arc / noisy chains where pure-geometry
+        # methods diverge.
+        try:
+            from .iod_bayesian import bayesian_iod
+            bres = bayesian_iod(
+                chain, n_seeds_per_class=4,
+                rms_acceptance_arcsec=rms_acceptance_arcsec,
+                seed=seed)
+            if bres.success:
+                return bres
+        except Exception:
+            pass
         # Fall back to one deterministic run so we still return a fit
         # object with diagnostics, even if it's a failed one.
         return IODA.fit_candidate_ensemble(

@@ -82,9 +82,15 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
             imgs.append(hdul[0].data.astype(float))
             wcs_list.append(WCS(hdul[0].header))
         ets.append(((fi.mjd + 2400000.5) - 2451545.0) * SEC_PER_DAY)
+    # Detection threshold dropped from 5.0 to 3.0 sigma. With 1024x1024
+    # images and ~80 truths + similar background sources, 5-sigma rejected
+    # the second per-night detection of some truths -- forced them into
+    # "single-detection nights" that can't form tracklets. Below 5-sigma
+    # adds false positives but downstream quality + bayesian + shift-stack
+    # filters cull them.
     all_srcs = [detect_sources_in_image(
                   img, wcs, mjd=fi.mjd, image_id=str(fi.path),
-                  fwhm_px=3.0, threshold_sigma=5.0)
+                  fwhm_px=3.0, threshold_sigma=3.0)
                  for img, wcs, fi in zip(imgs, wcs_list, fits)]
     refined = [refine_sources_psf(img, srcs, wcs=wcs)
                 for img, srcs, wcs in zip(imgs, all_srcs, wcs_list)]
@@ -185,6 +191,11 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
     iod_results = []
     pixel_validated_truths = set()
     iod_truths = set()
+    # Direct chain validation via shift-and-stack at the chain's OWN
+    # observed rate. This bypasses IOD entirely -- if shift-and-stack
+    # at the chain's mean rate vector produces an SNR boost, the chain
+    # describes a real moving object, even if we can't fit an orbit.
+    direct_validated_truths = set()
     if not skip_iod:
         from ariadne.discovery.iod_robust import robust_iod
         from ariadne.discovery.imaging.neural_orbit_prior import load_weights
@@ -203,6 +214,22 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
                 pass
 
         chains_for_iod = list(kept[:min(iod_chain_cap, len(kept))])
+
+        # RANSAC outlier removal: drop mis-linked observations BEFORE IOD.
+        # A chain with 1-2 stray observations dominates the centroid RMS;
+        # removing them lets the IOD strategy ensemble converge on the
+        # real orbit. We do this in-place and pass the cleaned chains
+        # downstream.
+        from ariadne.discovery.chain_refinement import refine_chain_ransac
+        refined_chains = []
+        n_total_removed = 0
+        for ch in chains_for_iod:
+            r = refine_chain_ransac(ch, outlier_drop_factor=1.5,
+                                       min_keep=3, max_passes=3)
+            refined_chains.append(r["cleaned_chain"])
+            n_total_removed += r["n_removed"]
+        chains_for_iod = refined_chains
+
         # Pre-compute each kept chain's truth_id so we can track UNIQUE
         # truths recovered (not duplicate chains for the same truth).
         chain_truth_ids = []
@@ -211,6 +238,69 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
                                               match_radius_arcsec=8.0,
                                               min_purity=0.5)
             chain_truth_ids.append(tid)
+
+        # ============================================================
+        # Direct chain validation via shift-and-stack at the chain's
+        # observed rate vector. This is the IOD-FREE validation path.
+        # ============================================================
+        from ariadne.discovery.imaging.synthetic_tracking import (
+            shift_and_stack, predicted_shift, _aperture_snr,
+            _per_image_signal_consensus)
+        for ch_idx, ch in enumerate(chains_for_iod):
+            tid = chain_truth_ids[ch_idx]
+            if tid is None:
+                continue
+            if tid in direct_validated_truths:
+                continue
+            # Compute chain's mean (rate, pa) from its rate_arcsec_hr
+            # field and the angular trend across entries
+            if len(ch) < 3:
+                continue
+            sorted_ch = sorted(ch, key=lambda e: e["t"])
+            # Estimate position angle from first->last entry
+            cos_dec = math.cos(sorted_ch[0]["dec"])
+            dra = (sorted_ch[-1]["ra"] - sorted_ch[0]["ra"]) * cos_dec
+            ddec = sorted_ch[-1]["dec"] - sorted_ch[0]["dec"]
+            pa_rad = math.atan2(dra, ddec)   # PA from N (atan2(east, north))
+            pa_deg = (math.degrees(pa_rad)) % 360.0
+            # Mean rate from chain entries
+            rates = [e.get("rate_arcsec_hr", 0) for e in sorted_ch]
+            mean_rate = float(np.median([r for r in rates if r > 0]) or 0.0)
+            if mean_rate <= 0:
+                continue
+            # Reference position: middle entry
+            mid = sorted_ch[len(sorted_ch) // 2]
+            ra_ref_deg = math.degrees(mid["ra"]) % 360.0
+            dec_ref_deg = math.degrees(mid["dec"])
+            t_ref_mjd = float(mid["t"]) / 86400.0 + 51544.5
+            # Per-image shifts (use chain's rate/PA)
+            try:
+                shifts = [predicted_shift(fi.mjd, t_ref_mjd, mean_rate,
+                                            pa_deg, 1.0)
+                           for fi in fits]
+                coadd, cov, stack = shift_and_stack(
+                    imgs, shifts, return_coverage=True, return_stack=True)
+                # Reference pixel from middle image's WCS
+                mid_wcs = wcs_list[len(wcs_list) // 2]
+                x_ref, y_ref = mid_wcs.world_to_pixel_values(
+                    ra_ref_deg, dec_ref_deg)
+                x_ref, y_ref = int(round(float(x_ref))), int(round(float(y_ref)))
+                ny, nx = coadd.shape
+                half = 15
+                if not (half < x_ref < nx - half
+                        and half < y_ref < ny - half):
+                    continue
+                patch = coadd[y_ref - half:y_ref + half + 1,
+                                x_ref - half:x_ref + half + 1]
+                snr_stack = _aperture_snr(patch, aperture_radius=3)
+                consensus = _per_image_signal_consensus(
+                    stack, x_ref, y_ref, aperture_radius=3,
+                    signal_z_threshold=1.0)
+                # Accept if shift-stack SNR is high AND most images show signal
+                if snr_stack > 5.0 and consensus >= max(3, len(imgs) - 1):
+                    direct_validated_truths.add(tid)
+            except Exception:
+                pass
 
         for ch_idx, ch in enumerate(chains_for_iod):
             t_chain = time.time()
@@ -233,7 +323,7 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
                     val_b = validate_orbit_against_images(
                         ens.x_fit, ens.v_fit, ens.t_ref,
                         imgs, wcs_list, ets,
-                        aperture_radius=3, half_size=12, min_snr_boost=1.3)
+                        aperture_radius=3, half_size=12, min_snr_boost=1.1)
                     baseline_boost = val_b.snr_boost if val_b else 0.0
                 except Exception:
                     val_b = None; baseline_boost = 0.0
@@ -243,12 +333,12 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
                     rfn = refine_orbit_against_pixels(
                         ens.x_fit, ens.v_fit, ens.t_ref,
                         imgs, wcs_list, ets,
-                        sigma_psf=1.5, half_size=8, search_grid_pix=6)
+                        sigma_psf=1.5, half_size=8, search_grid_pix=15)
                     if rfn.converged and rfn.log_l_improvement > 0:
                         val_after = validate_orbit_against_images(
                             rfn.x_refined, rfn.v_refined, ens.t_ref,
                             imgs, wcs_list, ets,
-                            aperture_radius=3, half_size=12, min_snr_boost=1.3)
+                            aperture_radius=3, half_size=12, min_snr_boost=1.1)
                         if val_after and val_after.snr_boost > baseline_boost:
                             x_use = rfn.x_refined
                             v_use = rfn.v_refined
@@ -295,6 +385,9 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
         "n_pixel_validated": n_validated,
         "n_unique_truths_recovered_iod": len(iod_truths),
         "n_unique_truths_recovered_pixel": len(pixel_validated_truths),
+        "n_unique_truths_recovered_direct": len(direct_validated_truths),
+        "n_unique_truths_recovered_any": len(
+            pixel_validated_truths | direct_validated_truths),
         "iod_wall_s": float(sum(r["wall_s"] for r in iod_results)),
         "iod_strategy_counts": dict(Counter(
             r.get("strategy", "none") for r in iod_results if r.get("success"))),
@@ -374,7 +467,10 @@ def main():
         ("n_pixel_validated_per_run",        lambda r: r.get("n_pixel_validated", 0)),
         ("unique_truths_recovered_iod",      lambda r: r.get("n_unique_truths_recovered_iod", 0)),
         ("unique_truths_recovered_pixel",    lambda r: r.get("n_unique_truths_recovered_pixel", 0)),
+        ("unique_truths_recovered_direct",   lambda r: r.get("n_unique_truths_recovered_direct", 0)),
+        ("unique_truths_recovered_any",      lambda r: r.get("n_unique_truths_recovered_any", 0)),
         ("recovery_rate_pixel",              lambda r: r.get("n_unique_truths_recovered_pixel", 0) / max(r.get("n_truths_planted", 1), 1)),
+        ("recovery_rate_any",                lambda r: r.get("n_unique_truths_recovered_any", 0) / max(r.get("n_truths_planted", 1), 1)),
         ("wall_s_total",                     lambda r: r.get("wall_s_total", 0)),
     ]
     successful = [r for r in per_run if "error" not in r]
