@@ -1,0 +1,59 @@
+{
+  "status": "ok",
+  "query": {
+    "ra": 15.0,
+    "dec": -30.0,
+    "radius": 1.0,
+    "band": "r",
+    "mjd_min": 56000.0,
+    "mjd_max": 58000.0
+  },
+  "n_records": 1,
+  "n_downloaded": 1,
+  "n_ccds_processed": 3,
+  "n_calibrated_sources": 984,
+  "median_gaia_rms_arcsec": 0.10465664865547779,
+  "phase_a_success_threshold_arcsec": 0.2,
+  "phase_a_passed": true,
+  "per_ccd_stats": [
+    {
+      "obs_id": "c4d_161021_032753_ooi_r_v1",
+      "ccdnum": 1,
+      "ccd_name": "S29",
+      "n_raw": 320,
+      "n_refined": 320,
+      "magzero": 29.998,
+      "seeing_arcsec": 5.896326,
+      "gaia_n_matches": 36,
+      "gaia_rms_arcsec": 0.0337980444793263,
+      "gaia_mean_dra_arcsec": 0.026369549804429702,
+      "gaia_mean_ddec_arcsec": 0.0005821308491249511
+    },
+    {
+      "obs_id": "c4d_161021_032753_ooi_r_v1",
+      "ccdnum": 3,
+      "ccd_name": "S31",
+      "n_raw": 329,
+      "n_refined": 329,
+      "magzero": 29.998,
+      "seeing_arcsec": 5.765038,
+      "gaia_n_matches": 49,
+      "gaia_rms_arcsec": 0.10465664865547779,
+      "gaia_mean_dra_arcsec": -0.00698340690673245,
+      "gaia_mean_ddec_arcsec": -0.024104547183867453
+    },
+    {
+      "obs_id": "c4d_161021_032753_ooi_r_v1",
+      "ccdnum": 4,
+      "ccd_name": "S25",
+      "n_raw": 335,
+      "n_refined": 335,
+      "magzero": 29.998,
+      "seeing_arcsec": 5.827884,
+      "gaia_n_matches": 38,
+      "gaia_rms_arcsec": 0.19775239805397138,
+      "gaia_mean_dra_arcsec": 0.02077329482688145,
+      "gaia_mean_ddec_arcsec": -0.009112292763546748
+    }
+  ]
+}
