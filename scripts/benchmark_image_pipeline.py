@@ -425,7 +425,7 @@ def main():
                           help="Synthetic image side length in pixels")
     parser.add_argument("--mc-draws", type=int, default=2,
                           help="Monte Carlo draws per IOD attempt")
-    parser.add_argument("--iod-chain-cap", type=int, default=10,
+    parser.add_argument("--iod-chain-cap", type=int, default=30,
                           help="Max chains per run to feed to IOD")
     parser.add_argument("--skip-iod", action="store_true",
                           help="Skip step 8/8b (faster; linker-only metrics)")
