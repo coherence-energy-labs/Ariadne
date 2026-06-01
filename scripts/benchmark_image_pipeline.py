@@ -156,6 +156,8 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
     }
 
     iod_results = []
+    pixel_validated_truths = set()
+    iod_truths = set()
     if not skip_iod:
         from ariadne.discovery.iod_robust import robust_iod
         from ariadne.discovery.imaging.neural_orbit_prior import load_weights
@@ -163,6 +165,8 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
             refine_orbit_against_pixels)
         from ariadne.discovery.imaging.shift_stack_validation import (
             validate_orbit_against_images)
+        from ariadne.discovery.imaging.synthetic_truth import (
+            assign_truth_to_chain)
         neural_weights = None
         weights_path = Path("data/neural_orbit_prior_weights.json")
         if weights_path.exists():
@@ -171,7 +175,17 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
             except Exception:
                 pass
 
-        for ch in kept[:min(iod_chain_cap, len(kept))]:
+        chains_for_iod = list(kept[:min(iod_chain_cap, len(kept))])
+        # Pre-compute each kept chain's truth_id so we can track UNIQUE
+        # truths recovered (not duplicate chains for the same truth).
+        chain_truth_ids = []
+        for ch in chains_for_iod:
+            tid, _ = assign_truth_to_chain(ch, cat,
+                                              match_radius_arcsec=8.0,
+                                              min_purity=0.5)
+            chain_truth_ids.append(tid)
+
+        for ch_idx, ch in enumerate(chains_for_iod):
             t_chain = time.time()
             try:
                 ens = robust_iod(
@@ -216,6 +230,11 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
                     pass
                 row["snr_boost"] = float(val.snr_boost) if val else 0.0
                 row["validated"] = bool(val and val.accepted)
+                tid = chain_truth_ids[ch_idx]
+                if tid is not None:
+                    iod_truths.add(tid)
+                    if row["validated"]:
+                        pixel_validated_truths.add(tid)
             iod_results.append(row)
 
     n_iod_success = sum(1 for r in iod_results if r.get("success"))
@@ -247,6 +266,8 @@ def run_single_seed(seed: int, n_truths: int, npix: int,
         "n_iod_attempts": len(iod_results),
         "n_iod_success": n_iod_success,
         "n_pixel_validated": n_validated,
+        "n_unique_truths_recovered_iod": len(iod_truths),
+        "n_unique_truths_recovered_pixel": len(pixel_validated_truths),
         "iod_wall_s": float(sum(r["wall_s"] for r in iod_results)),
         "iod_strategy_counts": dict(Counter(
             r.get("strategy", "none") for r in iod_results if r.get("success"))),
@@ -324,6 +345,9 @@ def main():
         ("linker_quality_filtered.f1",       lambda r: r.get("linker_quality_filtered", {}).get("f1", 0)),
         ("n_iod_success_per_run",            lambda r: r.get("n_iod_success", 0)),
         ("n_pixel_validated_per_run",        lambda r: r.get("n_pixel_validated", 0)),
+        ("unique_truths_recovered_iod",      lambda r: r.get("n_unique_truths_recovered_iod", 0)),
+        ("unique_truths_recovered_pixel",    lambda r: r.get("n_unique_truths_recovered_pixel", 0)),
+        ("recovery_rate_pixel",              lambda r: r.get("n_unique_truths_recovered_pixel", 0) / max(r.get("n_truths_planted", 1), 1)),
         ("wall_s_total",                     lambda r: r.get("wall_s_total", 0)),
     ]
     successful = [r for r in per_run if "error" not in r]

@@ -7,25 +7,25 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": false,
-        "wall_s": 0.6162002086639404
+        "wall_s": 0.6291255950927734
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008325338363647461
+        "wall_s": 0.009218692779541016
       },
       {
         "rms_arcsec": 36.967255463920324,
         "strategy": "best_attempt:bernstein_khushalani",
         "success": false,
-        "wall_s": 28.453855276107788
+        "wall_s": 28.115249395370483
       },
       {
         "rms_arcsec": 37.33830795152168,
         "strategy": "best_attempt:bernstein_khushalani",
         "success": false,
-        "wall_s": 29.01494598388672
+        "wall_s": 28.089359521865845
       },
       {
         "rms_arcsec": 14.571028454439759,
@@ -33,13 +33,13 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": true,
-        "wall_s": 0.7154102325439453
+        "wall_s": 0.7022731304168701
       }
     ],
     "iod_strategy_counts": {
       "mc_bernstein_khushalani": 4
     },
-    "iod_wall_s": 104.38921213150024,
+    "iod_wall_s": 103.33160638809204,
     "linker_quality_filtered": {
       "f1": 0.3687150837988826,
       "n_pure_chains": 33,
@@ -64,6 +64,8 @@
     "n_raw_sources": 583,
     "n_tracklets": 64,
     "n_truths_planted": 30,
+    "n_unique_truths_recovered_iod": 3,
+    "n_unique_truths_recovered_pixel": 1,
     "per_stage_truth_attrition": {
       "n_truth_detected": 27,
       "n_truth_in_filtered_chain": 10,
@@ -80,7 +82,7 @@
     },
     "truth_source_coverage_pct": 0.9,
     "truth_tracklet_coverage_pct": 0.6333333333333333,
-    "wall_s_total": 109.14448928833008
+    "wall_s_total": 108.12018847465515
   },
   {
     "iod_rows": [
@@ -88,25 +90,25 @@
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008673906326293945
+        "wall_s": 0.008510112762451172
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.007910966873168945
+        "wall_s": 0.007969856262207031
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008065223693847656
+        "wall_s": 0.007777214050292969
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008347749710083008
+        "wall_s": 0.007835626602172852
       },
       {
         "rms_arcsec": 0.13536373773916827,
@@ -114,13 +116,13 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": false,
-        "wall_s": 0.3857901096343994
+        "wall_s": 0.3732903003692627
       }
     ],
     "iod_strategy_counts": {
       "mc_bernstein_khushalani": 5
     },
-    "iod_wall_s": 2.8730812072753906,
+    "iod_wall_s": 2.749554395675659,
     "linker_quality_filtered": {
       "f1": 0.53125,
       "n_pure_chains": 40,
@@ -145,6 +147,8 @@
     "n_raw_sources": 597,
     "n_tracklets": 84,
     "n_truths_planted": 30,
+    "n_unique_truths_recovered_iod": 2,
+    "n_unique_truths_recovered_pixel": 1,
     "per_stage_truth_attrition": {
       "n_truth_detected": 30,
       "n_truth_in_filtered_chain": 17,
@@ -161,7 +165,7 @@
     },
     "truth_source_coverage_pct": 1.0,
     "truth_tracklet_coverage_pct": 0.8666666666666667,
-    "wall_s_total": 6.821837425231934
+    "wall_s_total": 6.758728981018066
   },
   {
     "iod_rows": [
@@ -169,19 +173,19 @@
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008198976516723633
+        "wall_s": 0.008779048919677734
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.007937908172607422
+        "wall_s": 0.008264303207397461
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.009735107421875
+        "wall_s": 0.008015871047973633
       },
       {
         "rms_arcsec": 0.13145446408905231,
@@ -189,7 +193,7 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": false,
-        "wall_s": 0.5496053695678711
+        "wall_s": 0.5580036640167236
       },
       {
         "rms_arcsec": 12.078005015304345,
@@ -197,13 +201,13 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": false,
-        "wall_s": 0.6808140277862549
+        "wall_s": 0.6771583557128906
       }
     ],
     "iod_strategy_counts": {
       "mc_bernstein_khushalani": 4
     },
-    "iod_wall_s": 2.4977598190307617,
+    "iod_wall_s": 2.470973491668701,
     "linker_quality_filtered": {
       "f1": 0.36241610738255037,
       "n_pure_chains": 27,
@@ -228,6 +232,8 @@
     "n_raw_sources": 594,
     "n_tracklets": 75,
     "n_truths_planted": 30,
+    "n_unique_truths_recovered_iod": 3,
+    "n_unique_truths_recovered_pixel": 1,
     "per_stage_truth_attrition": {
       "n_truth_detected": 26,
       "n_truth_in_filtered_chain": 9,
@@ -244,7 +250,7 @@
     },
     "truth_source_coverage_pct": 0.8666666666666667,
     "truth_tracklet_coverage_pct": 0.6666666666666666,
-    "wall_s_total": 6.155010938644409
+    "wall_s_total": 6.134111404418945
   },
   {
     "iod_rows": [
@@ -252,15 +258,15 @@
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.010416269302368164
+        "wall_s": 0.008285045623779297
       },
       {
         "rms_arcsec": 0.5905117466390631,
         "snr_boost": 0.0,
-        "strategy": "mc_bernstein_khushalani",
+        "strategy": "mc_vaisala",
         "success": true,
         "validated": false,
-        "wall_s": 0.7887699604034424
+        "wall_s": 0.7599866390228271
       },
       {
         "rms_arcsec": 0.23706465167093702,
@@ -268,7 +274,7 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": false,
-        "wall_s": 0.889643669128418
+        "wall_s": 0.8634316921234131
       },
       {
         "rms_arcsec": 13.867220114754819,
@@ -276,7 +282,7 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": true,
-        "wall_s": 0.563992977142334
+        "wall_s": 0.5477440357208252
       },
       {
         "rms_arcsec": 17.665948478819637,
@@ -284,14 +290,14 @@
         "strategy": "mc_bernstein_khushalani",
         "success": true,
         "validated": true,
-        "wall_s": 0.7462179660797119
+        "wall_s": 0.6188704967498779
       }
     ],
     "iod_strategy_counts": {
-      "mc_bernstein_khushalani": 7,
-      "mc_vaisala": 2
+      "mc_bernstein_khushalani": 6,
+      "mc_vaisala": 3
     },
-    "iod_wall_s": 35.48568844795227,
+    "iod_wall_s": 35.60926079750061,
     "linker_quality_filtered": {
       "f1": 0.45321100917431195,
       "n_pure_chains": 38,
@@ -316,6 +322,8 @@
     "n_raw_sources": 592,
     "n_tracklets": 75,
     "n_truths_planted": 30,
+    "n_unique_truths_recovered_iod": 4,
+    "n_unique_truths_recovered_pixel": 3,
     "per_stage_truth_attrition": {
       "n_truth_detected": 27,
       "n_truth_in_filtered_chain": 13,
@@ -332,7 +340,7 @@
     },
     "truth_source_coverage_pct": 0.9,
     "truth_tracklet_coverage_pct": 0.7,
-    "wall_s_total": 39.640912771224976
+    "wall_s_total": 39.81326770782471
   },
   {
     "iod_rows": [
@@ -340,38 +348,38 @@
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008625030517578125
+        "wall_s": 0.00872945785522461
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008297920227050781
+        "wall_s": 0.00790858268737793
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008966207504272461
+        "wall_s": 0.008585929870605469
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.008118391036987305
+        "wall_s": 0.007856130599975586
       },
       {
         "rms_arcsec": Infinity,
         "strategy": "none",
         "success": false,
-        "wall_s": 0.00998377799987793
+        "wall_s": 0.008495807647705078
       }
     ],
     "iod_strategy_counts": {
       "mc_bernstein_khushalani": 2,
       "mc_vaisala": 1
     },
-    "iod_wall_s": 2.5169413089752197,
+    "iod_wall_s": 2.5297577381134033,
     "linker_quality_filtered": {
       "f1": 0.5049180327868854,
       "n_pure_chains": 44,
@@ -396,6 +404,8 @@
     "n_raw_sources": 589,
     "n_tracklets": 88,
     "n_truths_planted": 30,
+    "n_unique_truths_recovered_iod": 3,
+    "n_unique_truths_recovered_pixel": 1,
     "per_stage_truth_attrition": {
       "n_truth_detected": 30,
       "n_truth_in_filtered_chain": 14,
@@ -412,6 +422,6 @@
     },
     "truth_source_coverage_pct": 1.0,
     "truth_tracklet_coverage_pct": 0.8,
-    "wall_s_total": 6.1308629512786865
+    "wall_s_total": 6.212895631790161
   }
 ]
