@@ -1,37 +1,75 @@
 [
   {
-    "iod_rows": [],
-    "iod_strategy_counts": {},
-    "iod_wall_s": 0.0,
-    "linker_quality_filtered": {
-      "f1": 0.3687150837988826,
-      "n_pure_chains": 33,
-      "n_truth_covered": 10,
-      "precision": 0.4125,
-      "recall": 0.3333333333333333
+    "iod_rows": [
+      {
+        "rms_arcsec": 0.23211715839724145,
+        "snr_boost": 0.0,
+        "strategy": "mc_bernstein_khushalani",
+        "success": true,
+        "validated": false,
+        "wall_s": 0.6036415100097656
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.039328813552856445
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.036919593811035156
+      },
+      {
+        "rms_arcsec": 36.967255463920324,
+        "strategy": "best_attempt:bernstein_khushalani",
+        "success": false,
+        "wall_s": 32.058799028396606
+      },
+      {
+        "rms_arcsec": 37.33830795152168,
+        "strategy": "best_attempt:bernstein_khushalani",
+        "success": false,
+        "wall_s": 31.994030714035034
+      }
+    ],
+    "iod_strategy_counts": {
+      "mc_bernstein_khushalani": 20,
+      "mc_vaisala": 1
     },
-    "linker_quality_raw": {
-      "f1": 0.3333333333333333,
+    "iod_wall_s": 207.57182049751282,
+    "linker_quality_filtered": {
+      "f1": 0.35242290748898675,
       "n_pure_chains": 40,
       "n_truth_covered": 12,
-      "precision": 0.2857142857142857,
+      "precision": 0.31496062992125984,
       "recall": 0.4
     },
-    "n_chains_dropped": 17,
-    "n_chains_kept": 80,
-    "n_chains_raw": 140,
-    "n_iod_attempts": 0,
-    "n_iod_success": 0,
-    "n_pixel_validated": 0,
-    "n_point_srcs": 537,
-    "n_raw_sources": 583,
-    "n_tracklets": 64,
+    "linker_quality_raw": {
+      "f1": 0.34567901234567905,
+      "n_pure_chains": 42,
+      "n_truth_covered": 12,
+      "precision": 0.30434782608695654,
+      "recall": 0.4
+    },
+    "n_chains_dropped": 11,
+    "n_chains_kept": 127,
+    "n_chains_raw": 138,
+    "n_iod_attempts": 30,
+    "n_iod_success": 21,
+    "n_pixel_validated": 11,
+    "n_point_srcs": 656,
+    "n_raw_sources": 2963,
+    "n_tracklets": 82,
     "n_truths_planted": 30,
-    "n_unique_truths_recovered_iod": 0,
-    "n_unique_truths_recovered_pixel": 0,
+    "n_unique_truths_recovered_any": 6,
+    "n_unique_truths_recovered_direct": 1,
+    "n_unique_truths_recovered_iod": 6,
+    "n_unique_truths_recovered_pixel": 5,
     "per_stage_truth_attrition": {
       "n_truth_detected": 27,
-      "n_truth_in_filtered_chain": 10,
+      "n_truth_in_filtered_chain": 12,
       "n_truth_in_raw_chain": 12,
       "n_truth_in_tracklet": 19,
       "n_truth_planted": 30
@@ -45,42 +83,80 @@
     },
     "truth_source_coverage_pct": 0.9,
     "truth_tracklet_coverage_pct": 0.6333333333333333,
-    "wall_s_total": 36.69702339172363
+    "wall_s_total": 303.98944544792175
   },
   {
-    "iod_rows": [],
-    "iod_strategy_counts": {},
-    "iod_wall_s": 0.0,
+    "iod_rows": [
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.03460240364074707
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.03633904457092285
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.03423762321472168
+      },
+      {
+        "rms_arcsec": Infinity,
+        "strategy": "none",
+        "success": false,
+        "wall_s": 0.033624887466430664
+      },
+      {
+        "rms_arcsec": 0.13536373773916827,
+        "snr_boost": 0.0,
+        "strategy": "mc_bernstein_khushalani",
+        "success": true,
+        "validated": false,
+        "wall_s": 0.7546675205230713
+      }
+    ],
+    "iod_strategy_counts": {
+      "mc_bernstein_khushalani": 21,
+      "mc_vaisala": 2
+    },
+    "iod_wall_s": 28.2368381023407,
     "linker_quality_filtered": {
-      "f1": 0.53125,
-      "n_pure_chains": 40,
-      "n_truth_covered": 17,
-      "precision": 0.5,
-      "recall": 0.5666666666666667
+      "f1": 0.516815034619189,
+      "n_pure_chains": 55,
+      "n_truth_covered": 19,
+      "precision": 0.4365079365079365,
+      "recall": 0.6333333333333333
     },
     "linker_quality_raw": {
-      "f1": 0.5506666666666666,
-      "n_pure_chains": 59,
-      "n_truth_covered": 21,
-      "precision": 0.45384615384615384,
-      "recall": 0.7
+      "f1": 0.5132743362831859,
+      "n_pure_chains": 58,
+      "n_truth_covered": 20,
+      "precision": 0.4172661870503597,
+      "recall": 0.6666666666666666
     },
-    "n_chains_dropped": 8,
-    "n_chains_kept": 80,
-    "n_chains_raw": 130,
-    "n_iod_attempts": 0,
-    "n_iod_success": 0,
-    "n_pixel_validated": 0,
-    "n_point_srcs": 562,
-    "n_raw_sources": 597,
-    "n_tracklets": 84,
+    "n_chains_dropped": 13,
+    "n_chains_kept": 126,
+    "n_chains_raw": 139,
+    "n_iod_attempts": 30,
+    "n_iod_success": 23,
+    "n_pixel_validated": 9,
+    "n_point_srcs": 658,
+    "n_raw_sources": 2998,
+    "n_tracklets": 95,
     "n_truths_planted": 30,
-    "n_unique_truths_recovered_iod": 0,
-    "n_unique_truths_recovered_pixel": 0,
+    "n_unique_truths_recovered_any": 7,
+    "n_unique_truths_recovered_direct": 5,
+    "n_unique_truths_recovered_iod": 8,
+    "n_unique_truths_recovered_pixel": 5,
     "per_stage_truth_attrition": {
       "n_truth_detected": 30,
-      "n_truth_in_filtered_chain": 17,
-      "n_truth_in_raw_chain": 21,
+      "n_truth_in_filtered_chain": 19,
+      "n_truth_in_raw_chain": 20,
       "n_truth_in_tracklet": 26,
       "n_truth_planted": 30
     },
@@ -93,54 +169,6 @@
     },
     "truth_source_coverage_pct": 1.0,
     "truth_tracklet_coverage_pct": 0.8666666666666667,
-    "wall_s_total": 36.77480220794678
-  },
-  {
-    "iod_rows": [],
-    "iod_strategy_counts": {},
-    "iod_wall_s": 0.0,
-    "linker_quality_filtered": {
-      "f1": 0.36000000000000004,
-      "n_pure_chains": 27,
-      "n_truth_covered": 9,
-      "precision": 0.45,
-      "recall": 0.3
-    },
-    "linker_quality_raw": {
-      "f1": 0.42767295597484273,
-      "n_pure_chains": 34,
-      "n_truth_covered": 12,
-      "precision": 0.4594594594594595,
-      "recall": 0.4
-    },
-    "n_chains_dropped": 14,
-    "n_chains_kept": 60,
-    "n_chains_raw": 74,
-    "n_iod_attempts": 0,
-    "n_iod_success": 0,
-    "n_pixel_validated": 0,
-    "n_point_srcs": 555,
-    "n_raw_sources": 594,
-    "n_tracklets": 75,
-    "n_truths_planted": 30,
-    "n_unique_truths_recovered_iod": 0,
-    "n_unique_truths_recovered_pixel": 0,
-    "per_stage_truth_attrition": {
-      "n_truth_detected": 26,
-      "n_truth_in_filtered_chain": 9,
-      "n_truth_in_raw_chain": 12,
-      "n_truth_in_tracklet": 20,
-      "n_truth_planted": 30
-    },
-    "seed": 1002,
-    "truth_family_distribution": {
-      "kepler_centaur": 22,
-      "kepler_mba": 2,
-      "kepler_neo": 5,
-      "kepler_tno": 88
-    },
-    "truth_source_coverage_pct": 0.8666666666666667,
-    "truth_tracklet_coverage_pct": 0.6666666666666666,
-    "wall_s_total": 36.303205728530884
+    "wall_s_total": 121.82717227935791
   }
 ]
