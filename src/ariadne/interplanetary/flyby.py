@@ -17,7 +17,10 @@ import math
 import numpy as np
 from scipy.optimize import differential_evolution
 
-from ..data.constants import (GM_SUN, GM_EARTH, GM_VENUS, R_EARTH, R_VENUS)
+from ..data.constants import (
+    GM_SUN, GM_EARTH, GM_VENUS, GM_JUPITER, GM_SATURN,
+    R_EARTH, R_VENUS, R_JUPITER, R_SATURN,
+)
 from ..data.ephemeris import body_state, utc
 from ..dynamics.secular import kepler_step
 from ..optimize.lambert import lambert
@@ -27,7 +30,13 @@ DAY = 86400.0
 # flyby bodies -> (GM, body radius km)
 _BODY = {
     "EARTH": (GM_EARTH, R_EARTH),
+    "EARTH BARYCENTER": (GM_EARTH, R_EARTH),
     "VENUS": (GM_VENUS, R_VENUS),
+    "VENUS BARYCENTER": (GM_VENUS, R_VENUS),
+    "JUPITER": (GM_JUPITER, R_JUPITER),
+    "JUPITER BARYCENTER": (GM_JUPITER, R_JUPITER),
+    "SATURN": (GM_SATURN, R_SATURN),
+    "SATURN BARYCENTER": (GM_SATURN, R_SATURN),
 }
 
 

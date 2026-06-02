@@ -47,3 +47,18 @@ docs/sphinx/_build/
 
 # Discovery-engine cached data
 /signalbook-data/
+
+# Local real-survey acquisitions and diagnostics. These are regenerated or
+# downloaded by scripts and are too large/noisy to version directly.
+data/des_snc3/
+data/real_decam_recovery/
+data/real_decam_tracklet/
+data/real_decam_phase_a/
+data/mpc_catalog/
+data/synth_fits/
+data/discovery/
+data/discovery_night_report/
+data/decam_night_report/
+.benchmarks/
+.coverage
+_*.log

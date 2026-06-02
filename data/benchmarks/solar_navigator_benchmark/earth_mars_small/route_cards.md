@@ -1,6 +1,6 @@
 # Solar Navigator Route Cards: EARTH to MARS
 
-- report certificate: `a431a1db1bfb285cec065c13ed5db50bdb22ad039f515b2971fafc66ff6b5606`
+- report certificate: `c622683a3d7bbc94c0a3f8aff4c94fa345269ed6610e5c5508d98c4041050567`
 - routes: `12`
 - fastest: `route_12a8b5753f0a5a`
 - cheapest: `route_360cab946c0202`
@@ -52,6 +52,7 @@
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -74,6 +75,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -96,6 +98,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -118,6 +121,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -140,6 +144,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -162,6 +167,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -184,6 +190,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -206,6 +213,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -228,6 +236,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -250,6 +259,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -272,6 +282,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:
@@ -294,6 +305,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 
 Validations:

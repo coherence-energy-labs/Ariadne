@@ -1,0 +1,189 @@
+{
+  "corpus_path": "data\\benchmarks\\real_corpus_mpc_500\\labelled_cases.jsonl",
+  "heldout_adversarial_mutations": {
+    "baseline": {
+      "accuracy": 0.8102189781021898,
+      "brier": 0.026566579106171977,
+      "calibration": {
+        "channel_weights": {},
+        "class_temperatures": {},
+        "label_bias": {},
+        "temperature": 1.0,
+        "version": "manual-v1"
+      },
+      "certificate_hash": "91aeb36e9a57eeb1201dbd322656bd61f0412e113b55364b88a2b335d1b7b727",
+      "ece": 0.038318767481060584,
+      "failures": 156,
+      "macro_f1": 0.8476854507744583,
+      "macro_precision": 1.0,
+      "macro_recall": 0.7387152777777778,
+      "n": 822,
+      "nll": 0.0912680032461324,
+      "safe_accuracy": 1.0
+    },
+    "delta": {
+      "accuracy": 0.0,
+      "brier": -0.006162579021116315,
+      "ece": -0.022898600483684067,
+      "failures": 0,
+      "macro_f1": 0.0,
+      "macro_precision": 0.0,
+      "macro_recall": 0.0,
+      "nll": 0.032085963946831,
+      "safe_accuracy": 0.0
+    },
+    "trained_calibration": {
+      "channel_weights": {
+        "artifact_context": 1.0,
+        "magnitude": 2.0,
+        "morphology": 0.75,
+        "orbit_fit": 2.0,
+        "rate": 2.0
+      },
+      "class_temperatures": {},
+      "label_bias": {
+        "AMOR": -2.25,
+        "HILDA": 0.75,
+        "HUNGARIA": 1.5,
+        "IMB": 1.5,
+        "MARS_CROSSER": 0.75,
+        "MBA": -0.75,
+        "OMB": -0.75,
+        "THULE": 3.0
+      },
+      "temperature": 0.5,
+      "version": "label-bias-search-v1"
+    },
+    "tuned": {
+      "accuracy": 0.8102189781021898,
+      "brier": 0.020404000085055662,
+      "calibration": {
+        "channel_weights": {
+          "artifact_context": 1.0,
+          "magnitude": 2.0,
+          "morphology": 0.75,
+          "orbit_fit": 2.0,
+          "rate": 2.0
+        },
+        "class_temperatures": {},
+        "label_bias": {
+          "AMOR": -2.25,
+          "HILDA": 0.75,
+          "HUNGARIA": 1.5,
+          "IMB": 1.5,
+          "MARS_CROSSER": 0.75,
+          "MBA": -0.75,
+          "OMB": -0.75,
+          "THULE": 3.0
+        },
+        "temperature": 0.5,
+        "version": "label-bias-search-v1"
+      },
+      "certificate_hash": "017f9c0e15b6eb927bbdbe0d7de6de74c2459885234b87728faccd03dd20cab9",
+      "ece": 0.015420166997376517,
+      "failures": 156,
+      "macro_f1": 0.8476854507744583,
+      "macro_precision": 1.0,
+      "macro_recall": 0.7387152777777778,
+      "n": 822,
+      "nll": 0.1233539671929634,
+      "safe_accuracy": 1.0
+    }
+  },
+  "heldout_real_corpus": {
+    "baseline": {
+      "accuracy": 1.0,
+      "brier": 7.631559751447494e-05,
+      "calibration": {
+        "channel_weights": {},
+        "class_temperatures": {},
+        "label_bias": {},
+        "temperature": 1.0,
+        "version": "manual-v1"
+      },
+      "certificate_hash": "3ba3bc8c13ddb27c993339960f329b44a7621a577a34ba9d1ebd14870dcd1040",
+      "ece": 0.0028298846914051046,
+      "failures": 0,
+      "macro_f1": 1.0,
+      "macro_precision": 1.0,
+      "macro_recall": 1.0,
+      "n": 137,
+      "nll": 0.002868910630104105,
+      "safe_accuracy": 1.0
+    },
+    "delta": {
+      "accuracy": 0.0,
+      "brier": -7.631559751447494e-05,
+      "ece": -0.002829884675508154,
+      "failures": 0,
+      "macro_f1": 0.0,
+      "macro_precision": 0.0,
+      "macro_recall": 0.0,
+      "nll": -0.0028689106142072056,
+      "safe_accuracy": 0.0
+    },
+    "trained_calibration": {
+      "channel_weights": {
+        "artifact_context": 1.0,
+        "magnitude": 2.0,
+        "morphology": 0.75,
+        "orbit_fit": 2.0,
+        "rate": 2.0
+      },
+      "class_temperatures": {},
+      "label_bias": {
+        "AMOR": -2.25,
+        "HILDA": 0.75,
+        "HUNGARIA": 1.5,
+        "IMB": 1.5,
+        "MARS_CROSSER": 0.75,
+        "MBA": -0.75,
+        "OMB": -0.75,
+        "THULE": 3.0
+      },
+      "temperature": 0.5,
+      "version": "label-bias-search-v1"
+    },
+    "tuned": {
+      "accuracy": 1.0,
+      "brier": 5.665766285103146e-21,
+      "calibration": {
+        "channel_weights": {
+          "artifact_context": 1.0,
+          "magnitude": 2.0,
+          "morphology": 0.75,
+          "orbit_fit": 2.0,
+          "rate": 2.0
+        },
+        "class_temperatures": {},
+        "label_bias": {
+          "AMOR": -2.25,
+          "HILDA": 0.75,
+          "HUNGARIA": 1.5,
+          "IMB": 1.5,
+          "MARS_CROSSER": 0.75,
+          "MBA": -0.75,
+          "OMB": -0.75,
+          "THULE": 3.0
+        },
+        "temperature": 0.5,
+        "version": "label-bias-search-v1"
+      },
+      "certificate_hash": "a250faac28a92d6a0c6ad561bb2535cc3cc6f44fac203ed207941a6628af5c7c",
+      "ece": 1.589695042270023e-11,
+      "failures": 0,
+      "macro_f1": 1.0,
+      "macro_precision": 1.0,
+      "macro_recall": 1.0,
+      "n": 137,
+      "nll": 1.5896899371481615e-11,
+      "safe_accuracy": 1.0
+    }
+  },
+  "n_adversarial_eval": 822,
+  "n_cases": 500,
+  "n_eval": 137,
+  "n_train": 363,
+  "schema": "ariadne.engine_improvement_benchmark.v1",
+  "train_percent": 70
+}

@@ -95,7 +95,10 @@ def test_mpc_emit_submission_with_header():
         Alert(survey="ZTF", alert_id="a2", obj_id="x1", mjd=60450.05, ra=180.001,
               dec=20.0001, mag=21.3, band="r", meta={}),
     ]
-    text = emit_submission(header, [(cand, alerts)])
+    # This test verifies 80-col record FORMATTING, not the grade-A gate
+    # (which would skip this minimal candidate for lacking MCMC/observations).
+    text = emit_submission(header, [(cand, alerts)],
+                             enforce_grade_a_gate=False)
     lines = text.splitlines()
     assert any(line.startswith("COD 500") for line in lines)
     body_lines = [line for line in lines if len(line) == 80]

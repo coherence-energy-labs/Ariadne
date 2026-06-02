@@ -41,11 +41,17 @@ class RealBogusVerdict:
       bogus_score:       0..1, total weighted score from all rules that fired.
       rules_fired:       list of (rule_name, contribution) pairs.
       threshold:         the cutoff used to decide is_real.
+      severity:          low/medium/high/critical risk bucket.
+      action:            keep/review/discard operator recommendation.
+      explanation:       compact human-readable reason.
     """
     is_real: bool
     bogus_score: float
     rules_fired: list
     threshold: float
+    severity: str = "low"
+    action: str = "keep"
+    explanation: str = ""
 
 
 # --------------- single-detection rules (operate on Source/morphology) ----
@@ -185,6 +191,42 @@ def rule_high_rms_fit(tracklet: dict, *, max_rms_arcsec: float = 30.0) -> float:
     return 0.0
 
 
+def rule_short_arc_artefact_risk(tracklet: dict) -> float:
+    """Short arcs are underdetermined; weak artifact-looking chains need review."""
+    members = tracklet.get("members") or []
+    n = len(members) if members else int(tracklet.get("n_detections", 0) or 0)
+    arc = tracklet.get("arc_days")
+    if arc is None and members and hasattr(members[0], "mjd"):
+        mjds = [m.mjd for m in members]
+        arc = max(mjds) - min(mjds)
+    if n and n <= 2 and arc is not None and arc <= 0.1:
+        return 0.35
+    return 0.0
+
+
+def risk_bucket(score: float) -> str:
+    if score >= 0.9:
+        return "critical"
+    if score >= 0.6:
+        return "high"
+    if score >= 0.3:
+        return "medium"
+    return "low"
+
+
+def recommended_action(score: float, rules_fired: list) -> str:
+    names = {name for name, _ in rules_fired}
+    if score >= 0.9:
+        return "discard"
+    if "short_arc_artefact_risk" in names and score >= 0.3:
+        return "review"
+    if score >= 0.6:
+        return "discard"
+    if score >= 0.3:
+        return "review"
+    return "keep"
+
+
 # --------------- composite scorer ----------------------------------------
 
 DEFAULT_RULES = (
@@ -193,6 +235,7 @@ DEFAULT_RULES = (
     ("same_pixel_stacking", rule_same_pixel_stacking, 1.0),
     ("collinear_unequal_spacing", rule_collinear_but_unequal_spacing, 1.0),
     ("high_rms_fit", rule_high_rms_fit, 1.0),
+    ("short_arc_artefact_risk", rule_short_arc_artefact_risk, 1.0),
 )
 
 
@@ -229,11 +272,20 @@ def score_realbogus(tracklet: dict,
                 fired.append((name, s))
                 total += s
     total = min(1.0, total)             # cap so multiple rules don't oversaturate
+    action = recommended_action(total, fired)
+    severity = risk_bucket(total)
+    explanation = (
+        "no bogus rules fired" if not fired
+        else ", ".join(f"{name}:{score:.2f}" for name, score in fired[:4])
+    )
     return RealBogusVerdict(
-        is_real=(total < threshold),
+        is_real=(total < threshold and action != "discard"),
         bogus_score=total,
         rules_fired=fired,
         threshold=threshold,
+        severity=severity,
+        action=action,
+        explanation=explanation,
     )
 
 

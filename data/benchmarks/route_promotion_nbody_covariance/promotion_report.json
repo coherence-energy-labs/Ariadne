@@ -1,0 +1,1787 @@
+{
+  "certificate_hash": "0e22b9f7ca8b1d3a45abeeef30c865b5db12f937c2228bbf90234e1a810c59d2",
+  "certificates": [
+    {
+      "certificate_hash": "2ba362e8829852e615a0dbffc20e2332e61d4eb98e3c1a0b572166d555e93205",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "1c6467fbd01206d71b7e7c95da92f46661a721d216abb294bb9ddee0038f471f",
+      "route_id": "route_360cab946c0202",
+      "route_name": "direct_optimized",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.716245869853926,
+            "c3_km2_s2": 9.18214113116599,
+            "risk": 0.27054152899513084,
+            "tof_days": 292.3272916143833,
+            "total_dv_ms": 3633.7767237682933
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "c1bb6f1f53ee96ef974820d26dfc2002d91182353044a2b308db35c2303174cb",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.2883858231320984,
+            "max_position_residual_km": 1.4661006054549715,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7343988139676898,
+            "tof_days": 292.3272916143833,
+            "uncorrected_position_residual_km": 35388.08509176103
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "886e6bff5475d7c79068154d3abfae5e0768c1d15de6a42a3a1c5cad3883c624",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 35388.08509176103,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 78.37801437933372,
+            "position_3sigma_km": 235.13404313800118,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 292.3272916143833
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "b386b27acd84beb781d486f2c18b2193902f36898543f419adc83dd8bc68750b",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "7576684fef142782ebd2ef3880f518d6d01369537ea3523dca4a7bb85218a78f",
+      "route_id": "route_182991ad071d1b",
+      "route_name": "direct_pareto_07",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.778148243111514,
+            "c3_km2_s2": 11.081177034723648,
+            "risk": 0.27260494143705044,
+            "tof_days": 304.61538461538464,
+            "total_dv_ms": 3716.635541191946
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "e6767f20e912060698496154fa0503d9940e392f08e42c92cc71bb129821a0dd",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.155301651348306,
+            "max_position_residual_km": 0.9851515526325109,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 1.2167655613064443,
+            "tof_days": 304.61538461538464,
+            "uncorrected_position_residual_km": 22965.02168612731
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "84a83cb3cb681fab9b3550895c015b9f7c37dc9f205f4607df07351814f6f851",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 22965.02168612731,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 90.67507623237888,
+            "position_3sigma_km": 272.02522869713664,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 304.61538461538464
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "e4580a5c1d02e1b9f9abb521908a5c28eaf0d7ca0294fd05f8356eae3a336f85",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "6b8808d89f7fd5a4a941dd6b44c62f72e508396ff05a30167a9957d36b0748c7",
+      "route_id": "route_a44f44159e470f",
+      "route_name": "direct_pareto_08",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.8545075778929263,
+            "c3_km2_s2": 10.929656148559136,
+            "risk": 0.2751502525964309,
+            "tof_days": 327.6923076923077,
+            "total_dv_ms": 3710.0463029253215
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "5f1d6ee6945c4e454bd995c4745ed2d959142903d458aa521d9ec35ff08706ac",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.7073038932275681,
+            "max_position_residual_km": 4.708987414008088,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.6681106645156716,
+            "tof_days": 327.6923076923077,
+            "uncorrected_position_residual_km": 47376.69132566891
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "556a1c8bb51c134965a4350aab6546b21a0e782abcfbe78d87c291880702f50a",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 47376.69132566891,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 77.92281829272896,
+            "position_3sigma_km": 233.7684548781869,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 327.6923076923077
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "9d2497dc8558e8ca6b6c549b9c98b0066fa1dd7bdfdde57c5f2ca4df45aa5f45",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "3fcfb2ab2d8689df7ef0dcc59bd21ce4971baf66fe0e523f71332ce315e61e2b",
+      "route_id": "route_55443dabbedea8",
+      "route_name": "direct_pareto_06",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.105190407245941,
+            "c3_km2_s2": 11.76378916626027,
+            "risk": 0.28350634690819804,
+            "tof_days": 258.46153846153845,
+            "total_dv_ms": 3746.2738246318822
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "c195af8f78613a2c5883af67f31c981ba65fe582bad26c3f91860ee4c8c9c8fc",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.1952275060597937,
+            "max_position_residual_km": 1.2204304092822822,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.568440864415957,
+            "tof_days": 258.46153846153845,
+            "uncorrected_position_residual_km": 31031.23352362123
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "0eed69587e17e537bf772133fca030135f166ef38be4184c2e296ba44b76fb3b",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 31031.23352362123,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 57.69508879679644,
+            "position_3sigma_km": 173.08526639038934,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 258.46153846153845
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "b086c519d4b34b7063fc828e00b43e63f02db2edf12067952f9bd43228e82077",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "d7684b7532347849ff23230705dc63888c05e579f5396c13026813dffbc6be7f",
+      "route_id": "route_3aba93786458ab",
+      "route_name": "direct_grid_best",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.3288944518528236,
+            "c3_km2_s2": 10.414212417260643,
+            "risk": 0.29096314839509413,
+            "tof_days": 350.7692307692308,
+            "total_dv_ms": 3687.602696609873
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "d1f5c427e8660a4c1bbdf7b203d9bcf682d036ef1608f829b343ac547c5260e4",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.813872629811728,
+            "max_position_residual_km": 6.284516579167854,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.9811547212701818,
+            "tof_days": 350.7692307692308,
+            "uncorrected_position_residual_km": 48505.99835960333
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "88481af044f8b49c6b26e6907cbad567c62a85eae27ed2d30009725ea7d17f7b",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 48505.99835960333,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 90.01041396712414,
+            "position_3sigma_km": 270.0312419013724,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 350.7692307692308
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "c7af8d770faa2510f53671a3cbf98889d984f78c48a661f29b9e09a7d72f3c3d",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "8462086b93da04edfbef2a9f9501e14fe8054517b77fc1c2737b15ad917b7819",
+      "route_id": "route_b4623ccb507a80",
+      "route_name": "direct_pareto_09",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.3288944518528236,
+            "c3_km2_s2": 10.414212417260643,
+            "risk": 0.29096314839509413,
+            "tof_days": 350.7692307692308,
+            "total_dv_ms": 3687.602696609873
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "d1f5c427e8660a4c1bbdf7b203d9bcf682d036ef1608f829b343ac547c5260e4",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.813872629811728,
+            "max_position_residual_km": 6.284516579167854,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.9811547212701818,
+            "tof_days": 350.7692307692308,
+            "uncorrected_position_residual_km": 48505.99835960333
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "88481af044f8b49c6b26e6907cbad567c62a85eae27ed2d30009725ea7d17f7b",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 48505.99835960333,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 90.01041396712414,
+            "position_3sigma_km": 270.0312419013724,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 350.7692307692308
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "1a25974fa77d8e5136f648e3d981b5d91117a992448d1b41e4bf4b8b1ed75a2f",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "25a89e5088ccd41bcab10bed450917fdd2d58207536a1e81653ef2f878dc9163",
+      "route_id": "route_0d2b2c5634c4c1",
+      "route_name": "direct_pareto_05",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.8937110326867606,
+            "c3_km2_s2": 12.565346732086883,
+            "risk": 0.30979036775622537,
+            "tof_days": 235.3846153846154,
+            "total_dv_ms": 3780.9796313154316
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "6ba378eed784fdf385f5a25e517620252bc05e1b6bf18f0620513d7e537b119a",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.0601621304050088,
+            "max_position_residual_km": 0.5550418876811233,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.6737471145923878,
+            "tof_days": 235.3846153846154,
+            "uncorrected_position_residual_km": 24196.336123603716
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "aae94a5d4163bb6f7e5ea80cd789f97687aa59fc4a508c557059782d5cd09957",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 24196.336123603716,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 49.97996134662097,
+            "position_3sigma_km": 149.9398840398629,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 235.3846153846154
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "667ccd02bdab1a68a1e0428a7609b42ba3180c0eb24b1cda2a4c32deb760ed7e",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "bfdbadb15271fd873cf104080ebac9cf12bc688613ec77675a8a25fad50fd3a1",
+      "route_id": "route_ea9b5405819713",
+      "route_name": "direct_pareto_04",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 5.036099525697785,
+            "c3_km2_s2": 13.70859582006064,
+            "risk": 0.34786998418992615,
+            "tof_days": 212.30769230769232,
+            "total_dv_ms": 3830.300544909606
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "56e1df676c9fb085f28bd793f9edce75e1bedcfa41b52132720ee08b3d5b08bb",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.9498741625579193,
+            "max_position_residual_km": 0.16360239598691045,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7421275170172502,
+            "tof_days": 212.30769230769232,
+            "uncorrected_position_residual_km": 17962.92969913962
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "cbf603fcf0547d5bff265199f884a063192e5498a5308cb1ece0cc09dbab8d87",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 17962.92969913962,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 42.48178959423695,
+            "position_3sigma_km": 127.44536878271086,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 212.30769230769232
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "df18fca470221479a596821c0f45fd20d02802880c106eba3b238b8ac6f39cf9",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "a1d273e8d21d379184fdafc96f1378b32766782e33bbfa684650d8a63c3287cd",
+      "route_id": "route_3a1673f6b2eac3",
+      "route_name": "direct_pareto_knee",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 6.55974030932064,
+            "c3_km2_s2": 16.39580705813856,
+            "risk": 0.398658010310688,
+            "tof_days": 189.23076923076923,
+            "total_dv_ms": 3945.4129494556696
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "593d19dc977098f9c6f9561878a3f00be5e5a44cce1d52494f48c6b8c9d798e6",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.8699970479165848,
+            "max_position_residual_km": 0.02715693548134783,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.76941027427342,
+            "tof_days": 189.23076923076923,
+            "uncorrected_position_residual_km": 12796.579329347887
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "e3f3f85926eb97ead53a806316b9dcc86876f184bd59c97927f70de168116a4e",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 12796.579329347887,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 35.27089618504427,
+            "position_3sigma_km": 105.81268855513281,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 189.23076923076923
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "3a4b8aceb72f73523a391c2b18f2c926414440d318e53314ebfb05ec3ce9c47a",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "e2d55f1e4c2365573da8de5694b1d4a7db7d9ac7e1edf5534244af65458e8425",
+      "route_id": "route_da892619bea14d",
+      "route_name": "direct_pareto_02",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 8.560759892883523,
+            "c3_km2_s2": 22.878520488826293,
+            "risk": 0.4653586630961174,
+            "tof_days": 166.15384615384616,
+            "total_dv_ms": 4218.570499951279
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "c706f96e1a98896a971689cc3edcd5d510a1b5a8ed374536bcb57b23f21ff012",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.8074278243358475,
+            "max_position_residual_km": 0.07361197557218627,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7572807242264129,
+            "tof_days": 166.15384615384616,
+            "uncorrected_position_residual_km": 8963.26122209024
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "2971a71700da2d4663e86f07bf784fd8c90bfe00d9fb399cb96aaeea25b4c7aa",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 8963.26122209024,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 28.489080591373643,
+            "position_3sigma_km": 85.46724177412094,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 166.15384615384616
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "31264987f4af8edf6e95aed9cfc53657914717bc7682dcb51ccd647ad2a418d5",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "bc394690465dc43d7a71701a757f750e14bc13ccd7b48eee3f4c58fc159f7685",
+      "route_id": "route_4f2e5702363048",
+      "route_name": "direct_pareto_01",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 11.222153060509065,
+            "c3_km2_s2": 37.97012135259262,
+            "risk": 0.5540717686836355,
+            "tof_days": 143.07692307692307,
+            "total_dv_ms": 4831.584752006211
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "1b7553d23fafb93857636da5a8ec01574e8ae70f2658af2eb69f302df22eaa16",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.7089094344057113,
+            "max_position_residual_km": 0.0634212590470962,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7167633849876478,
+            "tof_days": 143.07692307692307,
+            "uncorrected_position_residual_km": 6516.6807757957995
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "9511b7d619a5a3b135409b9b279d0b18520c2f9225562405d720c499c8bddf6b",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 6516.6807757957995,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 22.270217490984216,
+            "position_3sigma_km": 66.81065247295265,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 143.07692307692307
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "8dda395164c0cdecddc62ec186a809d349aaba80e132b03285c965d3ce6e613f",
+      "created_utc": "2026-06-02T11:44:24+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay",
+        "covariance_envelope"
+      ],
+      "route_fingerprint": "8e56a0b10ba40de457265396964415696292e962f28df189dcdd29497bbfbddc",
+      "route_id": "route_12a8b5753f0a5a",
+      "route_name": "direct_pareto_00",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 11.141019406154285,
+            "c3_km2_s2": 47.77325517809634,
+            "risk": 0.5513673135384762,
+            "tof_days": 120.0,
+            "total_dv_ms": 5214.304203071488
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "1c9d24b53f6e0a24db0b1fa8641f7b8c53901501ed6a4551657204e99cbdc995",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.6862823646821982,
+            "max_position_residual_km": 0.02336142997213311,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.38063312645704794,
+            "tof_days": 120.0,
+            "uncorrected_position_residual_km": 5585.049592865412
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "cd2a55ddcb9d98f495d52d95663e43b48703789a98fa6d3dc6d7644c573a546c",
+          "message": "",
+          "metrics": {
+            "dv_1sigma_mps": 0.001,
+            "dv_3sigma_mps": 0.003,
+            "max_dv_3sigma_mps": 10.0,
+            "max_position_3sigma_km": 1000.0,
+            "nominal_nbody_position_residual_km": 5585.049592865412,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_1sigma_km": 13.5279060771985,
+            "position_3sigma_km": 40.5837182315955,
+            "sigma_point_count": 12,
+            "sigma_position_km": 0.001,
+            "sigma_velocity_mps": 0.001,
+            "tof_days": 120.0
+          },
+          "required": true,
+          "rung": "covariance_envelope",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    }
+  ],
+  "created_utc": "2026-06-02T11:44:24+00:00",
+  "promoted_count": 12,
+  "rejected_count": 0,
+  "route_count": 12,
+  "schema": "ariadne.route_promotion_report.v1",
+  "status": "pass"
+}

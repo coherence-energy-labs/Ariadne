@@ -564,6 +564,14 @@ these add depth where real value remained.
   graph (Earth-Moon, 5000 samples, 127k edges, Helmholtz CG 17 iters, 29/29 greedy starts reach a
   lunar-vicinity goal sample in 3-5 steps). Real-dynamics value field, sub-second compute, no curse-
   of-dimensionality on the dynamics-derived graph. *DoD:* **G45a/b/c**.
+- **Stage 46 — Certified Route Promotion** *(done)*: proof-carrying trajectory certificates. Every route
+  certificate carries canonical JSON, SHA-256 payload hash, explicit required rungs, thresholds, replay
+  commands, CR3BP patch proof, BCR4BP survivability, deterministic Monte-Carlo robustness envelope,
+  DE440 multiple-shooting evidence when required, and explicit GMAT status. Validated on an Earth-Moon
+  L1->L2 heteroclinic promoted through DE440: 0.000000 m/s CR3BP patch, 271,225 km bounded BCR4BP
+  divergence, 207.7 km/(m/s) sensitivity, 736.3 m/s DE440 correction, 5.6 m position residual.
+  Missing patch evidence and missing required DE440 evidence both reject fail-closed; tampering breaks
+  the certificate hash. *DoD:* **G46a/b/c**.
 
 ---
 
@@ -648,8 +656,16 @@ these add depth where real value remained.
 
 ## 16. Status & changelog (UPDATE EVERY SESSION)
 
-**Current stage:** Stage 43 — ITF ingest: the beast got its dinner
-**COMPLETE**. Fed the linker the actual MPC Isolated Tracklet File (135 MB, 2.6 M tracklets the MPC
+**Current stage:** Stage 46 — Certified Route Promotion
+**COMPLETE**. Ariadne now emits proof-carrying route certificates: canonical JSON with a SHA-256
+payload hash, explicit pass/fail rungs, fail-closed missing-evidence behavior, CR3BP patch proof,
+BCR4BP survivability, deterministic robustness envelope, optional GMAT replay status, and DE440
+multiple-shooting promotion. The Stage-46 physical gate certifies an Earth-Moon L1->L2 heteroclinic:
+CR3BP patch Delta-v 0.000000 m/s, BCR4BP divergence 271,225 km (bounded/correctable at this rung),
+robustness 207.7 km per 1 m/s injection error, and DE440 retargeting at 736.3 m/s with 5.6 m max
+position residual. This is the trust layer: routes now carry replayable evidence instead of just
+optimizer output. Run: `PYTHONPATH=src python -m ariadne.validate.stage46`.
+PRIOR (Stage 43): Fed the linker the actual MPC Isolated Tracklet File (135 MB, 2.6 M tracklets the MPC
 itself couldn't link). `discovery/itf.py` parses in 17 s, isolates 45 k slow movers, links per sky/time
 bin -> 607 clean canonical candidates. Injection in the densest real bin recovered. HONEST cross-match:
 25/25 spot-checked candidates are KNOWN objects (re-links the MPC's pipeline left unlinked, including
@@ -1441,6 +1457,19 @@ position-gap filter): median 2.88-10.4 km/s on Earth-side starts -- in the Hohma
 The curse-of-dimensionality is genuinely beaten on full CR3BP using only Forge-Doctrine machinery.
 Run: `PYTHONPATH=src python -m ariadne.validate.stage45`.
 
+**Stage 46 results (Certified Route Promotion -- proof-carrying trajectories):** Ariadne now has a
+route trust layer, not just a route finder. `certification.py` emits canonical JSON certificates with
+SHA-256 payload hashes, required-rung lists, explicit thresholds, replay commands, and pass/fail evidence
+for CR3BP patch proof, BCR4BP survivability, deterministic robustness envelope, optional DE440
+multiple-shooting promotion, and explicit GMAT replay status. Fail-closed tests prove that missing patch
+states reject and hash tampering is detected. Physical gate: an Earth-Moon L1->L2 same-energy
+heteroclinic certifies with CR3BP patch Delta-v **0.000000 m/s**, BCR4BP worst divergence **271,225 km**
+(bounded/correctable rung, not a final ephemeris claim), robustness **207.7 km per 1 m/s**, DE440
+retargeting **736.3 m/s** with **5.6 m** maximum position residual, and GMAT recorded as `not_run` unless
+an installed GmatConsole replay is actually executed. This is NASA-grade in the important sense: every
+claim has a machine-checkable evidence packet and unsupported rungs are never implied. Run:
+`PYTHONPATH=src python -m ariadne.validate.stage46`.
+
 **Decisions on record:**
 - 2026-05-28 — New standalone repo (credibility); codename **Ariadne**.
 - 2026-05-28 — Reproduce **Earth–Moon first**, then generalize.
@@ -1452,6 +1481,13 @@ Run: `PYTHONPATH=src python -m ariadne.validate.stage45`.
   the Forge-Doctrine Helmholtz HJB substitute, validated 2D-6D + full CR3BP.
 
 **Changelog:**
+- 2026-05-30 `v1.0.0rc2` -- Stage 46 (Certified Route Promotion) complete. Added
+  `certification.py`, `validate/stage46.py`, and `tests/test_certification.py`. Certificates include
+  canonical JSON, SHA-256 replay hash, CR3BP patch proof, BCR4BP survivability, deterministic
+  Monte-Carlo robustness, optional DE440 retarget evidence, explicit GMAT status, and replay commands.
+  The physical gate certifies an Earth-Moon L1->L2 heteroclinic through DE440 (736.3 m/s correction,
+  5.6 m residual) while preserving model-rung honesty. Missing evidence rejects; tampering invalidates
+  the hash.
 - 2026-05-29 `v0.43` — Stage 43 (ITF ingest -- the real unlinked archive run) complete. Added
   discovery/itf.py (parse the MPC 80-col format, build tracklets, filter slow movers, sky/time-bin,
   link per bin), validate/stage43.py + tests/test_itf.py. End-to-end run on the live MPC Isolated

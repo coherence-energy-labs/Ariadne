@@ -1,0 +1,74 @@
+{
+  "baseline_artifact": "data\\benchmarks\\real_run.json",
+  "candidate_artifacts": [
+    "data\\benchmarks\\real_corpus_mpc_500\\benchmark\\metrics.json",
+    "data\\benchmarks\\inference_adversarial_builtin\\metrics.json",
+    "data\\benchmarks\\closure\\closure_report.json",
+    "data\\benchmarks\\solar_navigator_benchmark\\benchmark_summary.json",
+    "data\\benchmarks\\transport_admissibility\\metrics.json"
+  ],
+  "notes": [
+    "Baseline real_run.json is an older built-in labelled benchmark artifact, not the same sample as the MPC-500 corpus.",
+    "MPC-500 is real MPCORB-derived labelled data; adversarial suite is proxy/synthetic mutation stress testing.",
+    "Before/after deltas are meaningful for headline inference metrics but should not be read as paired-sample statistics."
+  ],
+  "rows": [
+    {
+      "after": 1.0,
+      "before": 0.9285714285714286,
+      "delta": 0.0714285714285714,
+      "metric": "labelled inference accuracy",
+      "unit": ""
+    },
+    {
+      "after": 1.0,
+      "before": null,
+      "delta": null,
+      "metric": "labelled inference safe_accuracy",
+      "unit": ""
+    },
+    {
+      "after": 1.0,
+      "before": 0.696969696969697,
+      "delta": 0.303030303030303,
+      "metric": "labelled inference macro_f1",
+      "unit": ""
+    },
+    {
+      "after": 1.0,
+      "before": 0.7272727272727273,
+      "delta": 0.2727272727272727,
+      "metric": "labelled inference macro_recall",
+      "unit": ""
+    },
+    {
+      "after": 7.045142247363856e-12,
+      "before": 0.2905966063831035,
+      "delta": -0.29059660637605833,
+      "metric": "labelled inference ECE",
+      "unit": ""
+    },
+    {
+      "after": 1.0,
+      "before": null,
+      "delta": null,
+      "metric": "closure readiness_score",
+      "unit": ""
+    },
+    {
+      "after": 0.9466666666666667,
+      "before": null,
+      "delta": null,
+      "metric": "adversarial safe_accuracy",
+      "unit": ""
+    },
+    {
+      "after": 3.0,
+      "before": null,
+      "delta": null,
+      "metric": "transport A* speedup vs brute",
+      "unit": "x"
+    }
+  ],
+  "schema": "ariadne.benchmark_improvement_report.v1"
+}

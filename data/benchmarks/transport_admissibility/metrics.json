@@ -1,0 +1,58 @@
+{
+  "admissible": true,
+  "astar_expansions": 4,
+  "benchmark": {
+    "admissible": true,
+    "astar": {
+      "cost": 3.1,
+      "expansions": 4,
+      "path": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "time": 1.1100004485342652e-05
+    },
+    "brute": {
+      "cost": 3.1,
+      "expansions": 12,
+      "path": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "time": 1.2299999070819467e-05
+    },
+    "dijkstra": {
+      "cost": 3.1,
+      "expansions": 5,
+      "path": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "time": 1.6600002709310502e-05
+    },
+    "heuristic_slope": 39.857142857142954,
+    "optimal_match": true,
+    "source": "A",
+    "speedup_astar_vs_brute": 3.0,
+    "speedup_dijkstra_vs_brute": 2.4,
+    "target": "E",
+    "w_robust": 0.0
+  },
+  "brute_expansions": 12,
+  "certificate_hash": "d2a7fb13fcaae969c5606a47f6d76e07b7809d3085bba0d3bf708525ae134f9e",
+  "created_utc": "2026-06-02T12:05:43+00:00",
+  "dijkstra_expansions": 5,
+  "optimal_match": true,
+  "passed": true,
+  "schema": "ariadne.transport_admissibility_benchmark.v1",
+  "speedup_astar_vs_brute": 3.0
+}

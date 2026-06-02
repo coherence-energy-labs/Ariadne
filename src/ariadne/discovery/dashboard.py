@@ -87,7 +87,8 @@ $rows
   <a href="/alerts">View alert log</a> &middot;
   <a href="/api/store">API: store</a> &middot;
   <a href="/api/alerts">API: alerts</a> &middot;
-  <a href="/api/score">API: score</a>
+  <a href="/api/score">API: score</a> &middot;
+  <a href="/api/ops">API: ops</a>
 </p>
 </body></html>""")
 
@@ -347,6 +348,25 @@ def create_app(store_path: str | Path, alerts_path: str | Path | None = None):
             "rms": s.rms, "arc": s.arc, "runs": s.runs,
             "skybot": s.skybot, "obs": s.obs,
         } for c, s in ranked])
+
+    @app.get("/api/ops")
+    def api_ops():
+        store = _store()
+        cands = list(store)
+        ranked = rank_candidates(cands)
+        return jsonify({
+            "n_candidates": len(cands),
+            "n_ranked": len(ranked),
+            "store_path": str(store_path),
+            "alerts_path": str(alerts_path) if alerts_path else None,
+            "top": [{
+                "key": c.key,
+                "grade": s.grade(),
+                "score": s.total,
+                "status": c.status,
+                "meta": c.meta,
+            } for c, s in ranked[:20]],
+        })
 
     return app
 

@@ -144,6 +144,7 @@ class ActionRecommendation:
     cost: float
     score: float            # info_gain / max(cost, 0.1)
     rationale: str
+    separates: list = field(default_factory=list)
 
 
 class PredictiveScheduler:
@@ -250,6 +251,7 @@ class PredictiveScheduler:
 
     def recommend(self, *, evidence_class: str,
                   hypothesis_posterior: float,
+                  alternatives: list | None = None,
                   exclude: list[str] | None = None,
                   confirmation_weight: float = 1.5) -> ActionRecommendation:
         """Score every action; recommend the one with the highest info-gain-per-cost.
@@ -260,6 +262,7 @@ class PredictiveScheduler:
         the tie in favour of actions that historically lead to confirmations.
         """
         exclude = exclude or []
+        alternatives = alternatives or []
         best = None
         best_score = -float("inf")
         rationale = ""
@@ -275,6 +278,9 @@ class PredictiveScheduler:
                                                 COLD_START_PRIORS["default"]
                                                 ).get(action, 0.3)
             score = info_gain * (1.0 + confirmation_weight * p_conf) / max(cost, 0.1)
+            separates = discriminating_actions(evidence_class, alternatives).get(action, [])
+            if separates:
+                score *= 1.0 + 0.15 * len(separates)
             if score > best_score:
                 best_score = score
                 source = "history" if self.historical_confirmation_rate(
@@ -288,6 +294,7 @@ class PredictiveScheduler:
                     rationale=(f"Best info-gain/cost (confirm-weighted): "
                                 f"P(confirm)={p_conf:.2f} ({source}), info gain "
                                 f"{info_gain:.3f} nats, cost {cost:.2f}."),
+                    separates=separates,
                 )
         if best is None:
             best = ActionRecommendation(
@@ -348,3 +355,35 @@ def classify_evidence(evidence) -> str:
     if (rate is not None and rate < 0.5) and (n_det <= 2):
         return "low_confidence_low_rate"
     return "default"
+
+
+def discriminating_actions(evidence_class: str, alternatives: list) -> dict[str, list]:
+    """Map actions to hypothesis labels they can help separate.
+
+    `alternatives` can be Hypothesis objects or dicts with label/orbital_class.
+    This is intentionally transparent and rule-based.
+    """
+    labels = []
+    for h in alternatives:
+        if isinstance(h, dict):
+            label = h.get("orbital_class") or h.get("label") or h.get("class")
+        else:
+            label = getattr(h, "orbital_class", None) or getattr(h, "label", None)
+        if label:
+            labels.append(label)
+    labels = list(dict.fromkeys(labels))
+    out = {a: [] for a in ACTIONS}
+    outer = {"CENTAUR", "JTROJAN", "HILDA", "THULE", "CLASSICAL_KBO",
+             "HOT_CLASSICAL", "RESONANT_KBO", "SCATTERED_KBO", "DETACHED", "SEDNOID"}
+    if any(l in outer for l in labels):
+        out["observe_multi_band"] = labels
+        out["observe_deep_stack"] = labels
+        out["archive_search"] = labels
+    if evidence_class in {"single_detection_no_rate", "low_confidence_low_rate", "default"}:
+        out["observe_second_night"] = labels
+    if evidence_class in {"confirmed_orbit_no_match", "high_novelty_distant"}:
+        out["query_skybot"] = labels
+        out["query_horizons"] = labels
+    if evidence_class == "likely_artefact":
+        out["discard"] = labels
+    return {k: v for k, v in out.items() if v}

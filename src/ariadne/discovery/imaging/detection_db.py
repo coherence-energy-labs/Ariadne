@@ -376,6 +376,11 @@ class DetectionDB:
             "SELECT * FROM chains WHERE id = ?", (chain_id,)).fetchone()
         return dict(row) if row else None
 
+    def get_tracklet(self, tracklet_id: int) -> dict | None:
+        row = self.conn.execute(
+            "SELECT * FROM tracklets WHERE id = ?", (tracklet_id,)).fetchone()
+        return dict(row) if row else None
+
     def get_tracklet_detections(self, tracklet_id: int) -> list[dict]:
         sql = """SELECT d.* FROM detections d
                  INNER JOIN tracklets t

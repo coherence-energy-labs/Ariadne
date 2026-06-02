@@ -12,6 +12,82 @@ suffixes for `rc` / `a` / `b`).
 What was *claimed* to work; this sprint actually exercised everything end-to-end and
 corrected loose numbers.
 
+- **Discovery inference hardening**: `discovery.inference` now emits evidence audits,
+  posterior-predictive checks, tamper-evident inference certificates, per-hypothesis
+  evidence-term traces, temperature-scaled posterior calibration, reliability reports
+  (accuracy/NLL/Brier/ECE), and fail-closed contradictory-evidence handling. This turns
+  sparse-evidence "extreme guessing" into a calibrated, auditable inference artifact.
+- **Discovery inference benchmark harness**: `discovery.benchmarking` now runs labelled
+  known-object proxy cases, ZTF/LSST-like alert streams, adversarial false positives,
+  blind holdouts, precision/recall, confusion matrices, reliability curves, calibration
+  scoring, ablation studies, and deterministic benchmark certificates. Reports emit JSON
+  plus CSV artifacts for independent review.
+- **External labelled-corpus ingest**: `discovery.external_corpora` plus
+  `scripts/build_external_inference_benchmark.py` now import live MPCORB known-object
+  samples and local ZTF/Rubin alert exports into the `LabelledCase` benchmark schema.
+  The first live MPC run wrote `.benchmarks/external_mpc_live_500` with 500 labelled
+  external cases. After adding recovered orbital-element context for known-object
+  recovery, the live MPC run reaches **0.986 accuracy** with certificate
+  `dde4ddb7e218d556f15200861e3f4f264a5e8c294044c433669866635c2f7037`.
+- **Inference improvement cockpit**: benchmark results now include stratified
+  leaderboards, failure diagnostics, low-margin risk cases, channel-weight search,
+  and label-bias calibration search. Max-mode sparse benchmark reaches **1.000
+  accuracy** / **1.000 macro-F1** with certificate
+  `2aa620fc88dc02f5d8689f3379f688cee240a002615c730ba4fd1c12ee60c34b`; max-mode
+  live MPC recovery reaches **1.000 accuracy** / **1.000 macro-F1** on 500 labelled
+  MPCORB cases with certificate
+  `50d42d1e3defe0d91150ad74146a137c2cddd2334700891b058cf60e2ee7c57d`.
+- **Real corpus acquisition bundle**: added `scripts/acquire_real_labelled_corpus.py`
+  plus portable case/alert JSONL round-tripping for downloaded MPCORB samples,
+  local ZTF/Rubin exports, and ALeRCE ZTF alert probes. The script writes
+  source manifests, benchmark artifacts, replay manifests, and provenance ledgers.
+  Latest acquisition-bundle MPC run: 500 downloaded labelled cases, **1.000
+  accuracy**, **1.000 safe-decision accuracy**, **1.000 macro-F1**, certificate
+  `da3b6fedff6aba7eac3c2b5bd6e1274ea2c7c7ba7888b1f0c18388938b8ff7ed`.
+  Latest ALeRCE probe acquired 2 real ZTF broker alerts and replayed them with
+  deterministic zero-candidate output.
+- **Benchmark anti-overfit hardening**: benchmark reports now include safe-decision
+  accuracy, frozen holdout manifests, train/eval split calibration, deterministic
+  adversarial mutations, drift manifests, and reliability diagram images. Latest
+  built-in adversarial stress run: 75 cases, **0.733 exact accuracy**, **1.000
+  safe-decision accuracy**, macro-F1 0.804, certificate
+  `22cb7bd7cfa2d9e3bc6a003ba2560ab70b7de107f625f3822e6b1759ebb8d262`.
+- **Operational discovery hardening**: added chronological alert replay,
+  append-only provenance ledgers with input/output hashes, pipeline provenance
+  wrappers, real/bogus severity/action/explanation fields, scheduler
+  hypothesis-separation metadata, and a dashboard `/api/ops` endpoint for
+  operator-facing state.
+- **Replay drift tooling**: replay outputs now summarize candidate keys, status
+  counts, action counts, and write comparable manifests. Added
+  `scripts/compare_replay_manifests.py` plus nightly `provenance_path` support
+  so scheduled runs can emit the same audit trail.
+- **Cislunar mission architect**: added `transfers.mission_architect`,
+  `ariadne.architect_cislunar_round_trip()`, and
+  `scripts/architect_cislunar_mission.py`. The architect combines direct
+  full-ephemeris Earth->Moon targeting, CR3BP low-energy capture, coherence
+  Pareto candidates, and analytic Moon->Earth return screening into a certified
+  Earth-Moon-Moon-Earth route catalogue with explicit fidelity tags,
+  assumptions, validation notes, Pareto flags, and deterministic hashes.
+- **Solar-system navigator**: added `interplanetary.navigator`,
+  `ariadne.navigate_solar_system()`, and `scripts/navigate_solar_system.py`.
+  The navigator resolves planet/moon targets, combines direct real-ephemeris
+  Lambert porkchops, optimized flyby-chain templates, and Jupiter/Saturn
+  Tisserand moon-tour screening, then writes certified route cards plus PNG
+  heat-map/trade-space artifacts. Giant-planet flyby turn authority now uses
+  Jupiter/Saturn GM and radius instead of Earth fallback values.
+- **Solar navigator benchmark hardening**: added
+  `interplanetary.navigator_benchmark` and
+  `scripts/benchmark_solar_navigator.py`. The benchmark runs real-SPICE Mars
+  and Enceladus cases, validates route-card invariants and physical sanity
+  bounds, checks generated PNG artifacts, and writes a certificate-bearing
+  summary. Porkchop and launch-window sweeps now cache departure ephemeris
+  states across TOF rows to avoid repeated SPICE calls while preserving exact
+  Lambert outputs.
+- **Solar navigator route intelligence**: reports now include representative
+  direct-Pareto routes across the time/energy frontier, a human-readable
+  `route_cards.md`, and `scripts/compare_solar_navigator_benchmarks.py` for
+  drift comparison of benchmark summaries. This exposes fastest/cheapest/
+  balanced/in-between routes instead of only the single minimum.
 - **Fresh-venv install verified**: built the wheel, installed in a clean venv, ran
   `import ariadne` + `ariadne.lyapunov_family('L1', n=3)` cleanly.
 - **Sphinx `-W` build clean**: fixed 9 docutils warnings (the `|...|` substitution-

@@ -49,13 +49,25 @@ class Source:
 def detect_sources_in_image(image_data, wcs, mjd: float, image_id: str,
                              fwhm_px: float = 3.0, threshold_sigma: float = 5.0,
                              zeropoint_mag: float | None = None,
-                             min_fwhm_px: float = 1.0,
-                             max_fwhm_px: float = 8.0) -> list[Source]:
+                             min_fwhm_px: float = 1.5,
+                             max_fwhm_px: float = 25.0,
+                             auto_fwhm: bool = True) -> list[Source]:
     """Detect sources in an image array (2-D numpy) given its WCS + observation MJD.
 
-    Returns a list of Source objects. Uses photutils DAOStarFinder with the supplied
-    FWHM + threshold (default 5-sigma above background). Filters out detections with
-    pathological FWHM (cosmic-ray hits, edge clusters).
+    Returns a list of Source objects via photutils DAOStarFinder at `threshold_sigma`
+    above the background.
+
+    CRITICAL (measured 2026-06-02): the detection matched-filter MUST use the
+    image's ACTUAL PSF FWHM. DECam r-band seeing is routinely ~5-9 px, but this
+    function historically assumed ~3.5 px -- a kernel tuned to the wrong width
+    grossly mismatches real sources and silently loses the faint ones. On a real
+    DECam exposure (true seeing 8.7 px) this dropped known-asteroid recall to 32%;
+    measuring the FWHM and using it recovered 94%. So `auto_fwhm=True` (default)
+    measures the stellar PSF FWHM from the image and detects with that, falling
+    back to `fwhm_px` only if it cannot be measured. DAOStarFinder's built-in
+    sharpness/roundness cuts handle cosmic-ray / artefact rejection -- the old
+    `sharpness * fwhm_px` post-filter was dimensionally meaningless (sharpness is
+    a ratio, not a FWHM) and is removed.
 
     Parameters
     ----------
@@ -63,9 +75,13 @@ def detect_sources_in_image(image_data, wcs, mjd: float, image_id: str,
     wcs        : an astropy.wcs.WCS object for this image.
     mjd        : observation MJD (mid-exposure).
     image_id   : a string identifier (filename or exposure_id).
-    fwhm_px    : DAO-style detection FWHM in pixels.
+    fwhm_px    : fallback DAO detection FWHM (px) if auto-measurement fails.
     threshold_sigma : detection threshold above the background sigma.
     zeropoint_mag : magnitude of a 1-count source. If None, mag is set to -99.
+    min_fwhm_px, max_fwhm_px : valid range for the auto-measured FWHM (a measured
+                   value outside this range is rejected and `fwhm_px` is used).
+    auto_fwhm  : measure the PSF FWHM from the image (recommended). Set False to
+                 force the supplied `fwhm_px` (e.g. for controlled synthetic tests).
     """
     try:
         import numpy as np
@@ -82,7 +98,22 @@ def detect_sources_in_image(image_data, wcs, mjd: float, image_id: str,
     sub = data - bkg.background
     # global sigma after background subtraction
     _mean, _med, std = sigma_clipped_stats(sub, sigma=3.0)
-    finder = DAOStarFinder(fwhm=fwhm_px, threshold=threshold_sigma * std)
+
+    # Use the MEASURED PSF FWHM for the detection kernel (see docstring).
+    # measure_image_fwhm fits real stars with FWHM-scaled stamps -> robust on
+    # any field (a 3px PSF measures ~3px, an 8.7px PSF measures ~8.7px), unlike
+    # a fixed assumed width.
+    det_fwhm = float(fwhm_px)
+    if auto_fwhm:
+        try:
+            from .trailed_rate import measure_image_fwhm
+            meas = measure_image_fwhm(data, fwhm_guess=fwhm_px)
+            if meas is not None and np.isfinite(meas) and min_fwhm_px <= meas <= max_fwhm_px:
+                det_fwhm = float(meas)
+        except Exception:
+            pass
+
+    finder = DAOStarFinder(fwhm=det_fwhm, threshold=threshold_sigma * std)
     tbl = finder(sub)
     if tbl is None or len(tbl) == 0:
         return []
@@ -95,10 +126,6 @@ def detect_sources_in_image(image_data, wcs, mjd: float, image_id: str,
     for row in tbl:
         x = float(row[x_col])
         y = float(row[y_col])
-        # FWHM filter to reject cosmic-ray hits / extended artefacts
-        s_fwhm = float(row.get("sharpness", 1.0)) * fwhm_px  # rough proxy
-        if not (min_fwhm_px <= s_fwhm <= max_fwhm_px):
-            continue
         flux = float(row["flux"])
         if flux <= 0:
             continue
@@ -107,7 +134,7 @@ def detect_sources_in_image(image_data, wcs, mjd: float, image_id: str,
         ra = float(ra) % 360.0
         dec = float(dec)
         mag = (zeropoint_mag - 2.5 * math.log10(flux)) if zeropoint_mag else -99.0
-        sources.append(Source(ra=ra, dec=dec, flux=flux, mag=mag, fwhm_px=s_fwhm,
+        sources.append(Source(ra=ra, dec=dec, flux=flux, mag=mag, fwhm_px=det_fwhm,
                               mjd=mjd, image_id=image_id, x=x, y=y))
     return sources
 

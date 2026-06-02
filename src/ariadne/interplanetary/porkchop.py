@@ -19,7 +19,10 @@ import math
 import numpy as np
 from scipy.optimize import differential_evolution
 
-from ..data.constants import GM_SUN, GM_EARTH, GM_MARS, GM_VENUS, R_EARTH, R_MARS, R_VENUS
+from ..data.constants import (
+    GM_SUN, GM_EARTH, GM_MARS, GM_VENUS, GM_JUPITER, GM_SATURN,
+    R_EARTH, R_MARS, R_VENUS, R_JUPITER, R_SATURN,
+)
 from ..data.ephemeris import body_state, utc
 from ..optimize.lambert import lambert
 
@@ -32,6 +35,15 @@ _CAPTURE = {
     "VENUS": (GM_VENUS, R_VENUS + 400.0),
 }
 
+_PARKING = {
+    "EARTH": (GM_EARTH, R_EARTH + 200.0),
+    "VENUS": (GM_VENUS, R_VENUS + 400.0),
+    "MARS": (GM_MARS, R_MARS + 400.0),
+    "MARS BARYCENTER": (GM_MARS, R_MARS + 400.0),
+    "JUPITER BARYCENTER": (GM_JUPITER, R_JUPITER + 1000.0),
+    "SATURN BARYCENTER": (GM_SATURN, R_SATURN + 1000.0),
+}
+
 
 def lambert_transfer(dep_body, arr_body, et_dep, tof_days, leo_alt=200.0,
                      capture=True, prograde=True, mu=GM_SUN):
@@ -39,6 +51,21 @@ def lambert_transfer(dep_body, arr_body, et_dep, tof_days, leo_alt=200.0,
     tof = tof_days * DAY
     sd = body_state(dep_body, et_dep, "J2000", "SUN")
     sa = body_state(arr_body, et_dep + tof, "J2000", "SUN")
+    return _lambert_transfer_from_states(
+        dep_body, arr_body, float(et_dep), float(tof_days), sd, sa,
+        leo_alt=leo_alt, capture=capture, prograde=prograde, mu=mu)
+
+
+def _lambert_transfer_from_states(dep_body, arr_body, et_dep, tof_days, sd, sa,
+                                  leo_alt=200.0, capture=True, prograde=True,
+                                  mu=GM_SUN):
+    """Lambert transfer with caller-supplied ephemeris states.
+
+    Porkchop grids evaluate many TOFs for the same departure epochs. Supplying
+    states avoids repeated SPICE calls for the departure body while keeping the
+    public `lambert_transfer` semantics identical.
+    """
+    tof = tof_days * DAY
     try:
         v1, v2 = lambert(sd[:3], sa[:3], tof, mu, prograde=prograde)
     except Exception:
@@ -47,8 +74,13 @@ def lambert_transfer(dep_body, arr_body, et_dep, tof_days, leo_alt=200.0,
         return None
     c3 = float(np.dot(v1 - sd[3:], v1 - sd[3:]))
     vinf_arr = float(np.linalg.norm(v2 - sa[3:]))
-    r_leo = R_EARTH + leo_alt
-    dv_dep = math.sqrt(c3 + 2.0 * GM_EARTH / r_leo) - math.sqrt(GM_EARTH / r_leo)
+    if dep_body in _PARKING:
+        gm_dep, r_park = _PARKING[dep_body]
+        if dep_body == "EARTH":
+            r_park = R_EARTH + leo_alt
+        dv_dep = math.sqrt(c3 + 2.0 * gm_dep / r_park) - math.sqrt(gm_dep / r_park)
+    else:
+        dv_dep = math.sqrt(c3)
     dv_arr = 0.0
     if capture and arr_body in _CAPTURE:
         gm, rc = _CAPTURE[arr_body]
@@ -56,7 +88,8 @@ def lambert_transfer(dep_body, arr_body, et_dep, tof_days, leo_alt=200.0,
     return {"c3": c3, "dep_vinf_kms": math.sqrt(c3), "arr_vinf_kms": vinf_arr,
             "dv_dep_ms": dv_dep * 1000.0, "dv_arr_ms": dv_arr * 1000.0,
             "total_ms": (dv_dep + dv_arr) * 1000.0, "tof_days": float(tof_days),
-            "et_dep": float(et_dep), "r1": sd[:3], "v1": v1, "et_arr": float(et_dep + tof)}
+            "et_dep": float(et_dep), "r1": sd[:3], "v1": v1,
+            "et_arr": float(et_dep + tof), "r2": sa[:3], "v2": v2}
 
 
 def porkchop(dep_body, arr_body, et_start, dep_days, tof_range,
@@ -67,9 +100,12 @@ def porkchop(dep_body, arr_body, et_start, dep_days, tof_range,
     C3 = np.full((n_tof, n_dep), np.nan)
     TOT = np.full((n_tof, n_dep), np.nan)
     best = None
+    dep_states = [body_state(dep_body, ed, "J2000", "SUN") for ed in dep_grid]
     for i, tof in enumerate(tof_grid):
-        for j, ed in enumerate(dep_grid):
-            r = lambert_transfer(dep_body, arr_body, ed, float(tof), **kw)
+        for j, (ed, sd) in enumerate(zip(dep_grid, dep_states)):
+            sa = body_state(arr_body, ed + float(tof) * DAY, "J2000", "SUN")
+            r = _lambert_transfer_from_states(
+                dep_body, arr_body, float(ed), float(tof), sd, sa, **kw)
             if r is None:
                 continue
             C3[i, j] = r["c3"]
@@ -103,9 +139,14 @@ def launch_windows(dep_body, arr_body, et_start, years=6.0, tof_range=(120.0, 40
     tofs = np.linspace(tof_range[0], tof_range[1], n_tof)
     best_dv = np.full(n_dep, np.nan)
     best_tof = np.full(n_dep, np.nan)
-    for j, ed in enumerate(dep_grid):
-        vals = [(lambert_transfer(dep_body, arr_body, ed, float(t), **kw) or {"total_ms": np.inf})["total_ms"]
-                for t in tofs]
+    dep_states = [body_state(dep_body, ed, "J2000", "SUN") for ed in dep_grid]
+    for j, (ed, sd) in enumerate(zip(dep_grid, dep_states)):
+        vals = []
+        for t in tofs:
+            sa = body_state(arr_body, ed + float(t) * DAY, "J2000", "SUN")
+            rec = _lambert_transfer_from_states(
+                dep_body, arr_body, float(ed), float(t), sd, sa, **kw)
+            vals.append((rec or {"total_ms": np.inf})["total_ms"])
         k = int(np.nanargmin(vals))
         best_dv[j] = vals[k]
         best_tof[j] = tofs[k]

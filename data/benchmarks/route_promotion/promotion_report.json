@@ -1,0 +1,1295 @@
+{
+  "certificate_hash": "418c913d0eaf421403ab8ae5f769828337f630b24929fc40a63ff445825992b7",
+  "certificates": [
+    {
+      "certificate_hash": "d14f7c67ab2dcd26a511a5619687229d18e94aa546c60241c69ddac89e2622fc",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "1c6467fbd01206d71b7e7c95da92f46661a721d216abb294bb9ddee0038f471f",
+      "route_id": "route_360cab946c0202",
+      "route_name": "direct_optimized",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.716245869853926,
+            "c3_km2_s2": 9.18214113116599,
+            "risk": 0.27054152899513084,
+            "tof_days": 292.3272916143833,
+            "total_dv_ms": 3633.7767237682933
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "63bcf38ce2429902e6c1adec38e865c11e4526ebbd0cf4392d3bfb036edbe95a",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "7576684fef142782ebd2ef3880f518d6d01369537ea3523dca4a7bb85218a78f",
+      "route_id": "route_182991ad071d1b",
+      "route_name": "direct_pareto_07",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.778148243111514,
+            "c3_km2_s2": 11.081177034723648,
+            "risk": 0.27260494143705044,
+            "tof_days": 304.61538461538464,
+            "total_dv_ms": 3716.635541191946
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "46bc55d4bef3fafb544ea35caf96c06213d4fd12ae731be4b2a0f40cd2f46fd7",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "6b8808d89f7fd5a4a941dd6b44c62f72e508396ff05a30167a9957d36b0748c7",
+      "route_id": "route_a44f44159e470f",
+      "route_name": "direct_pareto_08",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.8545075778929263,
+            "c3_km2_s2": 10.929656148559136,
+            "risk": 0.2751502525964309,
+            "tof_days": 327.6923076923077,
+            "total_dv_ms": 3710.0463029253215
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "de0596c6f28829c2a4378d6c88e4fc16d73ed4540767decb938e48c41912f375",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "3fcfb2ab2d8689df7ef0dcc59bd21ce4971baf66fe0e523f71332ce315e61e2b",
+      "route_id": "route_55443dabbedea8",
+      "route_name": "direct_pareto_06",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.105190407245941,
+            "c3_km2_s2": 11.76378916626027,
+            "risk": 0.28350634690819804,
+            "tof_days": 258.46153846153845,
+            "total_dv_ms": 3746.2738246318822
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "6ec3b9a95f22b6311c11d29c6a899746560de8b973d2171ac95c1adc1f0972cb",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "d7684b7532347849ff23230705dc63888c05e579f5396c13026813dffbc6be7f",
+      "route_id": "route_3aba93786458ab",
+      "route_name": "direct_grid_best",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.3288944518528236,
+            "c3_km2_s2": 10.414212417260643,
+            "risk": 0.29096314839509413,
+            "tof_days": 350.7692307692308,
+            "total_dv_ms": 3687.602696609873
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "171f182876bae8fbedb18f0023876e82fb972ee726c712ece0353ce79ca063ff",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "8462086b93da04edfbef2a9f9501e14fe8054517b77fc1c2737b15ad917b7819",
+      "route_id": "route_b4623ccb507a80",
+      "route_name": "direct_pareto_09",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.3288944518528236,
+            "c3_km2_s2": 10.414212417260643,
+            "risk": 0.29096314839509413,
+            "tof_days": 350.7692307692308,
+            "total_dv_ms": 3687.602696609873
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "6bab0b0bdf3dacc252f9ca60d5c695a26a714476800d71e949cbac3e898d91c1",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "25a89e5088ccd41bcab10bed450917fdd2d58207536a1e81653ef2f878dc9163",
+      "route_id": "route_0d2b2c5634c4c1",
+      "route_name": "direct_pareto_05",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.8937110326867606,
+            "c3_km2_s2": 12.565346732086883,
+            "risk": 0.30979036775622537,
+            "tof_days": 235.3846153846154,
+            "total_dv_ms": 3780.9796313154316
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "3ebedd970ed925999d1093e6c76d175de2b6506b414ee6cadbcb6a28915f2cd4",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "bfdbadb15271fd873cf104080ebac9cf12bc688613ec77675a8a25fad50fd3a1",
+      "route_id": "route_ea9b5405819713",
+      "route_name": "direct_pareto_04",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 5.036099525697785,
+            "c3_km2_s2": 13.70859582006064,
+            "risk": 0.34786998418992615,
+            "tof_days": 212.30769230769232,
+            "total_dv_ms": 3830.300544909606
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "06ea7c8ec8c9ecefbaa47bcb2ad7b4e4e998681cbf50fdf25a8886602a11b99f",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "a1d273e8d21d379184fdafc96f1378b32766782e33bbfa684650d8a63c3287cd",
+      "route_id": "route_3a1673f6b2eac3",
+      "route_name": "direct_pareto_knee",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 6.55974030932064,
+            "c3_km2_s2": 16.39580705813856,
+            "risk": 0.398658010310688,
+            "tof_days": 189.23076923076923,
+            "total_dv_ms": 3945.4129494556696
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "189cd2ebe586ec0e06c762364e4bf1b08118ce14ba94291e6e3db70e0c199c1d",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "e2d55f1e4c2365573da8de5694b1d4a7db7d9ac7e1edf5534244af65458e8425",
+      "route_id": "route_da892619bea14d",
+      "route_name": "direct_pareto_02",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 8.560759892883523,
+            "c3_km2_s2": 22.878520488826293,
+            "risk": 0.4653586630961174,
+            "tof_days": 166.15384615384616,
+            "total_dv_ms": 4218.570499951279
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "ca00fe4052d3d0a0c204942ed02e5607e153c1c3567db307c328cef4477868ba",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "bc394690465dc43d7a71701a757f750e14bc13ccd7b48eee3f4c58fc159f7685",
+      "route_id": "route_4f2e5702363048",
+      "route_name": "direct_pareto_01",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 11.222153060509065,
+            "c3_km2_s2": 37.97012135259262,
+            "risk": 0.5540717686836355,
+            "tof_days": 143.07692307692307,
+            "total_dv_ms": 4831.584752006211
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "19e540566e42dd51bc3288613b78d2e6f0f84f7d39a963d017a0090cbd5414f0",
+      "created_utc": "2026-06-02T11:26:59+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence"
+      ],
+      "route_fingerprint": "8e56a0b10ba40de457265396964415696292e962f28df189dcdd29497bbfbddc",
+      "route_id": "route_12a8b5753f0a5a",
+      "route_name": "direct_pareto_00",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 11.141019406154285,
+            "c3_km2_s2": 47.77325517809634,
+            "risk": 0.5513673135384762,
+            "tof_days": 120.0,
+            "total_dv_ms": 5214.304203071488
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "nbody_replay",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    }
+  ],
+  "created_utc": "2026-06-02T11:26:59+00:00",
+  "promoted_count": 12,
+  "rejected_count": 0,
+  "route_count": 12,
+  "schema": "ariadne.route_promotion_report.v1",
+  "status": "pass"
+}

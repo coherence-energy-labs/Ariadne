@@ -1,0 +1,177 @@
+{
+  "origin": "EARTH",
+  "pareto_count": 7,
+  "report_certificate_hash": "f89e79557d7cca09a1804f325c6c4bf47fbee7c8e8175737fb9418c62e3d9a40",
+  "required_figures": {
+    "mission_plate": {
+      "must_show": [
+        "origin",
+        "target",
+        "balanced route",
+        "certificate",
+        "route count"
+      ],
+      "path": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\mission_plate.png"
+    },
+    "porkchop_heatmap": {
+      "must_show": [
+        "departure offset days",
+        "time of flight days",
+        "delta-v scale"
+      ],
+      "path": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\porkchop_heatmap.png"
+    },
+    "route_trade_space": {
+      "must_show": [
+        "time of flight",
+        "delta-v",
+        "pareto front",
+        "balanced route"
+      ],
+      "path": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_trade_space.png"
+    }
+  },
+  "route_count": 9,
+  "route_roles": {
+    "balanced": "route_e560eba24bcf16",
+    "cheapest": "route_e560eba24bcf16",
+    "fastest": "route_e90cb7ad9b86db"
+  },
+  "routes": [
+    {
+      "assumption_count": 4,
+      "certificate_hash": "e560eba24bcf169c5ccaf82860fc5b502fa7093a53e0a0c5b8177b3647ef29c5",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_optimized_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_e560eba24bcf16",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "20375b979fd1263819fa646cecd01d556812d0a1021dd43286579c83a3c6f9ea",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_pareto_05_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_20375b979fd126",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "f4af60ef3829cf258c1a7bf4e6fb29a59e34e43374d107a814b29b8337f472aa",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_pareto_04_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_f4af60ef3829cf",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "de254e1dd4fb7c474a66f7f13e47098cf781212a522cec1f5768956dbb59c6f9",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_pareto_knee_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_de254e1dd4fb7c",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "d85d2239326f4c7a5d6dc5359fceccda115555982ecff782827d5544e605dab4",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_grid_best_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_d85d2239326f4c",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "b87e83fe7b829c634668d2aa5bd55a13eb6d24b276b8d9bb781c05ab3a1669de",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_pareto_06_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_b87e83fe7b829c",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "d67fdd787f699bf3100fa8bcf144c5c1803a0145a9d18c6354f527cc29c49d79",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_pareto_02_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_d67fdd787f699b",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "36860bbf402e9bb916934650e3689c16e22ae5fb2d8e9f110aa4bc33eee704ce",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_pareto_01_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_36860bbf402e9b",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    },
+    {
+      "assumption_count": 4,
+      "certificate_hash": "e90cb7ad9b86db044b50ec0ea9fc56eaf74afaeee4a01801dde7ad3a140bb38e",
+      "event_count": 3,
+      "fidelity": "patched_conic_ephemeris+tisserand_screen",
+      "name": "direct_pareto_00_plus_saturn_moon_tour_to_enceladus",
+      "route_id": "route_e90cb7ad9b86db",
+      "sequence": [
+        "EARTH",
+        "SATURN BARYCENTER",
+        "ENCELADUS"
+      ],
+      "validation_count": 4
+    }
+  ],
+  "schema": "ariadne.navigator_figure_manifest.v1",
+  "target": "ENCELADUS",
+  "units": {
+    "arrival_vinf": "km/s",
+    "c3": "km^2/s^2",
+    "coordinates": "km J2000 heliocentric unless otherwise noted",
+    "delta_v": "m/s",
+    "time_of_flight": "days"
+  }
+}

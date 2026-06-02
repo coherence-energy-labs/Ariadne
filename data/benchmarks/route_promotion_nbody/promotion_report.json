@@ -1,0 +1,1523 @@
+{
+  "certificate_hash": "999069e3adedc431cb3ddc6f9fb31be63d641be4d0a11116116966f9f59800e3",
+  "certificates": [
+    {
+      "certificate_hash": "0952164d5d404a757252f984bc220adf18d2f934b386d31d40d85e470cc545f9",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "1c6467fbd01206d71b7e7c95da92f46661a721d216abb294bb9ddee0038f471f",
+      "route_id": "route_360cab946c0202",
+      "route_name": "direct_optimized",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.716245869853926,
+            "c3_km2_s2": 9.18214113116599,
+            "risk": 0.27054152899513084,
+            "tof_days": 292.3272916143833,
+            "total_dv_ms": 3633.7767237682933
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "c1bb6f1f53ee96ef974820d26dfc2002d91182353044a2b308db35c2303174cb",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.2883858231320984,
+            "max_position_residual_km": 1.4661006054549715,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7343988139676898,
+            "tof_days": 292.3272916143833,
+            "uncorrected_position_residual_km": 35388.08509176103
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "898113d028efa62607f10d5d0cc440b29bb7286f6b1f546e5464d921558c2aab",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "7576684fef142782ebd2ef3880f518d6d01369537ea3523dca4a7bb85218a78f",
+      "route_id": "route_182991ad071d1b",
+      "route_name": "direct_pareto_07",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.778148243111514,
+            "c3_km2_s2": 11.081177034723648,
+            "risk": 0.27260494143705044,
+            "tof_days": 304.61538461538464,
+            "total_dv_ms": 3716.635541191946
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "e6767f20e912060698496154fa0503d9940e392f08e42c92cc71bb129821a0dd",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.155301651348306,
+            "max_position_residual_km": 0.9851515526325109,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 1.2167655613064443,
+            "tof_days": 304.61538461538464,
+            "uncorrected_position_residual_km": 22965.02168612731
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "be8ecd03e6107fdca668b21aa20868aa376a7c19b0af165b5d472aa4dcb02bdc",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "6b8808d89f7fd5a4a941dd6b44c62f72e508396ff05a30167a9957d36b0748c7",
+      "route_id": "route_a44f44159e470f",
+      "route_name": "direct_pareto_08",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 2.8545075778929263,
+            "c3_km2_s2": 10.929656148559136,
+            "risk": 0.2751502525964309,
+            "tof_days": 327.6923076923077,
+            "total_dv_ms": 3710.0463029253215
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "5f1d6ee6945c4e454bd995c4745ed2d959142903d458aa521d9ec35ff08706ac",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.7073038932275681,
+            "max_position_residual_km": 4.708987414008088,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.6681106645156716,
+            "tof_days": 327.6923076923077,
+            "uncorrected_position_residual_km": 47376.69132566891
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "20376d25dd037f0db1eb62dbc2fffcd86cd7d0b809611e1916f54b40a63f1fe0",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "3fcfb2ab2d8689df7ef0dcc59bd21ce4971baf66fe0e523f71332ce315e61e2b",
+      "route_id": "route_55443dabbedea8",
+      "route_name": "direct_pareto_06",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.105190407245941,
+            "c3_km2_s2": 11.76378916626027,
+            "risk": 0.28350634690819804,
+            "tof_days": 258.46153846153845,
+            "total_dv_ms": 3746.2738246318822
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "c195af8f78613a2c5883af67f31c981ba65fe582bad26c3f91860ee4c8c9c8fc",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.1952275060597937,
+            "max_position_residual_km": 1.2204304092822822,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.568440864415957,
+            "tof_days": 258.46153846153845,
+            "uncorrected_position_residual_km": 31031.23352362123
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "ba7d597a230c44e9ec03dcb0bbd49cfa30cdaf9c5c0e56586a07417069ad9d0a",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "d7684b7532347849ff23230705dc63888c05e579f5396c13026813dffbc6be7f",
+      "route_id": "route_3aba93786458ab",
+      "route_name": "direct_grid_best",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.3288944518528236,
+            "c3_km2_s2": 10.414212417260643,
+            "risk": 0.29096314839509413,
+            "tof_days": 350.7692307692308,
+            "total_dv_ms": 3687.602696609873
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "d1f5c427e8660a4c1bbdf7b203d9bcf682d036ef1608f829b343ac547c5260e4",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.813872629811728,
+            "max_position_residual_km": 6.284516579167854,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.9811547212701818,
+            "tof_days": 350.7692307692308,
+            "uncorrected_position_residual_km": 48505.99835960333
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "aa1718f32f2cd3259ddac0fa6626928c0aa4b30a09c6cbfdb57a49440a629beb",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "8462086b93da04edfbef2a9f9501e14fe8054517b77fc1c2737b15ad917b7819",
+      "route_id": "route_b4623ccb507a80",
+      "route_name": "direct_pareto_09",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.3288944518528236,
+            "c3_km2_s2": 10.414212417260643,
+            "risk": 0.29096314839509413,
+            "tof_days": 350.7692307692308,
+            "total_dv_ms": 3687.602696609873
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "d1f5c427e8660a4c1bbdf7b203d9bcf682d036ef1608f829b343ac547c5260e4",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.813872629811728,
+            "max_position_residual_km": 6.284516579167854,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.9811547212701818,
+            "tof_days": 350.7692307692308,
+            "uncorrected_position_residual_km": 48505.99835960333
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "dbf4817da50d6e174cef37b91db92914da9e5f037b3e1b2d3474b490147e6af4",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "25a89e5088ccd41bcab10bed450917fdd2d58207536a1e81653ef2f878dc9163",
+      "route_id": "route_0d2b2c5634c4c1",
+      "route_name": "direct_pareto_05",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 3.8937110326867606,
+            "c3_km2_s2": 12.565346732086883,
+            "risk": 0.30979036775622537,
+            "tof_days": 235.3846153846154,
+            "total_dv_ms": 3780.9796313154316
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "6ba378eed784fdf385f5a25e517620252bc05e1b6bf18f0620513d7e537b119a",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 1.0601621304050088,
+            "max_position_residual_km": 0.5550418876811233,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.6737471145923878,
+            "tof_days": 235.3846153846154,
+            "uncorrected_position_residual_km": 24196.336123603716
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "e0c374dcb8040d07096952a59d8ba50e71746971d873f3929e2026e47388cdbd",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "bfdbadb15271fd873cf104080ebac9cf12bc688613ec77675a8a25fad50fd3a1",
+      "route_id": "route_ea9b5405819713",
+      "route_name": "direct_pareto_04",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 5.036099525697785,
+            "c3_km2_s2": 13.70859582006064,
+            "risk": 0.34786998418992615,
+            "tof_days": 212.30769230769232,
+            "total_dv_ms": 3830.300544909606
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "56e1df676c9fb085f28bd793f9edce75e1bedcfa41b52132720ee08b3d5b08bb",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.9498741625579193,
+            "max_position_residual_km": 0.16360239598691045,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7421275170172502,
+            "tof_days": 212.30769230769232,
+            "uncorrected_position_residual_km": 17962.92969913962
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "1faf98d919dfa12a07e3217f7e81939a672e88536739349a953142d4d1d4eca3",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "a1d273e8d21d379184fdafc96f1378b32766782e33bbfa684650d8a63c3287cd",
+      "route_id": "route_3a1673f6b2eac3",
+      "route_name": "direct_pareto_knee",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 6.55974030932064,
+            "c3_km2_s2": 16.39580705813856,
+            "risk": 0.398658010310688,
+            "tof_days": 189.23076923076923,
+            "total_dv_ms": 3945.4129494556696
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "593d19dc977098f9c6f9561878a3f00be5e5a44cce1d52494f48c6b8c9d798e6",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.8699970479165848,
+            "max_position_residual_km": 0.02715693548134783,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.76941027427342,
+            "tof_days": 189.23076923076923,
+            "uncorrected_position_residual_km": 12796.579329347887
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "0b5f62d1b5c149784a506627874270a7f0ec743b3ec188d11c21fbb97402057d",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "e2d55f1e4c2365573da8de5694b1d4a7db7d9ac7e1edf5534244af65458e8425",
+      "route_id": "route_da892619bea14d",
+      "route_name": "direct_pareto_02",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 8.560759892883523,
+            "c3_km2_s2": 22.878520488826293,
+            "risk": 0.4653586630961174,
+            "tof_days": 166.15384615384616,
+            "total_dv_ms": 4218.570499951279
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "c706f96e1a98896a971689cc3edcd5d510a1b5a8ed374536bcb57b23f21ff012",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.8074278243358475,
+            "max_position_residual_km": 0.07361197557218627,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7572807242264129,
+            "tof_days": 166.15384615384616,
+            "uncorrected_position_residual_km": 8963.26122209024
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "f4566b0cb4d2db4ff59d13f4571be80807f9d9024e1a6456127314b1f32fbce8",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "bc394690465dc43d7a71701a757f750e14bc13ccd7b48eee3f4c58fc159f7685",
+      "route_id": "route_4f2e5702363048",
+      "route_name": "direct_pareto_01",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 11.222153060509065,
+            "c3_km2_s2": 37.97012135259262,
+            "risk": 0.5540717686836355,
+            "tof_days": 143.07692307692307,
+            "total_dv_ms": 4831.584752006211
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "1b7553d23fafb93857636da5a8ec01574e8ae70f2658af2eb69f302df22eaa16",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.7089094344057113,
+            "max_position_residual_km": 0.0634212590470962,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.7167633849876478,
+            "tof_days": 143.07692307692307,
+            "uncorrected_position_residual_km": 6516.6807757957995
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    },
+    {
+      "certificate_hash": "c5f050111b644d517ee84ae92074b4740aa3927226653f631e41712db568129d",
+      "created_utc": "2026-06-02T11:31:44+00:00",
+      "required_rungs": [
+        "route_card_integrity",
+        "patched_conic_sanity",
+        "event_chronology",
+        "ephemeris_coordinate_evidence",
+        "nbody_replay"
+      ],
+      "route_fingerprint": "8e56a0b10ba40de457265396964415696292e962f28df189dcdd29497bbfbddc",
+      "route_id": "route_12a8b5753f0a5a",
+      "route_name": "direct_pareto_00",
+      "rungs": [
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "assumptions": 2,
+            "sequence_length": 2,
+            "validations": 2
+          },
+          "required": true,
+          "rung": "route_card_integrity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "arrival_vinf_kms": 11.141019406154285,
+            "c3_km2_s2": 47.77325517809634,
+            "risk": 0.5513673135384762,
+            "tof_days": 120.0,
+            "total_dv_ms": 5214.304203071488
+          },
+          "required": true,
+          "rung": "patched_conic_sanity",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "event_chronology",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "",
+          "metrics": {
+            "coordinate_count": 2,
+            "event_count": 2
+          },
+          "required": true,
+          "rung": "ephemeris_coordinate_evidence",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": "1c9d24b53f6e0a24db0b1fa8641f7b8c53901501ed6a4551657204e99cbdc995",
+          "message": "",
+          "metrics": {
+            "final_velocity_delta_mps": 0.6862823646821982,
+            "max_position_residual_km": 0.02336142997213311,
+            "max_retarget_correction_mps": 500.0,
+            "perturber_count": 6,
+            "perturbers": [
+              "MERCURY BARYCENTER",
+              "VENUS",
+              "JUPITER BARYCENTER",
+              "SATURN BARYCENTER",
+              "URANUS BARYCENTER",
+              "NEPTUNE BARYCENTER"
+            ],
+            "position_tolerance_km": 10.0,
+            "retarget_correction_dv_mps": 0.38063312645704794,
+            "tof_days": 120.0,
+            "uncorrected_position_residual_km": 5585.049592865412
+          },
+          "required": true,
+          "rung": "nbody_replay",
+          "status": "pass"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "covariance_envelope",
+          "status": "not_available"
+        },
+        {
+          "evidence_hash": null,
+          "message": "no evidence supplied",
+          "metrics": {},
+          "required": false,
+          "rung": "independent_crosscheck",
+          "status": "not_available"
+        }
+      ],
+      "schema": "ariadne.route_promotion_certificate.v1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "status": "promoted",
+      "target": "MARS",
+      "thresholds": {
+        "max_arrival_vinf_kms": 35.0,
+        "max_covariance_dv_3sigma_mps": 10.0,
+        "max_covariance_position_3sigma_km": 1000.0,
+        "max_crosscheck_position_delta_km": 10.0,
+        "max_crosscheck_velocity_delta_mps": 0.05,
+        "max_launch_c3_km2_s2": 250.0,
+        "max_nbody_position_residual_km": 10.0,
+        "max_nbody_retarget_correction_mps": 500.0,
+        "max_nbody_velocity_residual_mps": 0.05,
+        "max_risk": 0.95,
+        "max_tof_days": 30000.0,
+        "max_total_dv_ms": 80000.0,
+        "min_tof_days": 1.0
+      }
+    }
+  ],
+  "created_utc": "2026-06-02T11:31:44+00:00",
+  "promoted_count": 12,
+  "rejected_count": 0,
+  "route_count": 12,
+  "schema": "ariadne.route_promotion_report.v1",
+  "status": "pass"
+}

@@ -11,9 +11,11 @@ Classes (mutually exclusive labels):
   ATEN            a < 1.0 AU, Q > 0.983 AU             (Earth-crossing, semi-major < 1)
   APOLLO          a > 1.0 AU, q < 1.017 AU             (Earth-crossing, semi-major > 1)
   AMOR            1.017 AU < q < 1.3 AU                (Mars-crossing, near-Earth)
+  HUNGARIA        1.78 < a < 2.0 AU, high inclination   (Hungaria group)
   IMB             2.0 < a < 2.5 AU                      (inner main belt)
   MBA             2.0 < a < 3.3 AU, not Hilda/Trojan   (main-belt asteroid)
   HILDA           3.7 < a < 4.2 AU, e<0.3, i<20         (3:2 Jupiter resonance)
+  THULE           4.2 < a < 4.4 AU, low e/i             (4:3 Jupiter resonance)
   JTROJAN         5.0 < a < 5.4 AU                      (Jupiter Trojan, L4/L5)
   CENTAUR         5.4 < a < 30.1 AU, q > 5.2 AU         (between Jupiter & Neptune)
   CLASSICAL_KBO   42 < a < 48 AU, e<0.2, i<5            (cold classical Kuiper belt)
@@ -50,10 +52,12 @@ class OrbitClass:
     APOLLO = "APOLLO"
     AMOR = "AMOR"
     MARS_CROSSER = "MARS_CROSSER"
+    HUNGARIA = "HUNGARIA"
     IMB = "IMB"
     MBA = "MBA"
     OMB = "OMB"
     HILDA = "HILDA"
+    THULE = "THULE"
     JTROJAN = "JTROJAN"
     CENTAUR = "CENTAUR"
     CLASSICAL_KBO = "CLASSICAL_KBO"
@@ -192,6 +196,10 @@ def classify_orbit(a_au: float, e: float, i_deg: float) -> OrbitTaxonomy:
     if MARS_Q <= q < MARS_QQ:
         return OrbitTaxonomy(OrbitClass.MARS_CROSSER, 0.8,
                              a_au, e, i_deg, q, Q, T_J, notes="Mars-crosser")
+    if 1.78 <= a_au < 2.0 and e < 0.25 and i_deg >= 12.0:
+        return OrbitTaxonomy(OrbitClass.HUNGARIA, 0.85,
+                             a_au, e, i_deg, q, Q, T_J,
+                             notes="Hungaria high-inclination inner-belt group")
 
     # --- Main belt ---
     if 2.0 <= a_au < 2.5:
@@ -209,6 +217,10 @@ def classify_orbit(a_au: float, e: float, i_deg: float) -> OrbitTaxonomy:
         return OrbitTaxonomy(OrbitClass.HILDA, 0.85,
                              a_au, e, i_deg, q, Q, T_J,
                              notes="3:2 Jupiter resonance (Hilda)")
+    if 4.2 <= a_au < 4.4 and e < 0.2 and i_deg < 10:
+        return OrbitTaxonomy(OrbitClass.THULE, 0.85,
+                             a_au, e, i_deg, q, Q, T_J,
+                             notes="4:3 Jupiter resonance (Thule group)")
     if 5.0 <= a_au < 5.4 and i_deg < 40:
         return OrbitTaxonomy(OrbitClass.JTROJAN, 0.9,
                              a_au, e, i_deg, q, Q, T_J,

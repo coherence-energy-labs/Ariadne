@@ -1,0 +1,575 @@
+{
+  "blocking_residuals": 0,
+  "certificate_hash": "6bd9ed7c7a560063e6a42b8c8bf2df5a312a154e2ffeef6866b3d189fec279ed",
+  "contracts": [
+    {
+      "maximum_metrics": {},
+      "minimum_metrics": {
+        "experiment_count": 1.0
+      },
+      "required_kinds": [
+        "dream_run"
+      ],
+      "soft_required_kinds": [],
+      "subsystem": "dream_calibration"
+    },
+    {
+      "maximum_metrics": {
+        "ece": 0.05
+      },
+      "minimum_metrics": {
+        "accuracy": 0.9,
+        "macro_f1": 0.9,
+        "safe_accuracy": 0.95
+      },
+      "required_kinds": [
+        "labelled_benchmark"
+      ],
+      "soft_required_kinds": [],
+      "subsystem": "discovery_inference"
+    },
+    {
+      "maximum_metrics": {},
+      "minimum_metrics": {
+        "safe_accuracy": 0.94
+      },
+      "required_kinds": [
+        "adversarial_benchmark"
+      ],
+      "soft_required_kinds": [],
+      "subsystem": "discovery_robustness"
+    },
+    {
+      "maximum_metrics": {},
+      "minimum_metrics": {},
+      "required_kinds": [
+        "navigator_benchmark"
+      ],
+      "soft_required_kinds": [],
+      "subsystem": "solar_navigator"
+    },
+    {
+      "maximum_metrics": {},
+      "minimum_metrics": {
+        "n_png": 10.0,
+        "png_valid_fraction": 1.0,
+        "semantic_route_fraction": 1.0
+      },
+      "required_kinds": [
+        "figure_audit",
+        "reviewer_visual_contract"
+      ],
+      "soft_required_kinds": [],
+      "subsystem": "visuals"
+    },
+    {
+      "maximum_metrics": {},
+      "minimum_metrics": {},
+      "required_kinds": [],
+      "soft_required_kinds": [
+        "route_certificate"
+      ],
+      "subsystem": "trajectory_certification"
+    },
+    {
+      "maximum_metrics": {},
+      "minimum_metrics": {
+        "speedup_astar_vs_brute": 1.0
+      },
+      "required_kinds": [
+        "admissibility_benchmark"
+      ],
+      "soft_required_kinds": [],
+      "subsystem": "transport_search"
+    },
+    {
+      "maximum_metrics": {},
+      "minimum_metrics": {
+        "file_count": 10.0
+      },
+      "required_kinds": [
+        "artifact_manifest"
+      ],
+      "soft_required_kinds": [],
+      "subsystem": "artifact_integrity"
+    }
+  ],
+  "created_utc": "2026-06-02T12:11:47+00:00",
+  "critical_failures": 0,
+  "evidence": [
+    {
+      "artifact_id": "dream_lab_run",
+      "certificate_hash": "1cf8724f8193daadeae41fd475d8ef239a325e41692ab33bce4247ce42984dce",
+      "content_hash": "b8300161b041278bac625412294eaf7f194374a8cdc9220a9e2278506d5e9ea4",
+      "kind": "dream_run",
+      "metrics": {
+        "experiment_count": 5
+      },
+      "notes": [],
+      "path": "data\\benchmarks\\dream_lab\\dream_run.json",
+      "required": true,
+      "status": "pass",
+      "subsystem": "dream_calibration"
+    },
+    {
+      "artifact_id": "solar_navigator_benchmark",
+      "certificate_hash": "332e107a4149206dee95c5de54cbbfb6ad457991a8e709831d11f7af6dc2de62",
+      "content_hash": "ff0dc4f7903b9768bbf50254f4a48be5ce9c7e23cfad080afacb8b6c6e26c08a",
+      "kind": "navigator_benchmark",
+      "metrics": {
+        "elapsed_s": 3.0992013000068255
+      },
+      "notes": [],
+      "path": "data\\benchmarks\\solar_navigator_benchmark\\benchmark_summary.json",
+      "required": true,
+      "status": "pass",
+      "subsystem": "solar_navigator"
+    },
+    {
+      "artifact_id": "discovery_real_corpus_mpc_500",
+      "certificate_hash": "da3b6fedff6aba7eac3c2b5bd6e1274ea2c7c7ba7888b1f0c18388938b8ff7ed",
+      "content_hash": "b72994b721c59ed4110b8b6ddb8d524ffe0cb336d33abd4db20ae69df5b6bd89",
+      "kind": "labelled_benchmark",
+      "metrics": {
+        "accuracy": 1.0,
+        "ece": 7.045142247363856e-12,
+        "macro_f1": 1.0,
+        "n": 500,
+        "safe_accuracy": 1.0
+      },
+      "notes": [],
+      "path": null,
+      "required": true,
+      "status": "pass",
+      "subsystem": "discovery_inference"
+    },
+    {
+      "artifact_id": "discovery_adversarial_builtin",
+      "certificate_hash": "031e6bcf6d32065f90e32228c3d7653fe98c81569a124695d55785d823d34d87",
+      "content_hash": "e42561748e71a9623a7d8c0559b203d4e6bf21261c253fa3b1a9c40f76ec3b95",
+      "kind": "adversarial_benchmark",
+      "metrics": {
+        "accuracy": 0.64,
+        "macro_f1": 0.5425241425241425,
+        "n": 75,
+        "safe_accuracy": 0.9466666666666667
+      },
+      "notes": [],
+      "path": null,
+      "required": true,
+      "status": "pass",
+      "subsystem": "discovery_robustness"
+    },
+    {
+      "artifact_id": "docs_figures_png_audit",
+      "certificate_hash": null,
+      "content_hash": null,
+      "kind": "figure_audit",
+      "metrics": {
+        "invalid_png": [],
+        "min_height_px": 728,
+        "min_width_px": 924,
+        "n_png": 28,
+        "n_valid_png": 28,
+        "png_valid_fraction": 1.0
+      },
+      "notes": [
+        "PNG signature and IHDR dimension audit"
+      ],
+      "path": "docs\\figures",
+      "required": true,
+      "status": "pass",
+      "subsystem": "visuals"
+    },
+    {
+      "artifact_id": "navigator_visual_contract",
+      "certificate_hash": "f2e04dd9f7ca14833eb20afd60f80ec94d4cf23ea3f1a35464e7c251398ca95e",
+      "content_hash": "f2e04dd9f7ca14833eb20afd60f80ec94d4cf23ea3f1a35464e7c251398ca95e",
+      "kind": "reviewer_visual_contract",
+      "metrics": {
+        "case_count": 2,
+        "cases": [
+          "earth_enceladus_small",
+          "earth_mars_small"
+        ],
+        "failure_count": 0,
+        "failures": [],
+        "manifest_count": 2,
+        "png_total": 6,
+        "png_valid": 6,
+        "png_valid_fraction": 1.0,
+        "route_total": 21,
+        "routes_with_assumptions": 21,
+        "routes_with_certificates": 21,
+        "routes_with_full_events": 21,
+        "routes_with_validations": 21,
+        "semantic_route_fraction": 1.0
+      },
+      "notes": [
+        "Navigator PNG + route-card semantic visual contract"
+      ],
+      "path": "data\\benchmarks\\solar_navigator_benchmark",
+      "required": true,
+      "status": "pass",
+      "subsystem": "visuals"
+    },
+    {
+      "artifact_id": "route_promotion_report",
+      "certificate_hash": "ef3a6a3c6706c3199ec0e9253a422dbb01592de5c23fc5e1ac2f60511a354987",
+      "content_hash": "38a31eb22012ec52f8682deaade7c307de84f354bd2c498fc8a302c561b53b55",
+      "kind": "route_certificate",
+      "metrics": {
+        "promoted_count": 12,
+        "rejected_count": 0,
+        "route_count": 12
+      },
+      "notes": [],
+      "path": "data\\benchmarks\\route_promotion_full_strict\\promotion_report.json",
+      "required": false,
+      "status": "pass",
+      "subsystem": "trajectory_certification"
+    },
+    {
+      "artifact_id": "transport_admissibility",
+      "certificate_hash": "d2a7fb13fcaae969c5606a47f6d76e07b7809d3085bba0d3bf708525ae134f9e",
+      "content_hash": "09b75c2abaed437a0bac28631a5e7380002c39180eab137c4c9173431b052e2b",
+      "kind": "admissibility_benchmark",
+      "metrics": {
+        "astar_expansions": 4,
+        "brute_expansions": 12,
+        "speedup_astar_vs_brute": 3.0
+      },
+      "notes": [],
+      "path": null,
+      "required": true,
+      "status": "pass",
+      "subsystem": "transport_search"
+    },
+    {
+      "artifact_id": "artifact_integrity_manifest",
+      "certificate_hash": "282f6643b179adfe262a628e440e32faf1040e896daf60f3b57264a101162d7c",
+      "content_hash": "63f0f114ebcaff8882339747febc0ad91e59d34399a56f24b3a628aeeca323c0",
+      "kind": "artifact_manifest",
+      "metrics": {
+        "file_count": 69,
+        "total_size_bytes": 6410182
+      },
+      "notes": [],
+      "path": null,
+      "required": true,
+      "status": "pass",
+      "subsystem": "artifact_integrity"
+    }
+  ],
+  "gates": [
+    {
+      "evidence_ids": [
+        "dream_lab_run"
+      ],
+      "gate_id": "dream_calibration:dream_run:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "dream_calibration"
+    },
+    {
+      "evidence_ids": [
+        "dream_lab_run"
+      ],
+      "gate_id": "dream_calibration:experiment_count:>=",
+      "message": "",
+      "metrics": {
+        "observed": 5.0,
+        "threshold": 1.0
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "dream_calibration"
+    },
+    {
+      "evidence_ids": [
+        "discovery_real_corpus_mpc_500"
+      ],
+      "gate_id": "discovery_inference:labelled_benchmark:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "discovery_inference"
+    },
+    {
+      "evidence_ids": [
+        "discovery_real_corpus_mpc_500"
+      ],
+      "gate_id": "discovery_inference:accuracy:>=",
+      "message": "",
+      "metrics": {
+        "observed": 1.0,
+        "threshold": 0.9
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "discovery_inference"
+    },
+    {
+      "evidence_ids": [
+        "discovery_real_corpus_mpc_500"
+      ],
+      "gate_id": "discovery_inference:safe_accuracy:>=",
+      "message": "",
+      "metrics": {
+        "observed": 1.0,
+        "threshold": 0.95
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "discovery_inference"
+    },
+    {
+      "evidence_ids": [
+        "discovery_real_corpus_mpc_500"
+      ],
+      "gate_id": "discovery_inference:macro_f1:>=",
+      "message": "",
+      "metrics": {
+        "observed": 1.0,
+        "threshold": 0.9
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "discovery_inference"
+    },
+    {
+      "evidence_ids": [
+        "discovery_real_corpus_mpc_500"
+      ],
+      "gate_id": "discovery_inference:ece:<=",
+      "message": "",
+      "metrics": {
+        "observed": 7.045142247363856e-12,
+        "threshold": 0.05
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "discovery_inference"
+    },
+    {
+      "evidence_ids": [
+        "discovery_adversarial_builtin"
+      ],
+      "gate_id": "discovery_robustness:adversarial_benchmark:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "discovery_robustness"
+    },
+    {
+      "evidence_ids": [
+        "discovery_adversarial_builtin"
+      ],
+      "gate_id": "discovery_robustness:safe_accuracy:>=",
+      "message": "",
+      "metrics": {
+        "observed": 0.9466666666666667,
+        "threshold": 0.94
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "discovery_robustness"
+    },
+    {
+      "evidence_ids": [
+        "solar_navigator_benchmark"
+      ],
+      "gate_id": "solar_navigator:navigator_benchmark:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "solar_navigator"
+    },
+    {
+      "evidence_ids": [
+        "docs_figures_png_audit"
+      ],
+      "gate_id": "visuals:figure_audit:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "visuals"
+    },
+    {
+      "evidence_ids": [
+        "navigator_visual_contract"
+      ],
+      "gate_id": "visuals:reviewer_visual_contract:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "visuals"
+    },
+    {
+      "evidence_ids": [
+        "docs_figures_png_audit"
+      ],
+      "gate_id": "visuals:png_valid_fraction:>=",
+      "message": "",
+      "metrics": {
+        "observed": 1.0,
+        "threshold": 1.0
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "visuals"
+    },
+    {
+      "evidence_ids": [
+        "docs_figures_png_audit"
+      ],
+      "gate_id": "visuals:n_png:>=",
+      "message": "",
+      "metrics": {
+        "observed": 28.0,
+        "threshold": 10.0
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "visuals"
+    },
+    {
+      "evidence_ids": [
+        "navigator_visual_contract"
+      ],
+      "gate_id": "visuals:semantic_route_fraction:>=",
+      "message": "",
+      "metrics": {
+        "observed": 1.0,
+        "threshold": 1.0
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "visuals"
+    },
+    {
+      "evidence_ids": [
+        "route_promotion_report"
+      ],
+      "gate_id": "trajectory_certification:route_certificate:soft_required",
+      "message": "",
+      "metrics": {},
+      "severity": "major",
+      "status": "pass",
+      "subsystem": "trajectory_certification"
+    },
+    {
+      "evidence_ids": [
+        "transport_admissibility"
+      ],
+      "gate_id": "transport_search:admissibility_benchmark:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "transport_search"
+    },
+    {
+      "evidence_ids": [
+        "transport_admissibility"
+      ],
+      "gate_id": "transport_search:speedup_astar_vs_brute:>=",
+      "message": "",
+      "metrics": {
+        "observed": 3.0,
+        "threshold": 1.0
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "transport_search"
+    },
+    {
+      "evidence_ids": [
+        "artifact_integrity_manifest"
+      ],
+      "gate_id": "artifact_integrity:artifact_manifest:required",
+      "message": "",
+      "metrics": {},
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "artifact_integrity"
+    },
+    {
+      "evidence_ids": [
+        "artifact_integrity_manifest"
+      ],
+      "gate_id": "artifact_integrity:file_count:>=",
+      "message": "",
+      "metrics": {
+        "observed": 69.0,
+        "threshold": 10.0
+      },
+      "severity": "critical",
+      "status": "pass",
+      "subsystem": "artifact_integrity"
+    }
+  ],
+  "readiness_score": 1.0,
+  "residuals": [
+    {
+      "category": "flight_grade_proof",
+      "confidence": 0.95,
+      "description": "Direct Earth-Mars routes now promote through n-body, covariance, and independent integrator cross-checks; remaining ladder work is moon-system and low-thrust expansion.",
+      "evidence_ids": [],
+      "recommended_action": "Extend strict promotion to moon-system ephemerides, low-thrust/DSM arcs, and installed GMAT/Monte external replays.",
+      "residual_id": "route_multifidelity_promotion_ladder",
+      "severity": 0.48,
+      "subsystem": "trajectory_certification"
+    },
+    {
+      "category": "model_scope",
+      "confidence": 0.9,
+      "description": "Direct non-Earth origins are supported; non-Earth gravity-assist templates still need expansion.",
+      "evidence_ids": [],
+      "recommended_action": "Add non-Earth gravity-assist templates and benchmark coverage for non-Earth departure bodies.",
+      "residual_id": "navigator_non_earth_origin_extension",
+      "severity": 0.45,
+      "subsystem": "solar_navigator"
+    },
+    {
+      "category": "operational_scaling",
+      "confidence": 0.9,
+      "description": "Rate-constrained cross-night linking exists; remaining work is deep near-ecliptic real-field scale validation.",
+      "evidence_ids": [],
+      "recommended_action": "Benchmark the rate-constrained linker on near-ecliptic deep cadence data and track runtime/false-link curves.",
+      "residual_id": "deep_field_rate_constrained_cross_night_linking",
+      "severity": 0.38,
+      "subsystem": "discovery_pipeline"
+    },
+    {
+      "category": "fidelity_default",
+      "confidence": 0.9,
+      "description": "Long-arc IOD now auto-promotes to N-body LM; remaining work is broader real-corpus burn-down.",
+      "evidence_ids": [],
+      "recommended_action": "Expand real-corpus regression coverage for long-arc N-body fits and monitor fallback rates.",
+      "residual_id": "discovery_long_arc_nbody_default",
+      "severity": 0.35,
+      "subsystem": "discovery_inference"
+    },
+    {
+      "category": "explainability",
+      "confidence": 0.95,
+      "description": "Reviewer visual contract now gates navigator PNGs and route-card semantics; remaining work is richer pixel-level/metadata scoring.",
+      "evidence_ids": [],
+      "recommended_action": "Add optional OCR/metadata sidecar scoring for units, labels, uncertainty overlays, and scale bars.",
+      "residual_id": "reviewer_grade_visual_contract",
+      "severity": 0.3,
+      "subsystem": "visuals"
+    }
+  ],
+  "schema": "ariadne.closure_report.v1",
+  "status": "complete",
+  "warnings": 0
+}

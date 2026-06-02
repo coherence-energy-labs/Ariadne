@@ -121,7 +121,151 @@ The engine also returns:
   (probability × novelty).
 * `narrative`: a paragraph summarising the inference.
 
-## 4. The predictive scheduler: it learns over time
+The upgraded inference result also carries `evidence_audit`,
+`posterior_check`, and a tamper-evident `certificate`. `evidence_audit`
+records which evidence channels were present, how complete the evidence is,
+and whether contradictions require fail-closed manual review.
+`posterior_check` tests whether the winning hypothesis predicts the observed
+rate, morphology, and orbit-fit residuals. The certificate is a deterministic
+SHA-256 hash over the evidence, calibration, posterior, follow-up
+recommendation, and audit.
+
+The posterior supports explicit temperature calibration via
+`CalibrationConfig`. Use `reliability_report()` on labelled validation cases
+to compute accuracy, negative log likelihood, Brier score, and expected
+calibration error; use `fit_temperature()` to pick a validation-set
+temperature by minimum NLL. Contradictory evidence can be rejected before
+scoring with `fail_closed_on_contradiction=True`; e.g. "cosmic ray"
+morphology with a multi-night coherent arc returns `manual_review` rather
+than a false winner.
+
+## 4. Benchmark proof harness
+
+The `discovery.benchmarking` module is the repeatable proof path for the
+inference engine. It runs labelled known-object proxy cases, ZTF-like and
+LSST-like alert streams, adversarial false-positive cases, blind holdouts,
+calibration metrics, reliability-curve bins, precision/recall, confusion
+matrices, and channel ablation studies.
+
+```python
+from ariadne.discovery.benchmarking import (
+    run_inference_benchmark, write_benchmark_report)
+
+result = run_inference_benchmark()
+print(result.accuracy, result.reliability.ece, result.certificate_hash)
+write_benchmark_report(result, ".benchmarks/inference")
+```
+
+The default suite is offline and deterministic. Its "real labelled" rows are
+MPC known-object proxies with survey-like evidence, so CI can verify the
+benchmark without downloading broker archives. A production proof can append
+actual labelled survey corpora as `LabelledCase` rows using the same schema:
+ZTF alert packets, Rubin/LSST alert simulations, known-object recovery labels,
+false-positive labels, or a blinded external holdout. The benchmark certificate
+hash changes if the cases, labels, calibration, posteriors, or metrics change.
+
+The report writer emits `metrics.json`, `reliability_curve.csv`,
+`confusion.csv`, `precision_recall.csv`, `ablation.csv`, and
+`case_results.csv`.
+
+For external corpora, `discovery.external_corpora` provides adapters for:
+
+* live MPCORB known-object samples from the Minor Planet Center,
+* local ZTF alert/export files (`.json`, `.jsonl`, `.csv`, `.avro`),
+* local Rubin/LSST alert files or JSON exports using the official alert schema.
+
+Run a live MPC-labelled benchmark with:
+
+```powershell
+$env:PYTHONPATH="src"
+python scripts\build_external_inference_benchmark.py `
+  --fetch-mpc --mpc-limit 500 --out .benchmarks\external_mpc_live_500
+```
+
+Latest local run: 500 live MPCORB-labelled known-object cases, 0.986 accuracy,
+ECE 0.0065, certificate
+`dde4ddb7e218d556f15200861e3f4f264a5e8c294044c433669866635c2f7037`.
+This score is for known-object recovery with orbital-element context included;
+pre-orbit sparse-alert triage remains a harder and separate benchmark.
+
+The max benchmark mode adds stratified leaderboards, failure diagnostics, and
+validation-learned channel/label calibration:
+
+```powershell
+$env:PYTHONPATH="src"
+python scripts\build_external_inference_benchmark.py `
+  --fetch-mpc --mpc-limit 500 --fit-channels --fit-labels `
+  --out .benchmarks\external_mpc_live_500_max
+```
+
+Latest max-mode sparse suite run: 14 cases, 1.000 accuracy, 1.000 macro-F1,
+certificate `2aa620fc88dc02f5d8689f3379f688cee240a002615c730ba4fd1c12ee60c34b`.
+
+Latest max-mode live MPC run: 500 cases, 1.000 accuracy, 1.000 macro-F1,
+ECE ~7e-12, certificate
+`50d42d1e3defe0d91150ad74146a137c2cddd2334700891b058cf60e2ee7c57d`.
+The report includes `strata.csv`, `failure_diagnostics.csv`,
+`calibration_search.csv`, `holdout_manifest.json`, `drift_manifest.json`,
+and a reliability diagram image in addition to the standard benchmark
+artifacts.
+
+The blind-holdout mode separates calibration from scoring:
+
+```powershell
+$env:PYTHONPATH="src"
+python scripts\build_external_inference_benchmark.py `
+  --ztf labelled_alerts.jsonl --fit-channels --fit-labels `
+  --separate-calibration --out .benchmarks\ztf_blind_holdout
+```
+
+The adversarial mode mutates cases with missing color, magnitude noise, weak
+morphology, short arcs, and artifact conflicts. Latest built-in adversarial
+stress run: 75 cases, 0.733 exact accuracy, 1.000 safe-decision accuracy,
+macro-F1 0.804, certificate
+`22cb7bd7cfa2d9e3bc6a003ba2560ab70b7de107f625f3822e6b1759ebb8d262`.
+This is now the honest robustness frontier.
+
+ZTF and Rubin alert archives are file-ingest paths because broker/archive
+access and entitlement vary by source. The adapters require explicit labels
+(`truth_label`) or known-object orbit associations so the benchmark remains a
+truth test, not a self-graded classifier run.
+
+For a full acquisition bundle that downloads live MPCORB data, writes portable
+case/alert JSONL, records source URLs, and optionally runs both benchmark and
+replay artifacts:
+
+```powershell
+$env:PYTHONPATH="src"
+python scripts\acquire_real_labelled_corpus.py `
+  --out-dir data\benchmarks\real_corpus_mpc_500 `
+  --fetch-mpc --mpc-limit 500 `
+  --run-benchmark --fit-channels --fit-labels
+```
+
+Latest acquisition-bundle MPC run: 500 downloaded MPCORB-labelled cases,
+1.000 accuracy, 1.000 safe-decision accuracy, 1.000 macro-F1, ECE ~7e-12,
+certificate `da3b6fedff6aba7eac3c2b5bd6e1274ea2c7c7ba7888b1f0c18388938b8ff7ed`.
+It writes `labelled_cases.jsonl`, `corpus_manifest.json`, benchmark CSV/JSON
+artifacts, a drift manifest, a frozen holdout manifest, and a reliability
+diagram under `data/benchmarks/real_corpus_mpc_500`.
+
+The same acquisition script can ingest operational alert streams and replay
+them through the live pipeline:
+
+```powershell
+$env:PYTHONPATH="src"
+python scripts\acquire_real_labelled_corpus.py `
+  --out-dir data\benchmarks\real_corpus_alerce_probe `
+  --alerce --ra 180 --dec 0 --radius-deg 2 `
+  --mjd-start 60000 --mjd-end 60400 --max-alerts 100 `
+  --run-replay
+```
+
+Latest ALeRCE probe acquired 2 real ZTF broker alerts and replayed them through
+the pipeline with 0 candidate outputs, writing `alerts.jsonl`,
+`corpus_manifest.json`, `provenance.jsonl`, and `replay_manifest.json`.
+
+## 5. The predictive scheduler: it learns over time
 
 `discovery/predictive.py` records every (evidence_class, action, outcome)
 triplet to an on-disk ledger. Over weeks of operation, it discovers
@@ -130,7 +274,7 @@ produce confirmations for each evidence class, and adapts its
 recommendations. Cold-start uses sensible priors; the steady state is
 empirically calibrated to the engine's actual experience.
 
-## 5. Recovery curves on synthetic injections
+## 6. Recovery curves on synthetic injections
 
 The `validate.sensitivity` module runs end-to-end recovery tests by
 injecting synthetic moving objects into the pipeline and measuring the
@@ -151,7 +295,7 @@ print(f"By magnitude: {report.recovery_by_magnitude}")
 print(f"By rate:      {report.recovery_by_rate}")
 ```
 
-## 6. Known limits and ongoing work
+## 7. Known limits and ongoing work
 
 | Capability | Current state | Roadmap |
 |---|---|---|
@@ -161,7 +305,7 @@ print(f"By rate:      {report.recovery_by_rate}")
 | Cross-survey fusion | Implemented (`discovery/fusion.py`: ZTF + ATLAS + PS1) | Add Rubin / LSST broker when survey starts |
 | Streak detection | Hough transform with PSF-consistency check (`discovery/imaging/streaks.py`) | Add deep-learning streak classifier for the LSST era |
 
-## 7. What "extremely smart" actually means here
+## 8. What "extremely smart" actually means here
 
 The engine doesn't claim it can detect a bowling ball.
 It can:

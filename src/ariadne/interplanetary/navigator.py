@@ -307,11 +307,12 @@ def _route_from_direct(rec: dict, target: BodyTarget, *, name="direct") -> Missi
         RouteEvent(rec.get("dep_body", "EARTH"), utc(rec["et_dep"]), "departure",
                    tuple(float(x) for x in rec.get("r1", [0, 0, 0]))),
         RouteEvent(target.system_barycenter or target.ephemeris_name, utc(rec["et_arr"]), "arrival",
-                   None, rec.get("arr_vinf_kms")),
+                   tuple(float(x) for x in rec.get("r2", [0, 0, 0])), rec.get("arr_vinf_kms")),
     )
+    origin_name = rec.get("dep_body", "EARTH")
     shell = {
         "name": name,
-        "sequence": ("EARTH", target.system_barycenter or target.name),
+        "sequence": (origin_name, target.system_barycenter or target.name),
         "total_dv_ms": rec["total_ms"],
         "tof_days": rec["tof_days"],
         "c3": rec["c3"],
@@ -321,7 +322,7 @@ def _route_from_direct(rec: dict, target: BodyTarget, *, name="direct") -> Missi
         route_id=f"route_{cert[:14]}",
         name=name,
         engine="porkchop.optimize_window",
-        sequence=("EARTH", target.system_barycenter or target.name),
+        sequence=(origin_name, target.system_barycenter or target.name),
         target=target.name,
         fidelity="patched_conic_ephemeris",
         total_dv_ms=float(rec["total_ms"]),
@@ -331,6 +332,7 @@ def _route_from_direct(rec: dict, target: BodyTarget, *, name="direct") -> Missi
         risk=min(0.95, 0.18 + float(rec["arr_vinf_kms"]) / 30.0),
         feasible=True,
         assumptions=("heliocentric Lambert arc on real ephemerides",
+                     "departure parking-orbit cost used when configured; otherwise departure v-infinity",
                      "capture cost included only for bodies with configured capture model"),
         validations=(f"launch C3 {rec['c3']:.3f} km^2/s^2",
                      f"arrival v_inf {rec['arr_vinf_kms']:.3f} km/s"),
@@ -338,7 +340,7 @@ def _route_from_direct(rec: dict, target: BodyTarget, *, name="direct") -> Missi
         components={"dv_depart_ms": rec.get("dv_dep_ms"),
                     "dv_arrival_ms": rec.get("dv_arr_ms"),
                     "c3_km2_s2": rec.get("c3")},
-        raw={k: v for k, v in rec.items() if k not in {"r1", "v1"}},
+        raw={k: v for k, v in rec.items() if k not in {"r1", "v1", "r2", "v2"}},
         certificate_hash=cert,
     )
 
@@ -385,7 +387,8 @@ def _with_moon_tour(route: MissionRoute, target: BodyTarget,
                      f"moon-tour deterministic mismatch {tour['ga_deterministic_dv_ms']:.1f} m/s",
                      f"moon-tour Hohmann baseline {tour['hohmann_dv_ms']:.1f} m/s"),
         events=route.events + tuple(
-            RouteEvent(m, route.events[-1].epoch_utc, "moon-tour-node")
+            RouteEvent(m, route.events[-1].epoch_utc, "moon-tour-node",
+                       notes="abstract Tisserand screening node; phased moon ephemeris not attached")
             for m in tour["sequence"]
         ),
         components={**route.components, "moon_tour": tour},
@@ -520,8 +523,26 @@ def navigate_solar_system(
     weights = weights or NavigatorWeights()
     origin = resolve_target(constraints.origin)
     target = resolve_target(constraints.target)
-    if origin.name != "EARTH":
-        raise NotImplementedError("current navigator supports EARTH origin; registry is ready for extension")
+    if origin.name != "EARTH" and constraints.include_gravity_assist:
+        constraints = NavigatorConstraints(
+            origin=constraints.origin,
+            target=constraints.target,
+            epoch_start=constraints.epoch_start,
+            departure_window_days=constraints.departure_window_days,
+            tof_range_days=constraints.tof_range_days,
+            n_dep=constraints.n_dep,
+            n_tof=constraints.n_tof,
+            optimize_direct=constraints.optimize_direct,
+            include_direct=constraints.include_direct,
+            include_gravity_assist=False,
+            include_moon_tour=constraints.include_moon_tour,
+            optimize_flybys=False,
+            flyby_maxiter=constraints.flyby_maxiter,
+            flyby_alt_km=constraints.flyby_alt_km,
+            max_total_dv_ms=constraints.max_total_dv_ms,
+            max_tof_days=constraints.max_tof_days,
+            max_direct_pareto_routes=constraints.max_direct_pareto_routes,
+        )
     arrival = target.system_barycenter or target.ephemeris_name
     start = et(constraints.epoch_start)
     routes: list[MissionRoute] = []
@@ -1362,7 +1383,65 @@ def write_navigator_report(report: NavigatorReport, outdir: str | Path,
     cards_path = out / "route_cards.md"
     cards_path.write_text(_route_cards_markdown(report, artifacts), encoding="utf-8")
     artifacts["route_cards"] = str(cards_path)
+    manifest_path = out / "figure_manifest.json"
+    manifest_path.write_text(
+        json.dumps(_figure_manifest(report, artifacts), sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    artifacts["figure_manifest"] = str(manifest_path)
     return artifacts
+
+
+def _figure_manifest(report: NavigatorReport, artifacts: dict) -> dict:
+    """Machine-checkable semantic contract for navigator visuals."""
+    route_roles = {
+        "fastest": report.fastest_id,
+        "cheapest": report.cheapest_id,
+        "balanced": report.balanced_id,
+    }
+    return {
+        "schema": "ariadne.navigator_figure_manifest.v1",
+        "report_certificate_hash": report.certificate_hash,
+        "origin": report.origin.name,
+        "target": report.target.name,
+        "route_count": len(report.routes),
+        "pareto_count": len(report.pareto_front),
+        "route_roles": route_roles,
+        "required_figures": {
+            "mission_plate": {
+                "path": artifacts.get("mission_plate"),
+                "must_show": ["origin", "target", "balanced route", "certificate", "route count"],
+            },
+            "porkchop_heatmap": {
+                "path": artifacts.get("porkchop_heatmap"),
+                "must_show": ["departure offset days", "time of flight days", "delta-v scale"],
+            },
+            "route_trade_space": {
+                "path": artifacts.get("route_trade_space"),
+                "must_show": ["time of flight", "delta-v", "pareto front", "balanced route"],
+            },
+        },
+        "units": {
+            "delta_v": "m/s",
+            "time_of_flight": "days",
+            "c3": "km^2/s^2",
+            "arrival_vinf": "km/s",
+            "coordinates": "km J2000 heliocentric unless otherwise noted",
+        },
+        "routes": [
+            {
+                "route_id": route.route_id,
+                "name": route.name,
+                "sequence": route.sequence,
+                "fidelity": route.fidelity,
+                "certificate_hash": route.certificate_hash,
+                "event_count": len(route.events),
+                "assumption_count": len(route.assumptions),
+                "validation_count": len(route.validations),
+            }
+            for route in report.routes
+        ],
+    }
 
 
 def _route_cards_markdown(report: NavigatorReport, artifacts: dict | None = None) -> str:

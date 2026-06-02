@@ -111,10 +111,14 @@ def main():
     print(f"    {len(streaks)} streaks detected")
 
     # 7. Difference imaging (frame 1 vs frame 0 as reference)
+    #    PSF-matched (Alard-Lupton) by default: solves a matching kernel from the
+    #    static stars so different-seeing frames subtract cleanly (no dipoles),
+    #    falling back to crude scalar subtraction if too few stars / no scipy.
     if len(images) >= 2:
-        from ariadne.discovery.imaging.difference import subtract_reference
+        from ariadne.discovery.imaging.difference import psf_matched_difference
         print(f"\n[7] difference imaging (frame 1 - frame 0)")
-        diff = subtract_reference(images[1], images[0], max_shift_px=10)
+        diff = psf_matched_difference(images[1], images[0], max_shift_px=10)
+        print(f"    method: {diff.method} (kernel fit on {diff.n_stars} stars)")
         print(f"    shift applied: ({diff.shift_px[0]:.2f}, {diff.shift_px[1]:.2f}) px")
         print(f"    flux scale: {diff.flux_scale:.3f}")
         print(f"    peak |residual|/sigma: {diff.n_sigma_max:.1f}")

@@ -118,6 +118,7 @@ $ ariadne tutorial 5                 # run example #5 (Coherence-HJB) end-to-end
 | Interplanetary | Lambert porkchop, VEEGA + per-leg DSMs (1-DOF + 4-DOF) | Galileo C3 16.8, Earth→Mars 5.63 km/s |
 | Coherence-HJB | Sampled-graph Helmholtz value function | 6D CR3BP: ~84% greedy reach in sub-second |
 | TNO discovery | HelioLinC linker + (r, rdot)-hypothesis IOD + LM | Sedna/Eris/Makemake/Quaoar/2001 FP185 fit 1.4–8.7″ |
+| Discovery inference | Calibrated sparse-evidence posterior + benchmark proof harness | Labelled known-object proxies, ZTF/LSST-like alerts, adversarial false positives, reliability curves, precision/recall, ablations |
 | Real-data | MPC ITF (135 MB, 2.6 M tracklets) | 515/863 known re-links + 0 new (the honest verdict) |
 | Cross-validation | DE440 ephemeris, GMAT, REBOUND | 149 m vs GMAT over 3 days |
 | Proof-carrying routes | CR3BP → BCR4BP → DE440 promotion certificates | (see `ariadne.certification`) |

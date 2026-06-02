@@ -73,14 +73,110 @@ def _binarise(image: np.ndarray, sigma_threshold: float = 4.0) -> np.ndarray:
     return image > med + sigma_threshold * max(sigma, 1.0)
 
 
+def mask_compact_sources(image: np.ndarray, mask: np.ndarray,
+                            *, max_component_extent_px: float = 6.0,
+                            min_axis_ratio: float = 2.0) -> np.ndarray:
+    """Remove compact (star-like) connected components from a binary mask,
+    keeping only elongated (streak-like) pixel groups.
+
+    A real CCD has thousands of stars whose bright pixels swamp the Hough
+    accumulator and produce spurious line votes from random alignments.
+    Production streak finders (ZTF, PanSTARRS) suppress point sources
+    first. We label connected components and drop any whose bounding-box
+    is compact (both axes < max_component_extent_px) or whose elongation
+    (major/minor axis ratio) is below min_axis_ratio.
+
+    Returns a new boolean mask with only elongated components retained.
+    """
+    try:
+        from scipy import ndimage
+    except ImportError as e:
+        raise ImportError("scipy required for streak source masking") from e
+    labels, n = ndimage.label(mask)
+    if n == 0:
+        return mask
+    out = np.zeros_like(mask)
+    # Bounding-box slices per component
+    slices = ndimage.find_objects(labels)
+    for comp_id, sl in enumerate(slices, start=1):
+        if sl is None:
+            continue
+        h = sl[0].stop - sl[0].start
+        w = sl[1].stop - sl[1].start
+        major = max(h, w)
+        minor = max(min(h, w), 1)
+        axis_ratio = major / minor
+        # Keep only elongated OR long components -- reject compact blobs
+        if (major <= max_component_extent_px
+                and axis_ratio < min_axis_ratio):
+            continue
+        out[labels == comp_id] = True
+    return out
+
+
+def subtract_and_mask_stars(image: np.ndarray,
+                              *, fwhm_px: float = 3.5,
+                              detect_sigma: float = 4.0,
+                              mask_radius_factor: float = 3.0,
+                              ) -> np.ndarray:
+    """Background-subtract and remove point sources, returning a residual
+    image in which stars are zeroed out so that only trails (and noise)
+    survive.
+
+    Real CCD stars have PSF wings, saturation spikes and bleed trails
+    that connect into large elongated components -- those defeat a naive
+    "keep elongated components" streak filter. The robust approach used
+    by production fast-mover pipelines is to detect the stars explicitly
+    and mask a disc around each before searching for linear residuals.
+
+    Returns a background-subtracted residual with circular regions around
+    every detected source set to zero.
+    """
+    try:
+        import numpy as _np
+        from photutils.background import Background2D, MedianBackground
+        from photutils.detection import DAOStarFinder
+        from astropy.stats import sigma_clipped_stats
+    except ImportError as e:
+        raise ImportError("photutils + astropy required for star-subtracted "
+                            "streak detection") from e
+    data = np.asarray(image, dtype=float)
+    bkg = Background2D(data, box_size=(64, 64),
+                         bkg_estimator=MedianBackground())
+    resid = data - bkg.background
+    _mean, _med, std = sigma_clipped_stats(resid, sigma=3.0)
+    finder = DAOStarFinder(fwhm=fwhm_px, threshold=detect_sigma * std)
+    tbl = finder(resid)
+    if tbl is not None and len(tbl) > 0:
+        H, W = resid.shape
+        yy, xx = np.ogrid[0:H, 0:W]
+        r_mask = mask_radius_factor * fwhm_px
+        r2 = r_mask * r_mask
+        x_col = "x_centroid" if "x_centroid" in tbl.colnames else "xcentroid"
+        y_col = "y_centroid" if "y_centroid" in tbl.colnames else "ycentroid"
+        # Mask each detected source. Vectorised disc stamp per source.
+        half = int(math.ceil(r_mask))
+        for row in tbl:
+            sx = float(row[x_col]); sy = float(row[y_col])
+            x0 = max(0, int(sx) - half); x1 = min(W, int(sx) + half + 1)
+            y0 = max(0, int(sy) - half); y1 = min(H, int(sy) + half + 1)
+            sub_y = yy[y0:y1, :]
+            sub_x = xx[:, x0:x1]
+            dist2 = (sub_x - sx) ** 2 + (sub_y - sy) ** 2
+            resid[y0:y1, x0:x1][dist2 <= r2] = 0.0
+    return resid
+
+
 def hough_lines(image: np.ndarray,
                 *,
                 sigma_threshold: float = 4.0,
                 n_theta: int = 180,
                 rho_resolution: float = 1.0,
                 min_votes: int = 30,
-                top_n: int = 20) -> list[tuple[float, float, int]]:
-    """Standard Hough line transform; return top-N (rho, theta, vote_count).
+                top_n: int = 20,
+                premask: np.ndarray | None = None,
+                suppress_compact: bool = True) -> list[tuple[float, float, int]]:
+    """Vectorised Hough line transform; return top-N (rho, theta, vote_count).
 
     Args:
       image:           2D image array.
@@ -89,13 +185,28 @@ def hough_lines(image: np.ndarray,
       rho_resolution:  rho bin size in pixels.
       min_votes:       lines with fewer votes are discarded.
       top_n:           cap on number of returned lines.
+      premask:         optional precomputed boolean mask of voting pixels.
+                       If None, derived from `image` via sigma threshold.
+      suppress_compact: if True (and no premask given), remove star-like
+                       compact connected components before voting. This
+                       both speeds the transform up by orders of magnitude
+                       and removes spurious votes from crowded fields.
 
     Returns:
       List of (rho_pixels, theta_radians, vote_count), sorted by vote_count
       descending.
+
+    The accumulator is built with a single vectorised np.add.at over the
+    outer product of bright-pixel coordinates and angle bins -- O(N*T) in
+    numpy rather than a Python double loop.
     """
     H, W = image.shape
-    mask = _binarise(image, sigma_threshold=sigma_threshold)
+    if premask is not None:
+        mask = premask
+    else:
+        mask = _binarise(image, sigma_threshold=sigma_threshold)
+        if suppress_compact:
+            mask = mask_compact_sources(image, mask)
     ys, xs = np.where(mask)
     if len(xs) == 0:
         return []
@@ -108,18 +219,25 @@ def hough_lines(image: np.ndarray,
     n_rho = 2 * rho_max + 1
     accumulator = np.zeros((n_rho, n_theta), dtype=np.int32)
 
-    for x, y in zip(xs, ys):
-        rhos = x * cos_t + y * sin_t
-        rho_bins = np.round(rhos / rho_resolution).astype(int) + rho_max
-        valid = (rho_bins >= 0) & (rho_bins < n_rho)
-        for ti, rb in enumerate(rho_bins):
-            if 0 <= rb < n_rho:
-                accumulator[rb, ti] += 1
+    # Vectorised vote: rho_matrix[i, t] = x_i*cos_t + y_i*sin_t  (N x T)
+    xs_f = xs.astype(np.float64)
+    ys_f = ys.astype(np.float64)
+    rho_matrix = np.outer(xs_f, cos_t) + np.outer(ys_f, sin_t)
+    rho_bins = np.round(rho_matrix / rho_resolution).astype(np.int64) + rho_max
+    # Theta index per column, broadcast to the full N x T grid
+    theta_idx = np.broadcast_to(np.arange(n_theta), rho_bins.shape)
+    valid = (rho_bins >= 0) & (rho_bins < n_rho)
+    flat_rho = rho_bins[valid]
+    flat_theta = theta_idx[valid]
+    np.add.at(accumulator, (flat_rho, flat_theta), 1)
 
-    # find local maxima in accumulator (suppress neighbours)
+    # find local maxima in accumulator (suppress neighbours).
+    # The relative floor (fraction of the strongest line) must be low
+    # enough that a faint short streak co-occurring with a bright long
+    # one is not suppressed -- min_votes is the real false-positive guard.
     lines = []
     acc_max = accumulator.max() if accumulator.size > 0 else 0
-    threshold = max(min_votes, int(0.3 * acc_max))
+    threshold = max(min_votes, int(0.15 * acc_max))
     while len(lines) < top_n:
         idx = np.argmax(accumulator)
         votes = int(accumulator.flat[idx])
@@ -159,7 +277,36 @@ def _measure_streak(image: np.ndarray, mask: np.ndarray,
     # parametric coordinate along the line direction:
     # tangent = (-sin_t, cos_t); so t = x*(-sin_t) + y*cos_t
     tang = -xs_line * sin_t + ys_line * cos_t
-    t_min = tang.min(); t_max = tang.max()
+    # A genuine trail has CONTIGUOUS pixel coverage along its length.
+    # Unrelated collinear star residuals sit far away with large gaps.
+    # Restrict the endpoints to the longest gap-limited contiguous run so
+    # we don't extend the streak through chance-aligned debris.
+    order = np.argsort(tang)
+    tang_sorted = tang[order]
+    max_gap = max(3.0 * width_px, 6.0)
+    gaps = np.diff(tang_sorted)
+    # Segment boundaries where the gap exceeds max_gap
+    breaks = np.where(gaps > max_gap)[0]
+    seg_starts = np.concatenate(([0], breaks + 1))
+    seg_ends = np.concatenate((breaks, [len(tang_sorted) - 1]))
+    # Pick the segment with the greatest extent in t
+    best_i = 0
+    best_extent = -1.0
+    for si, ei in zip(seg_starts, seg_ends):
+        extent = tang_sorted[ei] - tang_sorted[si]
+        if extent > best_extent:
+            best_extent = extent
+            best_i = (si, ei)
+    si, ei = best_i
+    t_min = float(tang_sorted[si]); t_max = float(tang_sorted[ei])
+    # Restrict the on-line pixel set to that contiguous segment for the
+    # flux / width measurements too.
+    seg_mask = (tang >= t_min) & (tang <= t_max)
+    xs_line = xs_line[seg_mask]
+    ys_line = ys_line[seg_mask]
+    seg_line_pix = line_pix[seg_mask]
+    if len(seg_line_pix) < 3:
+        return None
     # endpoints (in image coords): solve for the foot on the line at t_min/t_max
     # foot_x = rho*cos_t - t*sin_t,  foot_y = rho*sin_t + t*cos_t
     x1 = rho * cos_t - t_min * sin_t
@@ -176,11 +323,25 @@ def _measure_streak(image: np.ndarray, mask: np.ndarray,
     pixel_vals = image[ys_line, xs_line] - bg_median
     peak = float(pixel_vals.max())
     total = float(pixel_vals.sum())
-    n_pix = int(line_pix.size)
+    n_pix = int(seg_line_pix.size)
 
-    # Width estimate: spread of perpendicular distances of bright pixels
-    spread = float(np.percentile(np.abs(proj_perp[on_line]), 84))
-    fwhm_perp = 2.355 * spread
+    # Width estimate: FLUX-WEIGHTED perpendicular second moment, which
+    # measures the PSF width independent of source brightness. A simple
+    # percentile of above-threshold pixel offsets grows with brightness
+    # (a brighter trail pushes more wing pixels over the threshold), which
+    # wrongly inflated the width of bright trails and rejected them. The
+    # flux-weighted sigma of the perpendicular profile is amplitude-
+    # invariant: a Gaussian profile has the same sigma at any peak height.
+    seg_perp = proj_perp[seg_line_pix]
+    w = np.maximum(pixel_vals, 0.0)
+    w_sum = float(w.sum())
+    if w_sum > 0:
+        mean_perp = float(np.sum(w * seg_perp) / w_sum)
+        var_perp = float(np.sum(w * (seg_perp - mean_perp) ** 2) / w_sum)
+        sigma_perp = math.sqrt(max(var_perp, 0.0))
+        fwhm_perp = 2.3548 * sigma_perp
+    else:
+        fwhm_perp = 2.3548 * float(np.percentile(np.abs(seg_perp), 84))
     # Consistency: 1.0 = streak is exactly PSF-thin; <0.5 = wider than 3*PSF
     expected_psf_px = 3.0
     consistency = max(0.0, min(1.0, expected_psf_px / max(fwhm_perp, 1e-3)))
@@ -199,7 +360,9 @@ def detect_streaks(image: np.ndarray,
                    min_length_px: float = 8.0,
                    max_width_px: float = 6.0,
                    min_consistency: float = 0.3,
-                   max_streaks: int = 10) -> list[Streak]:
+                   max_streaks: int = 10,
+                   subtract_stars: bool = False,
+                   star_fwhm_px: float = 3.5) -> list[Streak]:
     """End-to-end streak detection: Hough transform + measurement + filter.
 
     Args:
@@ -209,17 +372,40 @@ def detect_streaks(image: np.ndarray,
       max_width_px:        reject streaks wider than this (extended sources).
       min_consistency:     reject streaks too wide for the PSF (extended fuzz).
       max_streaks:         cap on returned count.
+      subtract_stars:      if True, background-subtract and mask detected
+                           point sources before searching for trails. This
+                           is REQUIRED on real CCD images -- real stars have
+                           wings/spikes/bleed trails that connect into
+                           elongated components and defeat the compact-source
+                           filter. Synthetic clean fields do not need it.
+      star_fwhm_px:        PSF FWHM used for the star detection/masking step.
 
     Returns:
       List of Streak records, sorted by total_flux descending.
     """
-    mask = _binarise(image, sigma_threshold=sigma_threshold)
-    bg_med = float(np.median(image))
+    if subtract_stars:
+        # Work on a star-subtracted residual: stars zeroed, only trails +
+        # noise remain. Threshold the residual relative to its own noise.
+        resid = subtract_and_mask_stars(
+            image, fwhm_px=star_fwhm_px, detect_sigma=sigma_threshold)
+        med = float(np.median(resid))
+        mad = float(np.median(np.abs(resid - med)))
+        noise = 1.4826 * max(mad, 1e-6)
+        streak_mask = resid > med + sigma_threshold * noise
+        meas_image = resid
+        bg_med = med
+    else:
+        raw_mask = _binarise(image, sigma_threshold=sigma_threshold)
+        # Suppress compact (star-like) sources so only elongated trails vote
+        # + are measured (adequate only for clean/synthetic fields).
+        streak_mask = mask_compact_sources(image, raw_mask)
+        meas_image = image
+        bg_med = float(np.median(image))
     lines = hough_lines(image, sigma_threshold=sigma_threshold,
-                        top_n=max_streaks * 3)
+                        top_n=max_streaks * 3, premask=streak_mask)
     streaks = []
     for rho, theta, votes in lines:
-        s = _measure_streak(image, mask, rho, theta,
+        s = _measure_streak(meas_image, streak_mask, rho, theta,
                             width_px=max_width_px, bg_median=bg_med)
         if s is None:
             continue
@@ -236,56 +422,90 @@ def detect_streaks(image: np.ndarray,
                    total_flux=s.total_flux, n_pixels=s.n_pixels,
                    vote_count=votes, consistency=s.consistency)
         streaks.append(s)
+    streaks = _dedupe_streaks(streaks, tol_px=max(max_width_px, 4.0))
     streaks.sort(key=lambda x: x.total_flux, reverse=True)
     return streaks[:max_streaks]
 
 
+def _streak_endpoints_match(a: Streak, b: Streak, tol_px: float) -> bool:
+    """True if two streaks describe the same physical trail (endpoints
+    coincide, allowing for endpoint-order swap)."""
+    def close(p, q):
+        return math.hypot(p[0] - q[0], p[1] - q[1]) <= tol_px
+    a1, a2 = (a.x1, a.y1), (a.x2, a.y2)
+    b1, b2 = (b.x1, b.y1), (b.x2, b.y2)
+    return (close(a1, b1) and close(a2, b2)) or \
+           (close(a1, b2) and close(a2, b1))
+
+
+def _dedupe_streaks(streaks: list[Streak], *, tol_px: float = 4.0
+                      ) -> list[Streak]:
+    """Merge near-duplicate streaks (parallel Hough lines a few pixels
+    apart in rho describe one trail). Keep the highest-flux representative
+    of each group."""
+    kept: list[Streak] = []
+    for s in sorted(streaks, key=lambda x: x.total_flux, reverse=True):
+        if any(_streak_endpoints_match(s, k, tol_px) for k in kept):
+            continue
+        kept.append(s)
+    return kept
+
+
 def classify_streak(streak: Streak, exposure_seconds: float = 30.0,
-                    pixel_scale_arcsec: float = 0.25) -> dict:
+                    pixel_scale_arcsec: float = 0.25,
+                    *, psf_fwhm_px: float = 3.0,
+                    frame_diagonal_px: float | None = None) -> dict:
     """Distinguish asteroid trail / satellite trail / cosmic-ray trail.
 
-    Heuristics (empirical for ground-based CCD imaging):
+    Physical reasoning (a detected streak is, by definition, an object
+    that moved more than ~1 PSF during the exposure -- so it is never a
+    "slow mover"; the question is only WHICH kind of fast mover):
 
-      * Asteroid (NEO):   length 5-200 px, width 1-2 PSFs, consistent intensity,
-                          rate 0.5-30 arcsec/sec.
-      * Satellite (LEO):  length > 200 px (often spans entire frame), width
-                          consistent with PSF, rate >> 100 arcsec/sec.
-      * Geosync sat:      length 5-30 px, width ~ PSF, rate 5-15 arcsec/sec.
-      * Cosmic-ray trail: length < 10 px, width sub-PSF, often diagonal.
+      * Asteroid (NEO):   width consistent with the PSF (it is a point
+                          source dragged along the trail). Length implies
+                          a plausible angular rate (0.05 - ~50 arcsec/sec).
+                          Does NOT span the whole frame.
+      * Satellite (LEO):  spans a large fraction of the frame; angular
+                          rate >> 50 arcsec/sec (typically hundreds).
+      * Cosmic-ray trail: short, sub-PSF width (sharp, no PSF wings).
+      * Extended/wide:    width >> PSF (galaxy edge, diffraction, blend).
 
-    Returns a dict {label, confidence, rate_arcsec_sec, rate_arcsec_hr}.
+    Returns a dict with `label`, `confidence`, `is_asteroid_candidate`,
+    and the angular-rate estimate in both arcsec/sec and arcsec/hr.
     """
     rate_px_per_s = streak.length_px / max(exposure_seconds, 1e-3)
     rate_arcsec_per_s = rate_px_per_s * pixel_scale_arcsec
     rate_arcsec_per_hr = rate_arcsec_per_s * 3600.0
+    width_in_psf = streak.width_px / max(psf_fwhm_px, 1e-3)
 
-    # Width-based label cuts
-    if streak.consistency < 0.5:
-        label = "extended_or_satellite_wide"
-        conf = 0.5
-    elif streak.length_px > 200:
-        label = "satellite_LEO"
-        conf = 0.85
-    elif rate_arcsec_per_s > 5.0:
-        label = "satellite_or_fast_NEO"
-        conf = 0.6
-    elif streak.length_px < 8 and streak.width_px < 2.0:
-        label = "cosmic_ray_trail"
-        conf = 0.7
-    elif 0.5 < rate_arcsec_per_s < 5.0:
-        label = "NEO_or_inner_main_belt"
-        conf = 0.75
-    elif rate_arcsec_per_s < 0.5:
-        label = "slow_mover_or_artefact"
-        conf = 0.5
+    # A streak spanning a large fraction of the frame diagonal is a
+    # satellite regardless of width.
+    spans_frame = (frame_diagonal_px is not None
+                     and streak.length_px > 0.5 * frame_diagonal_px)
+
+    is_asteroid = False
+    if streak.width_px < 0.5 * psf_fwhm_px and streak.length_px < 10:
+        # sharp, short, sub-PSF -> cosmic ray
+        label = "cosmic_ray_trail"; conf = 0.75
+    elif width_in_psf > 2.5:
+        # much wider than the PSF -> extended source or saturated blend
+        label = "extended_or_blended"; conf = 0.6
+    elif spans_frame or rate_arcsec_per_s > 50.0:
+        # crosses the field / hypersonic angular rate -> satellite
+        label = "satellite"; conf = 0.8
+    elif 0.5 <= width_in_psf <= 2.5 and rate_arcsec_per_s <= 50.0:
+        # PSF-thin trail at an asteroid-plausible rate
+        label = "asteroid_candidate"; conf = 0.8
+        is_asteroid = True
     else:
-        label = "unclassified_streak"
-        conf = 0.4
+        label = "unclassified_streak"; conf = 0.4
 
     return {
         "label": label, "confidence": conf,
+        "is_asteroid_candidate": is_asteroid,
         "rate_arcsec_sec": rate_arcsec_per_s,
         "rate_arcsec_hr": rate_arcsec_per_hr,
         "length_px": streak.length_px, "width_px": streak.width_px,
+        "width_in_psf": width_in_psf,
         "consistency": streak.consistency,
     }

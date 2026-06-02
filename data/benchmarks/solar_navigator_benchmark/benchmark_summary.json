@@ -1,6 +1,7 @@
 {
   "artifacts": {
     "earth_enceladus_small": {
+      "figure_manifest": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\figure_manifest.json",
       "mission_plate": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\mission_plate.png",
       "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\porkchop_heatmap.png",
       "report": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\navigator_report.json",
@@ -8,6 +9,7 @@
       "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_trade_space.png"
     },
     "earth_mars_small": {
+      "figure_manifest": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\figure_manifest.json",
       "mission_plate": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\mission_plate.png",
       "porkchop_heatmap": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\porkchop_heatmap.png",
       "report": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\navigator_report.json",
@@ -29,7 +31,7 @@
         "tof_days": 292.3272916143833,
         "total_dv_ms": 3633.7767237682933
       },
-      "certificate_hash": "a431a1db1bfb285cec065c13ed5db50bdb22ad039f515b2971fafc66ff6b5606",
+      "certificate_hash": "c622683a3d7bbc94c0a3f8aff4c94fa345269ed6610e5c5508d98c4041050567",
       "name": "earth_mars_small",
       "route_count": 12,
       "target": "MARS"
@@ -48,15 +50,15 @@
         "tof_days": 2168.703244862143,
         "total_dv_ms": 7305.358709235279
       },
-      "certificate_hash": "545284acf4c88a5d049c1dd3520d374b4b65d78b5fea5fc0e87a5eb8d037063f",
+      "certificate_hash": "f89e79557d7cca09a1804f325c6c4bf47fbee7c8e8175737fb9418c62e3d9a40",
       "name": "earth_enceladus_small",
       "route_count": 9,
       "target": "ENCELADUS"
     }
   ],
-  "certificate_hash": "23868e414d330c938099c5d78c675adc09eed946790a5c6f9aeb7f6fee9e44fe",
-  "created_utc": "2026-05-31T22:15:34.018850+00:00",
-  "elapsed_s": 3.1271171000553295,
+  "certificate_hash": "332e107a4149206dee95c5de54cbbfb6ad457991a8e709831d11f7af6dc2de62",
+  "created_utc": "2026-06-02T12:00:02.070457+00:00",
+  "elapsed_s": 3.0992013000068255,
   "passed": true,
   "schema": "ariadne.solar_system_navigator_benchmark.v1",
   "validations": [

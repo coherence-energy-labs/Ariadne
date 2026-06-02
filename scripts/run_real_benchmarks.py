@@ -121,12 +121,13 @@ def run_sensitivity_recovery():
 
     t0 = time.time()
     # NEW: use the adaptive pair window (no explicit pair_dt) + tighter cluster
-    # tolerance so within-night detections stay distinct.
+    # tolerance + ENSEMBLE IOD (Gauss + adaptive linker + Vaisala + BK).
     pipeline_out = realtime.run_pipeline(
         alerts, rms_threshold_arcsec=1e9, do_xmatch=False, smart_layer=True,
         cluster_time_tol_days=0.02,
         rate_window_arcsec_hr=(0.05, 5.0),
         pair_dt_hours=(None, None),       # adaptive
+        use_ensemble_iod=True,            # multi-strategy IOD ensemble
     )
     elapsed = time.time() - t0
 

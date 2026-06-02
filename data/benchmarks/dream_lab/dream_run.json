@@ -1,0 +1,60 @@
+{
+  "certificate_hash": "1cf8724f8193daadeae41fd475d8ef239a325e41692ab33bce4247ce42984dce",
+  "created_utc": "2026-06-02T12:01:29+00:00",
+  "experiment_count": 5,
+  "experiments": [
+    {
+      "category": "flight_grade_proof",
+      "command": "PYTHONPATH=src python scripts/promote_navigator_routes.py data/benchmarks/solar_navigator_benchmark/earth_mars_small/navigator_report.json --out-dir data/benchmarks/route_promotion_full_strict --generate-nbody-evidence --require-nbody-replay --generate-covariance-evidence --require-covariance-envelope --generate-crosscheck-evidence --require-independent-crosscheck",
+      "expected_gate": "trajectory_certification:route_certificate:soft_required",
+      "experiment_id": "dream_route_full_strict_promotion",
+      "priority": 0.462,
+      "rationale": "Promote direct routes through n-body, covariance, and independent integrator cross-check rungs.",
+      "subsystem": "trajectory_certification",
+      "success_artifact": "data/benchmarks/route_promotion_full_strict/promotion_report.json"
+    },
+    {
+      "category": "model_scope",
+      "command": "PYTHONPATH=src python -m pytest tests/test_solar_navigator.py -q",
+      "expected_gate": "solar_navigator:model_scope",
+      "experiment_id": "dream_navigator_non_earth_origin_extension",
+      "priority": 0.41625,
+      "rationale": "Add non-Earth gravity-assist templates and benchmark coverage for non-Earth departure bodies.",
+      "subsystem": "solar_navigator",
+      "success_artifact": "pytest:non_earth_origin_regression"
+    },
+    {
+      "category": "operational_scaling",
+      "command": "PYTHONPATH=src python -m pytest tests/test_multi_night_linker.py tests/test_triplet_linker.py -q",
+      "expected_gate": "discovery_pipeline:operational_scaling",
+      "experiment_id": "dream_deep_field_rate_constrained_cross_night_linking",
+      "priority": 0.3515,
+      "rationale": "Benchmark the rate-constrained linker on near-ecliptic deep cadence data and track runtime/false-link curves.",
+      "subsystem": "discovery_pipeline",
+      "success_artifact": "pytest:deep_field_linking"
+    },
+    {
+      "category": "fidelity_default",
+      "command": "PYTHONPATH=src python -m pytest tests/test_mpc_ephemeris_nbody.py tests/test_iod_advanced.py -q",
+      "expected_gate": "discovery_inference:fidelity_default",
+      "experiment_id": "dream_discovery_long_arc_nbody_default",
+      "priority": 0.32375,
+      "rationale": "Expand real-corpus regression coverage for long-arc N-body fits and monitor fallback rates.",
+      "subsystem": "discovery_inference",
+      "success_artifact": "pytest:nbody_long_arc"
+    },
+    {
+      "category": "explainability",
+      "command": "PYTHONPATH=src python scripts/build_closure_report.py --project-root . --out-dir data/benchmarks/closure",
+      "expected_gate": "visuals:reviewer_visual_contract:required",
+      "experiment_id": "dream_visual_contract_audit",
+      "priority": 0.28875,
+      "rationale": "Ensure figure and route-card artifacts carry machine-checkable visual semantics.",
+      "subsystem": "visuals",
+      "success_artifact": "data/benchmarks/closure/closure_report.json"
+    }
+  ],
+  "schema": "ariadne.dream_run.v1",
+  "source_closure_hash": "fba065fe2322827af53c9cdc2142decff3bea1c14e8f207eab4227b3b7c75eca",
+  "status": "pass"
+}

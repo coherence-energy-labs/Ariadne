@@ -248,14 +248,45 @@ def fit_orbit_lm(tracklet_records, t_ref, x_init, v_init,
                 "rms_arcsec": float("inf"), "nfev": 0, "success": False, "err": str(e)[:120]}
 
 
-def fit_candidate(tracklet_records, t_ref=None):
-    """One-shot: IOD + LM. Returns full fit dict or None on geometric/IOD failure."""
+def fit_candidate(tracklet_records, t_ref=None, *,
+                  use_nbody_auto: bool = True,
+                  nbody_arc_days: float = 365.0):
+    """One-shot: IOD + LM. Returns full fit dict or None on geometric/IOD failure.
+
+    Long arcs are automatically promoted to the N-body LM fitter after the
+    2-body fit finds the basin. If N-body refinement fails, the returned fit is
+    explicitly marked as a 2-body fallback rather than silently presented as
+    high-fidelity.
+    """
     if t_ref is None:
         t_ref = float(np.median([t["t"] for t in tracklet_records]))
     seed = iod_hypothesis_search(tracklet_records, t_ref=t_ref)
     if seed is None:
         return None
     fit = fit_orbit_lm(tracklet_records, t_ref, seed["x_init"], seed["v_init"])
+    ts = [float(t["t"]) for t in tracklet_records]
+    arc_days = (max(ts) - min(ts)) / 86400.0 if ts else 0.0
+    fit["dynamics_model"] = "2body_kepler_lm"
+    fit["arc_days"] = float(arc_days)
+    if use_nbody_auto and arc_days >= nbody_arc_days and fit.get("success"):
+        try:
+            from .orbit_fit_nbody import fit_orbit_nbody
+            nfit = fit_orbit_nbody(tracklet_records, t_ref, fit["x_fit"], fit["v_fit"])
+            if nfit.get("success") and np.isfinite(nfit.get("rms_arcsec", np.inf)):
+                nfit["rms_2body_arcsec"] = fit["rms_arcsec"]
+                nfit["dynamics_model"] = "nbody_lm"
+                nfit["arc_days"] = float(arc_days)
+                fit = nfit
+            else:
+                fit["nbody_promotion_status"] = "failed"
+                fit["nbody_promotion_error"] = nfit.get("err", "nbody refinement did not converge")
+        except Exception as exc:
+            fit["nbody_promotion_status"] = "failed"
+            fit["nbody_promotion_error"] = str(exc)[:160]
+    elif use_nbody_auto:
+        fit["nbody_promotion_status"] = "not_required_short_arc"
+    else:
+        fit["nbody_promotion_status"] = "disabled"
     fit["t_ref"] = t_ref
     fit["iod"] = {"r_au": seed["r_au"], "rdot": seed["rdot"],
                   "scatter_km": seed["scatter_km"], "n_valid": seed["n_valid"]}

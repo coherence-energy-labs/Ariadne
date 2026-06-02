@@ -5,7 +5,7 @@
     "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_enceladus_small\\route_trade_space.png"
   },
   "balanced_id": "route_e560eba24bcf16",
-  "certificate_hash": "545284acf4c88a5d049c1dd3520d374b4b65d78b5fea5fc0e87a5eb8d037063f",
+  "certificate_hash": "f89e79557d7cca09a1804f325c6c4bf47fbee7c8e8175737fb9418c62e3d9a40",
   "cheapest_id": "route_e560eba24bcf16",
   "constraints": {
     "departure_window_days": 900.0,
@@ -29,7 +29,7 @@
       2400.0
     ]
   },
-  "created_utc": "2026-05-31T22:15:32.703553+00:00",
+  "created_utc": "2026-06-02T12:00:00.788546+00:00",
   "fastest_id": "route_e90cb7ad9b86db",
   "origin": {
     "body_radius_km": null,
@@ -55,6 +55,7 @@
       "arrival_vinf_kms": 5.754144449978402,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -92,7 +93,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -539688251.2491367,
+            1138821509.0269887,
+            493654380.6400139
+          ],
           "epoch_utc": "2034-06-21T23:52:24.154",
           "notes": "",
           "role": "arrival",
@@ -102,7 +107,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2034-06-21T23:52:24.154",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -157,6 +162,7 @@
       "arrival_vinf_kms": 5.911301908986419,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -194,7 +200,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -516641677.1021218,
+            1147750564.9755244,
+            496349415.50605714
+          ],
           "epoch_utc": "2034-05-24T15:56:38.600",
           "notes": "",
           "role": "arrival",
@@ -204,7 +214,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2034-05-24T15:56:38.600",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -257,6 +267,7 @@
       "arrival_vinf_kms": 7.937491303472553,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -294,7 +305,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -121542151.79245275,
+            1239622833.3877113,
+            517269030.1616505
+          ],
           "epoch_utc": "2033-02-15T00:40:16.782",
           "notes": "",
           "role": "arrival",
@@ -304,7 +319,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2033-02-15T00:40:16.782",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -357,6 +372,7 @@
       "arrival_vinf_kms": 9.437556414102703,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -394,7 +410,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            14155550.689486047,
+            1246693830.0014787,
+            514340775.2423498
+          ],
           "epoch_utc": "2032-09-13T11:34:49.512",
           "notes": "",
           "role": "arrival",
@@ -404,7 +424,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2032-09-13T11:34:49.512",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -457,6 +477,7 @@
       "arrival_vinf_kms": 5.832583436247178,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -494,7 +515,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -611057518.2618592,
+            1108355142.5603185,
+            484145497.9530391
+          ],
           "epoch_utc": "2034-09-19T03:31:28.113",
           "notes": "",
           "role": "arrival",
@@ -504,7 +529,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2034-09-19T03:31:28.113",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -557,6 +582,7 @@
       "arrival_vinf_kms": 5.832583436247178,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -594,7 +620,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -611057518.2618592,
+            1108355142.5603185,
+            484145497.9530391
+          ],
           "epoch_utc": "2034-09-19T03:31:28.113",
           "notes": "",
           "role": "arrival",
@@ -604,7 +634,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2034-09-19T03:31:28.113",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -657,6 +687,7 @@
       "arrival_vinf_kms": 11.591934180670922,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -694,7 +725,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            149696726.0833057,
+            1241774044.9430766,
+            506466478.02815366
+          ],
           "epoch_utc": "2032-04-11T22:29:22.236",
           "notes": "",
           "role": "arrival",
@@ -704,7 +739,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2032-04-11T22:29:22.236",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -757,6 +792,7 @@
       "arrival_vinf_kms": 14.686979258633258,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -794,7 +830,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            283786958.3119082,
+            1224932536.9128602,
+            493730795.60571545
+          ],
           "epoch_utc": "2031-11-09T09:23:54.966",
           "notes": "",
           "role": "arrival",
@@ -804,7 +844,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2031-11-09T09:23:54.966",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }
@@ -857,6 +897,7 @@
       "arrival_vinf_kms": 18.73036198664966,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model",
         "moon tour is Tisserand energy screening, not phased moon ephemeris"
       ],
@@ -894,7 +935,11 @@
         },
         {
           "body": "SATURN BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            693255276.9459301,
+            1091724834.2773218,
+            421064483.2293863
+          ],
           "epoch_utc": "2030-06-26T16:36:55.384",
           "notes": "",
           "role": "arrival",
@@ -904,7 +949,7 @@
           "body": "ENCELADUS",
           "coordinates_km": null,
           "epoch_utc": "2030-06-26T16:36:55.384",
-          "notes": "",
+          "notes": "abstract Tisserand screening node; phased moon ephemeris not attached",
           "role": "moon-tour-node",
           "vinf_kms": null
         }

@@ -1,0 +1,207 @@
+{
+  "origin": "EARTH",
+  "pareto_count": 8,
+  "report_certificate_hash": "c622683a3d7bbc94c0a3f8aff4c94fa345269ed6610e5c5508d98c4041050567",
+  "required_figures": {
+    "mission_plate": {
+      "must_show": [
+        "origin",
+        "target",
+        "balanced route",
+        "certificate",
+        "route count"
+      ],
+      "path": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\mission_plate.png"
+    },
+    "porkchop_heatmap": {
+      "must_show": [
+        "departure offset days",
+        "time of flight days",
+        "delta-v scale"
+      ],
+      "path": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\porkchop_heatmap.png"
+    },
+    "route_trade_space": {
+      "must_show": [
+        "time of flight",
+        "delta-v",
+        "pareto front",
+        "balanced route"
+      ],
+      "path": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\route_trade_space.png"
+    }
+  },
+  "route_count": 12,
+  "route_roles": {
+    "balanced": "route_360cab946c0202",
+    "cheapest": "route_360cab946c0202",
+    "fastest": "route_12a8b5753f0a5a"
+  },
+  "routes": [
+    {
+      "assumption_count": 3,
+      "certificate_hash": "360cab946c0202388082dee3ac69be8d8929506dce1789dc971fb1abe2e42aa2",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_optimized",
+      "route_id": "route_360cab946c0202",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "182991ad071d1babdd089371075a73bfef97be74d298724a7e0cf8a1e7f5765c",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_07",
+      "route_id": "route_182991ad071d1b",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "a44f44159e470fdc57ae82265432ff878925c5ecf91899e92746d6231aa87b59",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_08",
+      "route_id": "route_a44f44159e470f",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "55443dabbedea8ed2fda3056f4ba9b13411c9f9db5aeb1df7805f25d9463cb6d",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_06",
+      "route_id": "route_55443dabbedea8",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "3aba93786458ab0c80ddbb8a44396ced711c795dadb18709fcb0b1056c45ab9d",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_grid_best",
+      "route_id": "route_3aba93786458ab",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "b4623ccb507a80a9eed2d16d95b718b7c298d26c7322b3b5034846fc5eb822a7",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_09",
+      "route_id": "route_b4623ccb507a80",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "0d2b2c5634c4c1d488776f562920829a4d0437ee090895e11eb67e5803924d1f",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_05",
+      "route_id": "route_0d2b2c5634c4c1",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "ea9b540581971395826db8aa9d444696361d63c390b909d3c9e58bab29672315",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_04",
+      "route_id": "route_ea9b5405819713",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "3a1673f6b2eac363661d1eb967932a3447918b43e2b0fdb1714ccb87d3766fd6",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_knee",
+      "route_id": "route_3a1673f6b2eac3",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "da892619bea14d083586ab02c3f6b68dfe7f869d5e59771c75e13ea52d4805d3",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_02",
+      "route_id": "route_da892619bea14d",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "4f2e5702363048a4c5b2c8e5dfdec88e7a59884cf9957f2cd143a2c6b23a1ef8",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_01",
+      "route_id": "route_4f2e5702363048",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    },
+    {
+      "assumption_count": 3,
+      "certificate_hash": "12a8b5753f0a5acbe4f7a6124184fc00200aa8d9212b35715e327fa264e0a0a9",
+      "event_count": 2,
+      "fidelity": "patched_conic_ephemeris",
+      "name": "direct_pareto_00",
+      "route_id": "route_12a8b5753f0a5a",
+      "sequence": [
+        "EARTH",
+        "MARS BARYCENTER"
+      ],
+      "validation_count": 2
+    }
+  ],
+  "schema": "ariadne.navigator_figure_manifest.v1",
+  "target": "MARS",
+  "units": {
+    "arrival_vinf": "km/s",
+    "c3": "km^2/s^2",
+    "coordinates": "km J2000 heliocentric unless otherwise noted",
+    "delta_v": "m/s",
+    "time_of_flight": "days"
+  }
+}

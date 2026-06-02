@@ -484,20 +484,28 @@ class TestStreakDetector:
         assert out == []
 
     def test_classify_streak_satellite_label(self):
+        # A satellite spans a large fraction of the frame (or moves at a
+        # hypersonic angular rate). The physically-correct classifier needs
+        # frame context -- a mere 300 px trail at 2.5"/s is a fast NEO, not a
+        # satellite, so the old "length>200 => satellite" heuristic was wrong.
         from ariadne.discovery.imaging.streaks import classify_streak, Streak
-        s = Streak(x1=0, y1=0, x2=300, y2=0, length_px=300, width_px=2,
+        s = Streak(x1=0, y1=0, x2=2000, y2=100, length_px=2002, width_px=2,
                    theta_rad=0, peak_pixel=100, total_flux=10000,
-                   n_pixels=300, vote_count=100, consistency=0.9)
-        c = classify_streak(s, exposure_seconds=30.0, pixel_scale_arcsec=0.25)
-        assert c["label"] == "satellite_LEO"
+                   n_pixels=2000, vote_count=100, consistency=0.9)
+        c = classify_streak(s, exposure_seconds=30.0, pixel_scale_arcsec=0.25,
+                              frame_diagonal_px=2896)
+        assert c["label"] == "satellite"
+        assert c["is_asteroid_candidate"] is False
 
     def test_classify_streak_cosmic_ray_label(self):
+        # Short + clearly sub-PSF width => cosmic ray (sharp, no PSF wings).
         from ariadne.discovery.imaging.streaks import classify_streak, Streak
-        s = Streak(x1=0, y1=0, x2=5, y2=0, length_px=5, width_px=1.5,
+        s = Streak(x1=0, y1=0, x2=5, y2=0, length_px=5, width_px=1.0,
                    theta_rad=0, peak_pixel=200, total_flux=400,
                    n_pixels=5, vote_count=20, consistency=0.95)
-        c = classify_streak(s)
+        c = classify_streak(s, psf_fwhm_px=3.0)
         assert c["label"] == "cosmic_ray_trail"
+        assert c["is_asteroid_candidate"] is False
 
 
 # =============================================================================

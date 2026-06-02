@@ -11,6 +11,7 @@ Ariadne fills that gap: a tutorial-driven, validated, open-source Python toolkit
   - Gravity-assist (VEEGA / DSM) interplanetary chains;
   - Lambert porkchop + collocation + autodiff trajectory optimization;
   - TNO discovery from MPC astrometry (HelioLinC linker + IOD orbit fit);
+  - calibrated, certificate-bearing sparse-evidence inference for discoveries;
   - Coherence-HJB sampled-graph Helmholtz value function for 6D OCP;
   - proof-carrying route certificates with CR3BP->BCR4BP->DE440 promotion.
 
@@ -141,6 +142,42 @@ def certify_route(graph, path, system_obj=EARTH_MOON, **kwargs):
     return certify_transport_route(graph, path, system_obj, **kwargs)
 
 
+def infer_discovery(evidence, **kwargs):
+    """Run the calibrated sparse-evidence discovery inference engine."""
+    from .discovery.inference import infer
+    return infer(evidence, **kwargs)
+
+
+def benchmark_discovery_inference(**kwargs):
+    """Run the discovery inference benchmark proof harness."""
+    from .discovery.benchmarking import run_inference_benchmark
+    return run_inference_benchmark(**kwargs)
+
+
+def architect_cislunar_round_trip(*args, **kwargs):
+    """Rank Earth-Moon-Moon-Earth mission architectures across Ariadne engines."""
+    from .transfers.mission_architect import architect_cislunar_round_trip as _arch
+    return _arch(*args, **kwargs)
+
+
+def navigate_solar_system(*args, **kwargs):
+    """Search and rank solar-system routes across Lambert, flyby, and moon-tour engines."""
+    from .interplanetary.navigator import navigate_solar_system as _nav
+    return _nav(*args, **kwargs)
+
+
+def build_solar_transfer_atlas(*args, **kwargs):
+    """Build a whole-solar-system Lambert corridor atlas across major gravity bodies."""
+    from .interplanetary.solar_atlas import build_solar_transfer_atlas as _atlas
+    return _atlas(*args, **kwargs)
+
+
+def build_default_closure_report(*args, **kwargs):
+    """Build the system-wide Ariadne closure, benchmark, and residual report."""
+    from .proof.defaults import build_default_ariadne_closure as _closure
+    return _closure(*args, **kwargs)
+
+
 __all__ = [
     "__version__",
     # systems
@@ -149,5 +186,8 @@ __all__ = [
     "GM_SUN", "GM_EARTH", "GM_MOON", "GM_JUPITER", "GM_MARS", "AU_KM",
     # user-facing entry points
     "system", "lyapunov_family", "halo_family", "gateway_nrho",
-    "discover_tno", "helmholtz_hjb", "certify_route",
+    "discover_tno", "infer_discovery", "benchmark_discovery_inference",
+    "helmholtz_hjb", "certify_route", "architect_cislunar_round_trip",
+    "navigate_solar_system", "build_solar_transfer_atlas",
+    "build_default_closure_report",
 ]

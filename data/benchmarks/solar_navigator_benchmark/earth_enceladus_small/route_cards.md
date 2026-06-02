@@ -1,6 +1,6 @@
 # Solar Navigator Route Cards: EARTH to ENCELADUS
 
-- report certificate: `545284acf4c88a5d049c1dd3520d374b4b65d78b5fea5fc0e87a5eb8d037063f`
+- report certificate: `f89e79557d7cca09a1804f325c6c4bf47fbee7c8e8175737fb9418c62e3d9a40`
 - routes: `9`
 - fastest: `route_e90cb7ad9b86db`
 - cheapest: `route_e560eba24bcf16`
@@ -51,6 +51,7 @@
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -76,6 +77,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -101,6 +103,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -126,6 +129,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -151,6 +155,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -176,6 +181,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -201,6 +207,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -226,6 +233,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 
@@ -251,6 +259,7 @@ Validations:
 
 Assumptions:
 - heliocentric Lambert arc on real ephemerides
+- departure parking-orbit cost used when configured; otherwise departure v-infinity
 - capture cost included only for bodies with configured capture model
 - moon tour is Tisserand energy screening, not phased moon ephemeris
 

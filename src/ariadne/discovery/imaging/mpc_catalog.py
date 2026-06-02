@@ -278,43 +278,52 @@ def ingest_mpcorb_to_db(db, mpcorb_path: str | Path,
 
 def elements_to_state(rec: OrbitalElements) -> tuple:
     """Convert Keplerian elements to a heliocentric (r, v) state at the
-    catalog epoch via the existing dynamics module."""
+    catalog epoch via the existing dynamics module.
+
+    MPCORB stores Mean Anomaly (M); `secular.elements_to_state` expects
+    TRUE anomaly (nu). Solve Kepler's equation M = E - e sin(E) by
+    Newton iteration, then E -> nu, then call the dynamics module.
+    """
     from ...dynamics.secular import elements_to_state as _e2s
-    r0, v0 = _e2s(rec.a_au, rec.e, rec.i_deg,
-                    rec.Omega_deg, rec.omega_deg, rec.M_deg)
+    M = math.radians(rec.M_deg)
+    e = rec.e
+    E = M if e < 0.3 else M + e * math.sin(M)
+    for _ in range(50):
+        f = E - e * math.sin(E) - M
+        fp = 1.0 - e * math.cos(E)
+        dE = f / fp
+        E -= dE
+        if abs(dE) < 1e-12:
+            break
+    sqrt_one_minus_e2 = math.sqrt(max(1.0 - e * e, 0.0))
+    nu = math.atan2(sqrt_one_minus_e2 * math.sin(E), math.cos(E) - e)
+    nu_deg = math.degrees(nu)
+    r0, v0 = _e2s(rec.a_au, e, rec.i_deg,
+                    rec.Omega_deg, rec.omega_deg, nu_deg)
     return r0, v0
 
 
 def ephemeris_at_mjd(rec: OrbitalElements,
-                       target_mjd: float) -> tuple[float, float, float, float]:
+                       target_mjd: float,
+                       *, observer_geo_km=None,
+                       light_time: bool = True
+                       ) -> tuple[float, float, float, float]:
     """Propagate rec from its catalog epoch to target_mjd via 2-body Kepler,
-    project to geocentric (RA, Dec), and return (ra_deg, dec_deg, mag_est,
+    project to (RA, Dec), and return (ra_deg, dec_deg, mag_est,
     geocentric_distance_au).
 
-    The magnitude estimate uses the IAU H-G phase function.
+    Delegates to the vectorised `bulk_ephemeris_at_mjd` so the serial and
+    batch paths cannot diverge -- both apply the mandatory ecliptic->
+    equatorial frame rotation and light-time correction. (Earlier this
+    function subtracted an equatorial Earth vector from an ecliptic-frame
+    asteroid position, throwing RA/Dec off by tens of thousands of
+    arcsec on real sky -- the bug that defeated all real cross-matching.)
     """
-    import numpy as np
-    from ...dynamics.secular import kepler_step
-    from ...data.constants import GM_SUN, AU_KM
-    from ...data.ephemeris import body_state
-
-    r0, v0 = elements_to_state(rec)
-    dt_days = target_mjd - rec.epoch_mjd
-    dt_s = dt_days * 86400.0
-    et_target = (target_mjd - 51544.5) * 86400.0
-    r_t, _ = kepler_step(r0, v0, GM_SUN, dt_s)
-    # Earth position at target
-    R_e = np.array(body_state("EARTH", et_target, "J2000", "SUN")[:3])
-    geo = r_t - R_e
-    rho_km = float(np.linalg.norm(geo))
-    rho_au = rho_km / AU_KM
-    ra_deg = math.degrees(math.atan2(geo[1], geo[0])) % 360.0
-    dec_deg = math.degrees(math.asin(geo[2] / rho_km))
-    # Magnitude (no phase angle correction; simple approx)
-    r_helio_au = float(np.linalg.norm(r_t)) / AU_KM
-    mag_est = (rec.H_mag + 5.0 * math.log10(rho_au * r_helio_au)
-                 if (rho_au > 0 and r_helio_au > 0) else 0.0)
-    return ra_deg, dec_deg, mag_est, rho_au
+    from .mpc_ephemeris_batch import bulk_ephemeris_at_mjd
+    out = bulk_ephemeris_at_mjd([rec], target_mjd,
+                                  observer_geo_km=observer_geo_km,
+                                  light_time=light_time)[0]
+    return float(out[0]), float(out[1]), float(out[2]), float(out[3])
 
 
 # -------------------------------------------------------------------
@@ -357,53 +366,181 @@ def cross_match_detections(detections: Sequence[dict],
     return out
 
 
+_KOA_NUMERIC_COLS = [
+    ("koa_a_au", "a_au"), ("koa_ecc", "e"), ("koa_incl", "i_deg"),
+    ("koa_node", "Omega_deg"), ("koa_argp", "omega_deg"),
+    ("koa_manom", "M_deg"), ("koa_h", "H"),
+]
+# In-memory cache of element arrays, keyed by (db id, row count).
+_koa_cache: dict = {}
+
+
+def _ensure_numeric_columns(db) -> None:
+    """Add + populate numeric element columns on known_objects if absent,
+    so the cross-match loads arrays directly instead of JSON-parsing 1.5M
+    rows on every call. One-time migration (parses JSON once)."""
+    import json as _json
+    cur = db.conn.cursor()
+    existing = {r[1] for r in cur.execute("PRAGMA table_info(known_objects)")}
+    missing = [c for c, _ in _KOA_NUMERIC_COLS if c not in existing]
+    if not missing:
+        # Already migrated; check it's populated
+        any_null = cur.execute(
+            "SELECT 1 FROM known_objects WHERE koa_a_au IS NULL LIMIT 1"
+        ).fetchone()
+        if not any_null:
+            return
+    for col in missing:
+        cur.execute(f"ALTER TABLE known_objects ADD COLUMN {col} REAL")
+    # Populate from the JSON blob
+    rows = list(cur.execute(
+        "SELECT designation, epoch_mjd, orbital_elements FROM known_objects "
+        "WHERE koa_a_au IS NULL"))
+    updates = []
+    for r in rows:
+        try:
+            el = _json.loads(r["orbital_elements"])
+            updates.append((
+                float(el["a_au"]), float(el["e"]), float(el["i_deg"]),
+                float(el["Omega_deg"]), float(el["omega_deg"]),
+                float(el["M_deg"]), float(el.get("H", 0.0)),
+                r["designation"]))
+        except Exception:
+            continue
+    cur.executemany(
+        "UPDATE known_objects SET koa_a_au=?, koa_ecc=?, koa_incl=?, "
+        "koa_node=?, koa_argp=?, koa_manom=?, koa_h=? WHERE designation=?",
+        updates)
+    db.conn.commit()
+
+
+def load_known_element_arrays(db):
+    """Return (designations, dict-of-numpy-arrays) for the whole catalog,
+    read straight from numeric columns (no JSON). Cached in memory.
+
+    Arrays: a_au, e, i_deg, Omega_deg, omega_deg, M_deg, epoch_mjd, H_mag.
+    """
+    import numpy as _np
+    cur = db.conn.cursor()
+    n = cur.execute("SELECT COUNT(*) FROM known_objects").fetchone()[0]
+    key = (id(db), n)
+    if key in _koa_cache:
+        return _koa_cache[key]
+    _ensure_numeric_columns(db)
+    rows = cur.execute(
+        "SELECT designation, epoch_mjd, koa_a_au, koa_ecc, koa_incl, "
+        "koa_node, koa_argp, koa_manom, koa_h FROM known_objects").fetchall()
+    desig = [r[0] for r in rows]
+    arr = _np.array([[r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8]]
+                       for r in rows], dtype=float)
+    out = (desig, {
+        "epoch_mjd": arr[:, 0], "a_au": arr[:, 1], "e": arr[:, 2],
+        "i_deg": arr[:, 3], "Omega_deg": arr[:, 4], "omega_deg": arr[:, 5],
+        "M_deg": arr[:, 6], "H_mag": arr[:, 7]})
+    _koa_cache[key] = out
+    return out
+
+
+def observatory_geo_km(obs_code: str, target_mjd: float):
+    """Geocentric position of an observatory (J2000 equatorial, km) for
+    topocentric ephemerides. Returns None (geocenter) for unknown codes.
+
+    Hard-codes the common DECam/survey sites; extend as needed. Uses
+    astropy for the Earth-rotation-aware position.
+    """
+    sites = {
+        "807": (-30.169, -70.806, 2207.0),   # CTIO / Blanco (DECam)
+        "W84": (-30.169, -70.806, 2207.0),   # CTIO DECam alt code
+        "I11": (-29.0146, -70.6926, 2380.0), # Gemini South / Cerro Pachon
+        "568": (19.8264, -155.4750, 4213.0), # Mauna Kea
+        "F51": (20.7075, -156.2570, 3052.0), # Pan-STARRS 1, Haleakala
+    }
+    if obs_code not in sites:
+        return None
+    try:
+        import numpy as _np
+        from astropy.coordinates import EarthLocation
+        from astropy.time import Time
+        import astropy.units as u
+        lat, lon, h = sites[obs_code]
+        loc = EarthLocation(lat=lat * u.deg, lon=lon * u.deg, height=h * u.m)
+        g = loc.get_gcrs(Time(target_mjd, format="mjd", scale="utc")).cartesian
+        return _np.array([g.x.to(u.km).value, g.y.to(u.km).value,
+                            g.z.to(u.km).value])
+    except Exception:
+        return None
+
+
 def flag_known_in_db(db, target_mjd: float,
                        *, mjd_box_days: float = 0.5,
-                       match_radius_arcsec: float = 3.0,
-                       limit_known: int | None = None) -> int:
+                       match_radius_arcsec: float = 2.5,
+                       limit_known: int | None = None,
+                       observatory_code: str | None = None,
+                       field_margin_deg: float = 0.2) -> int:
+    # match_radius_arcsec=2.5 calibrated on real DECam: recall plateaus by
+    # ~1.5" (ephemeris ~0.65" + instcal astrometry ~1"); 2.5" keeps the NEO
+    # ephemeris tail (~2.4") at ~4x lower chance-FP than the old 3".
     """Cross-match every detection in the DB within `mjd_box_days` of
     target_mjd against the known_objects catalog. Sets known_designation
     on matching detections; updates their status to 'known'.
 
+    Two-stage for accuracy + speed: a fast 2-body pass pre-filters the
+    catalog to the detections' sky footprint, then an accurate (N-body +
+    topocentric + light-time) cross-match runs on the survivors. Pass
+    `observatory_code` (e.g. "807" for CTIO) for the topocentric observer.
+
     Returns the number of detections flagged.
     """
     import json as _json
+    import numpy as _np
     # Fetch detections in the target window
     dets = db.query_detections_by_cone(
         mjd_range=(target_mjd - mjd_box_days, target_mjd + mjd_box_days),
         ra_range=None, dec_range=None, limit=200000)
     if not dets:
         return 0
-    # Fetch known-object records (limit for performance during dev)
+    # Detection footprint (with margin) for the coarse pre-filter
+    d_ra = _np.array([float(d["ra"]) for d in dets])
+    d_dec = _np.array([float(d["dec"]) for d in dets])
+    cosd = math.cos(math.radians(float(_np.median(d_dec))))
+    ra_lo = d_ra.min() - field_margin_deg / max(cosd, 1e-3)
+    ra_hi = d_ra.max() + field_margin_deg / max(cosd, 1e-3)
+    dec_lo = d_dec.min() - field_margin_deg
+    dec_hi = d_dec.max() + field_margin_deg
+
     cur = db.conn.cursor()
-    sql = "SELECT designation, epoch_mjd, orbital_elements FROM known_objects"
+    # Stage 1: fast 2-body ephemeris (NO light-time -- the coarse field
+    # filter doesn't need arcsec) on element ARRAYS loaded straight from
+    # numeric columns (no per-row JSON parse / object build).
+    from .mpc_ephemeris_batch import (bulk_ephemeris_from_arrays,
+                                          bulk_cross_match)
+    desig, A = load_known_element_arrays(db)
+    coarse = bulk_ephemeris_from_arrays(
+        A["a_au"], A["e"], A["i_deg"], A["Omega_deg"], A["omega_deg"],
+        A["M_deg"], A["epoch_mjd"], A["H_mag"], target_mjd,
+        light_time=False)
+    cra, cdec = coarse[:, 0], coarse[:, 1]
+    sel = (~_np.isnan(cra) & (cra >= ra_lo) & (cra <= ra_hi)
+             & (cdec >= dec_lo) & (cdec <= dec_hi))
+    sel_idx = _np.where(sel)[0]
     if limit_known is not None:
-        sql += f" LIMIT {int(limit_known)}"
-    rows = list(cur.execute(sql))
-    known_records: list[OrbitalElements] = []
-    for r in rows:
-        try:
-            elems = _json.loads(r["orbital_elements"])
-            known_records.append(OrbitalElements(
-                designation=r["designation"],
-                epoch_mjd=float(r["epoch_mjd"]),
-                a_au=float(elems["a_au"]),
-                e=float(elems["e"]),
-                i_deg=float(elems["i_deg"]),
-                Omega_deg=float(elems["Omega_deg"]),
-                omega_deg=float(elems["omega_deg"]),
-                M_deg=float(elems["M_deg"]),
-                H_mag=float(elems.get("H", 0.0)),
-                G_param=float(elems.get("G", 0.15)),
-                name=str(elems.get("name", "")),
-            ))
-        except Exception:
-            continue
-    # Cross-match
-    matches = cross_match_detections(
-        dets, known_records, target_mjd,
-        match_radius_arcsec=match_radius_arcsec)
-    # Persist
+        sel_idx = sel_idx[:int(limit_known)]
+    if sel_idx.size == 0:
+        return 0
+    # Materialise OrbitalElements only for the in-field survivors
+    in_field = [OrbitalElements(
+        designation=desig[i], epoch_mjd=A["epoch_mjd"][i], a_au=A["a_au"][i],
+        e=A["e"][i], i_deg=A["i_deg"][i], Omega_deg=A["Omega_deg"][i],
+        omega_deg=A["omega_deg"][i], M_deg=A["M_deg"][i], H_mag=A["H_mag"][i])
+        for i in sel_idx]
+
+    # Stage 2: accurate (N-body + topocentric) cross-match on survivors
+    obs = (observatory_geo_km(observatory_code, target_mjd)
+             if observatory_code else None)
+    matches = bulk_cross_match(
+        dets, in_field, target_mjd,
+        match_radius_arcsec=match_radius_arcsec,
+        observer_geo_km=obs)["matches"]
     for det_id, designation in matches.items():
         cur.execute(
             "UPDATE detections SET known_designation = ?, status = 'known' "

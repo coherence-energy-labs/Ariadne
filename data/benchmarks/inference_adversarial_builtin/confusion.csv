@@ -1,0 +1,14 @@
+truth_label,APOLLO,CENTAUR,CLASSICAL_KBO,DETACHED,HOT_CLASSICAL,JTROJAN,MBA,RESONANT_KBO,cosmic_ray,manual_review,satellite_trail,stellar_variable,subtraction_residual
+APOLLO,3,0,0,0,0,0,0,0,0,1,0,1,1
+CENTAUR,0,4,0,0,0,0,0,0,0,1,0,0,1
+CLASSICAL_KBO,0,0,0,0,8,0,0,0,0,2,0,0,2
+DETACHED,0,0,0,0,4,0,0,0,0,1,0,0,1
+HOT_CLASSICAL,0,0,0,0,0,0,0,0,0,0,0,0,0
+JTROJAN,0,0,0,0,0,0,4,0,0,1,0,0,1
+MBA,0,0,0,0,0,0,4,0,0,1,0,0,1
+RESONANT_KBO,0,0,0,0,0,0,0,4,0,1,0,0,1
+cosmic_ray,0,0,0,0,0,0,0,0,3,0,0,0,1
+manual_review,0,0,0,0,0,0,0,0,0,8,0,0,2
+satellite_trail,0,0,0,0,0,0,0,0,0,0,6,0,2
+stellar_variable,0,0,0,0,0,0,0,0,0,0,0,4,1
+subtraction_residual,0,0,0,0,0,0,0,0,0,0,0,0,0

@@ -393,6 +393,76 @@ def test_inference_narrative_is_informative():
     assert ":" in res.narrative
 
 
+def test_inference_certificate_and_audit_are_tamper_evident():
+    from ariadne.discovery.inference import (
+        Evidence, infer, validate_inference_certificate)
+    ev = Evidence(
+        mjd=60450, ra_deg=180, dec_deg=15,
+        rate_arcsec_hr=1.0, apparent_mag=22.5,
+        morphology_label="POINT", morphology_confidence=0.9,
+        n_detections=5, arc_days=8.0, rms_arcsec=1.0,
+        skybot_match_names=[],
+    )
+    res = infer(ev)
+    assert res.evidence_audit is not None
+    assert res.evidence_audit.n_channels >= 6
+    assert res.posterior_check is not None
+    assert res.certificate["payload_hash"]
+    assert validate_inference_certificate(ev, res)
+    res.best.posterior *= 0.5
+    assert not validate_inference_certificate(ev, res)
+
+
+def test_inference_can_fail_closed_on_contradictory_evidence():
+    from ariadne.discovery.inference import Evidence, infer
+    ev = Evidence(
+        mjd=60450, ra_deg=180, dec_deg=15,
+        rate_arcsec_hr=2.0,
+        morphology_label="COSMIC_RAY", morphology_confidence=0.95,
+        n_detections=5, arc_days=4.0,
+    )
+    res = infer(ev, fail_closed_on_contradiction=True)
+    assert res.best is None
+    assert res.evidence_audit.fail_closed
+    assert res.recommended_followup["action"] == "manual_review"
+
+
+def test_temperature_calibration_softens_posterior():
+    from ariadne.discovery.inference import CalibrationConfig, Evidence, infer
+    ev = Evidence(
+        mjd=60450, ra_deg=180, dec_deg=15,
+        rate_arcsec_hr=200.0, apparent_mag=18.0,
+        morphology_label="POINT", morphology_confidence=0.95,
+        n_detections=6, arc_days=2, rms_arcsec=1.0,
+        skybot_match_names=[],
+    )
+    sharp = infer(ev, calibration=CalibrationConfig(temperature=1.0))
+    soft = infer(ev, calibration=CalibrationConfig(temperature=3.0))
+    assert soft.best.label == sharp.best.label
+    assert soft.best.posterior < sharp.best.posterior
+    assert soft.entropy > sharp.entropy
+
+
+def test_reliability_report_and_temperature_fit():
+    from ariadne.discovery.inference import (
+        Evidence, fit_temperature, reliability_report)
+    cases = [
+        (Evidence(rate_arcsec_hr=1.0, apparent_mag=22.5, morphology_label="POINT",
+                  morphology_confidence=0.9, n_detections=6, arc_days=10,
+                  rms_arcsec=1.0, skybot_match_names=[]), "CLASSICAL_KBO"),
+        (Evidence(rate_arcsec_hr=5000.0, morphology_label="STREAK",
+                  morphology_confidence=0.9, apparent_mag=18.0), "satellite_trail"),
+        (Evidence(morphology_label="COSMIC_RAY", morphology_confidence=0.95,
+                  apparent_mag=18.0, n_detections=1), "cosmic_ray"),
+    ]
+    rep = reliability_report(cases)
+    assert rep.n == 3
+    assert 0.0 <= rep.ece <= 1.0
+    cfg, rep2 = fit_temperature(cases, grid=(1.0, 2.0))
+    assert cfg.temperature in (1.0, 2.0)
+    assert rep2.n == 3
+
+
 # ---------------------------- Predictive scheduler -------------------------
 
 def test_scheduler_learns_from_history(tmp_path):

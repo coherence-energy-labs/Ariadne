@@ -7,7 +7,7 @@ import pytest
 from ariadne.data.ephemeris import et
 from ariadne.interplanetary.porkchop import (
     lambert_transfer, optimize_window, launch_windows, porkchop,
-    time_energy_pareto, coherent_knee,
+    time_energy_pareto, coherent_knee, _lambert_transfer_from_states,
 )
 from ariadne.interplanetary.gmat_helio import export_transfer_gmat, _gmat_gregorian
 
@@ -17,6 +17,20 @@ START = "2026-01-01T00:00:00"
 def test_gmat_gregorian_format():
     assert _gmat_gregorian("2026-11-01T00:00:00.000") == "01 Nov 2026 00:00:00.000"
     assert _gmat_gregorian("2028-12-15T06:30:00") == "15 Dec 2028 06:30:00.000"
+
+
+def test_state_cached_lambert_matches_public_transfer():
+    from ariadne.data.ephemeris import body_state
+
+    e0 = et("2026-11-01T00:00:00")
+    tof = 300.0
+    sd = body_state("EARTH", e0, "J2000", "SUN")
+    sa = body_state("MARS BARYCENTER", e0 + tof * 86400.0, "J2000", "SUN")
+    a = lambert_transfer("EARTH", "MARS BARYCENTER", e0, tof)
+    b = _lambert_transfer_from_states("EARTH", "MARS BARYCENTER", e0, tof, sd, sa)
+    assert a is not None and b is not None
+    for key in ("c3", "arr_vinf_kms", "dv_dep_ms", "dv_arr_ms", "total_ms"):
+        assert abs(a[key] - b[key]) < 1e-9
 
 
 @pytest.mark.slow

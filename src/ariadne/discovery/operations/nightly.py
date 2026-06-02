@@ -52,7 +52,8 @@ class NightlyConfig:
     Behaviour:
       stale_after_days: candidates not seen in N days move to status=stale
       do_xmatch:        SkyBoT cross-match accepted candidates (recommended True)
-      dry_run:          run the pipeline but don't fire alerts or save store
+    dry_run:          run the pipeline but don't fire alerts or save store
+      provenance_path: optional JSONL ledger path for run provenance
     """
     store_path: str
     source: str = "alerce_ztf"
@@ -76,6 +77,7 @@ class NightlyConfig:
     stale_after_days: float = 60.0
     do_xmatch: bool = True
     dry_run: bool = False
+    provenance_path: str | None = None
 
     alert_sinks: list = field(default_factory=list)
 
@@ -109,6 +111,10 @@ def _process_one_cone(cfg: NightlyConfig, ra: float, dec: float, radius_deg: flo
                       *, store, run_id: str, cone_idx: int) -> dict:
     """Pull + filter ONE sky cone. Returns per-cone summary; caller aggregates."""
     from .. import realtime
+    ledger = None
+    if cfg.provenance_path:
+        from .replay import ProvenanceLedger
+        ledger = ProvenanceLedger(cfg.provenance_path)
     t0 = time.time()
     print(f"\n-- cone {cone_idx} @ ({ra}, {dec}, r={radius_deg}) --")
     with warnings.catch_warnings():
@@ -118,15 +124,20 @@ def _process_one_cone(cfg: NightlyConfig, ra: float, dec: float, radius_deg: flo
     if not alerts:
         return {"alerts": 0, "accepted": 0, "new": 0}
 
-    res = realtime.run_pipeline(
-        alerts,
-        cluster_pos_tol_arcsec=cfg.cluster_pos_tol_arcsec,
-        rate_window_arcsec_hr=cfg.rate_window_arcsec_hr,
-        pair_dt_hours=cfg.pair_dt_hours,
-        rms_threshold_arcsec=cfg.rms_threshold_arcsec,
-        do_xmatch=cfg.do_xmatch and not cfg.dry_run,
-        use_helio_linc=cfg.use_helio_linc,
-    )
+    pipeline_kwargs = {
+        "cluster_pos_tol_arcsec": cfg.cluster_pos_tol_arcsec,
+        "rate_window_arcsec_hr": cfg.rate_window_arcsec_hr,
+        "pair_dt_hours": cfg.pair_dt_hours,
+        "rms_threshold_arcsec": cfg.rms_threshold_arcsec,
+        "do_xmatch": cfg.do_xmatch and not cfg.dry_run,
+        "use_helio_linc": cfg.use_helio_linc,
+    }
+    if ledger is not None:
+        res = realtime.run_pipeline_with_provenance(
+            alerts, ledger=ledger, source=f"nightly:{run_id}:cone:{cone_idx}",
+            **pipeline_kwargs)
+    else:
+        res = realtime.run_pipeline(alerts, **pipeline_kwargs)
     accepted = [r for r in res if r.get("status") == "accepted"]
 
     new_alerts = 0

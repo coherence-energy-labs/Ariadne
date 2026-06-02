@@ -5,7 +5,7 @@
     "route_trade_space": "data\\benchmarks\\solar_navigator_benchmark\\earth_mars_small\\route_trade_space.png"
   },
   "balanced_id": "route_360cab946c0202",
-  "certificate_hash": "a431a1db1bfb285cec065c13ed5db50bdb22ad039f515b2971fafc66ff6b5606",
+  "certificate_hash": "c622683a3d7bbc94c0a3f8aff4c94fa345269ed6610e5c5508d98c4041050567",
   "cheapest_id": "route_360cab946c0202",
   "constraints": {
     "departure_window_days": 540.0,
@@ -29,7 +29,7 @@
       420.0
     ]
   },
-  "created_utc": "2026-05-31T22:15:31.015302+00:00",
+  "created_utc": "2026-06-02T11:59:59.084088+00:00",
   "fastest_id": "route_12a8b5753f0a5a",
   "origin": {
     "body_radius_km": null,
@@ -56,6 +56,7 @@
       "arrival_vinf_kms": 2.716245869853926,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 9.18214113116599,
@@ -81,7 +82,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -137162199.58493903,
+            -169965148.6474971,
+            -74260953.29176405
+          ],
           "epoch_utc": "2027-08-19T18:10:53.518",
           "notes": "",
           "role": "arrival",
@@ -124,6 +129,7 @@
       "arrival_vinf_kms": 2.778148243111514,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 11.081177034723648,
@@ -149,7 +155,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -146272921.75981393,
+            -164775106.6682965,
+            -71634684.8393951
+          ],
           "epoch_utc": "2027-08-14T11:56:44.526",
           "notes": "",
           "role": "arrival",
@@ -190,6 +200,7 @@
       "arrival_vinf_kms": 2.8545075778929263,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 10.929656148559136,
@@ -215,7 +226,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -38906573.81121119,
+            -198194772.89526406,
+            -89859067.91639192
+          ],
           "epoch_utc": "2027-10-08T08:08:41.269",
           "notes": "",
           "role": "arrival",
@@ -256,6 +271,7 @@
       "arrival_vinf_kms": 3.105190407245941,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 11.76378916626027,
@@ -281,7 +297,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -169506157.27923483,
+            -148770861.6114505,
+            -63667296.706667736
+          ],
           "epoch_utc": "2027-07-31T02:36:22.806",
           "notes": "",
           "role": "arrival",
@@ -322,6 +342,7 @@
       "arrival_vinf_kms": 3.3288944518528236,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 10.414212417260643,
@@ -347,7 +368,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            11020641.357879538,
+            -196719862.7643767,
+            -90528965.82035027
+          ],
           "epoch_utc": "2027-10-31T09:59:27.422",
           "notes": "",
           "role": "arrival",
@@ -388,6 +413,7 @@
       "arrival_vinf_kms": 3.3288944518528236,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 10.414212417260643,
@@ -413,7 +439,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            11020641.357879538,
+            -196719862.7643767,
+            -90528965.82035027
+          ],
           "epoch_utc": "2027-10-31T09:59:27.422",
           "notes": "",
           "role": "arrival",
@@ -454,6 +484,7 @@
       "arrival_vinf_kms": 3.8937110326867606,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 12.565346732086883,
@@ -479,7 +510,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -201036694.31487218,
+            -118305124.80338328,
+            -48842939.25312839
+          ],
           "epoch_utc": "2027-07-08T00:45:36.652",
           "notes": "",
           "role": "arrival",
@@ -520,6 +555,7 @@
       "arrival_vinf_kms": 5.036099525697785,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 13.70859582006064,
@@ -545,7 +581,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -224759666.27216816,
+            -83229430.52412903,
+            -32114631.551089015
+          ],
           "epoch_utc": "2027-06-14T22:54:50.497",
           "notes": "",
           "role": "arrival",
@@ -586,6 +626,7 @@
       "arrival_vinf_kms": 6.55974030932064,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 16.39580705813856,
@@ -611,7 +652,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -240121137.0416706,
+            -45046115.6132069,
+            -14186407.576128295
+          ],
           "epoch_utc": "2027-05-22T21:04:04.343",
           "notes": "",
           "role": "arrival",
@@ -652,6 +697,7 @@
       "arrival_vinf_kms": 8.560759892883523,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 22.878520488826293,
@@ -677,7 +723,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -246860050.13036758,
+            -5236938.373233769,
+            4255032.873987964
+          ],
           "epoch_utc": "2027-04-29T19:13:18.188",
           "notes": "",
           "role": "arrival",
@@ -718,6 +768,7 @@
       "arrival_vinf_kms": 11.222153060509065,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 37.97012135259262,
@@ -743,7 +794,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -244970097.17808375,
+            34761133.63940024,
+            22550406.62245249
+          ],
           "epoch_utc": "2027-04-06T17:22:32.034",
           "notes": "",
           "role": "arrival",
@@ -784,6 +839,7 @@
       "arrival_vinf_kms": 11.141019406154285,
       "assumptions": [
         "heliocentric Lambert arc on real ephemerides",
+        "departure parking-orbit cost used when configured; otherwise departure v-infinity",
         "capture cost included only for bodies with configured capture model"
       ],
       "c3_km2_s2": 47.77325517809634,
@@ -809,7 +865,11 @@
         },
         {
           "body": "MARS BARYCENTER",
-          "coordinates_km": null,
+          "coordinates_km": [
+            -246685130.02024862,
+            19769811.38502018,
+            15720428.922580186
+          ],
           "epoch_utc": "2027-04-15T09:52:56.469",
           "notes": "",
           "role": "arrival",

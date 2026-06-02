@@ -1,0 +1,355 @@
+{
+  "certificate_hash": "282f6643b179adfe262a628e440e32faf1040e896daf60f3b57264a101162d7c",
+  "created_utc": "2026-06-02T12:11:47+00:00",
+  "entries": [
+    {
+      "path": "artifact_integrity/artifact_manifest.json",
+      "sha256": "a0828738d2da78e2a8e6534faec69fe79842e420d31196d68ab3b23edb3f9913",
+      "size_bytes": 13171
+    },
+    {
+      "path": "cislunar_architecture/direct_only.json",
+      "sha256": "8ebd3ca7ee8bcd9256b72694d1eb252a75ea20f69aedd59463694d847501fbea",
+      "size_bytes": 7298
+    },
+    {
+      "path": "cislunar_architecture/low_energy_screen.json",
+      "sha256": "60acd7fafa0c26c23d5d4672693824a4745e47f5a1f3f15f6cb562ab54659654",
+      "size_bytes": 20349
+    },
+    {
+      "path": "closure/closure_report.json",
+      "sha256": "da5061b95782a1c89600e294e0b9738f64fa6e8ac5a12b569e54ff93792ab76f",
+      "size_bytes": 17054
+    },
+    {
+      "path": "dream_lab/dream_run.json",
+      "sha256": "b8300161b041278bac625412294eaf7f194374a8cdc9220a9e2278506d5e9ea4",
+      "size_bytes": 3386
+    },
+    {
+      "path": "full_image_pipeline.json",
+      "sha256": "77b403409c6f0d20c493c89276e9b2c7d69797c31e2bd6a92bc6ecdf1f78f211",
+      "size_bytes": 528
+    },
+    {
+      "path": "inference_adversarial_builtin/drift_manifest.json",
+      "sha256": "5352ad257825b1e2f9799062817d425d70c2dc34218922616b03752ad7868711",
+      "size_bytes": 809
+    },
+    {
+      "path": "inference_adversarial_builtin/holdout_manifest.json",
+      "sha256": "80b4372e2eac510bec4b70e92c296daed5e3cab91de57497c7695ec2fd124efd",
+      "size_bytes": 295
+    },
+    {
+      "path": "inference_adversarial_builtin/metrics.json",
+      "sha256": "d1dcd83d24f83ecfa3c26358495094a51f52e3173624257f8fe71d3112a4e8a3",
+      "size_bytes": 85184
+    },
+    {
+      "path": "real_corpus_alerce_probe/corpus_manifest.json",
+      "sha256": "8044680f17492bd4a4b45a2472c182ebacaf3a9533b8a50d70db640a17237a18",
+      "size_bytes": 1490
+    },
+    {
+      "path": "real_corpus_alerce_probe/replay_manifest.json",
+      "sha256": "349da4ce4fc01c02036a67d8cad4301b3bf26ad16eb3287a3cf57f5d1536107f",
+      "size_bytes": 409
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/drift_manifest.json",
+      "sha256": "7b1e85fb834f9fb9276a2becb09d2d052a31d3e3bebc8895dd51fff7a3d87a64",
+      "size_bytes": 956
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/holdout_manifest.json",
+      "sha256": "01f717bcc62fc3e259dacae82ce76b6ed0b0608895b87e99bc4a852d301f1139",
+      "size_bytes": 286
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/metrics.json",
+      "sha256": "067d59dc51d06dac0058ed28195955d5a7a225ab93b4e60acf8e2994a194c15a",
+      "size_bytes": 163445
+    },
+    {
+      "path": "real_corpus_mpc_500/corpus_manifest.json",
+      "sha256": "c7076711bb43d708f012d03bee2d72593279bd9f89c36385c96791ae67c29803",
+      "size_bytes": 2510
+    },
+    {
+      "path": "real_run.json",
+      "sha256": "101a61d12d7581584be38708e6aa443bc7ffd89da34ddf04964c2324ea035a52",
+      "size_bytes": 2163
+    },
+    {
+      "path": "route_promotion/promotion_report.json",
+      "sha256": "5716ea4276ea11a5f490569131315d5297effd301564cd29fba781abda18ffef",
+      "size_bytes": 39808
+    },
+    {
+      "path": "route_promotion_full_strict/promotion_report.json",
+      "sha256": "38a31eb22012ec52f8682deaade7c307de84f354bd2c498fc8a302c561b53b55",
+      "size_bytes": 68974
+    },
+    {
+      "path": "route_promotion_nbody/promotion_report.json",
+      "sha256": "321ebb4fd665b13e8c8ce4e0b7fb8d7ca9c1117b1e88e010d4c9069def1adb2e",
+      "size_bytes": 49388
+    },
+    {
+      "path": "route_promotion_nbody_covariance/promotion_report.json",
+      "sha256": "01b06ad9eb9e03a6156237eb1a23a6f9952c015093a45d8dc33b213fc38965de",
+      "size_bytes": 59769
+    },
+    {
+      "path": "solar_navigator_benchmark/benchmark_summary.json",
+      "sha256": "ff0dc4f7903b9768bbf50254f4a48be5ce9c7e23cfad080afacb8b6c6e26c08a",
+      "size_bytes": 3548
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_enceladus_small/figure_manifest.json",
+      "sha256": "246d5079ae0cdf57e1d085ceaf584b1e73e959d2c9b9c38eecb37be5b6fda9cb",
+      "size_bytes": 5685
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_enceladus_small/navigator_report.json",
+      "sha256": "af2d76a066c6304c8681425cc24ebd6f54e1294219ce4f54a06e96bed050bd0d",
+      "size_bytes": 33040
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_mars_small/figure_manifest.json",
+      "sha256": "d8ad88f644d462edd8fb60b5073d55ce3bd311e21412deb319880d5edc85c7de",
+      "size_bytes": 6164
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_mars_small/navigator_report.json",
+      "sha256": "6c813f619e54cd84baf101e0687991780342b3ed62fa4cfa461377cf326d5d78",
+      "size_bytes": 29414
+    },
+    {
+      "path": "solar_navigator_enceladus_smoke/navigator_report.json",
+      "sha256": "38527bfcaa3c483a7431a7a13e93eec0ff466194beb55500433c006f55781804",
+      "size_bytes": 8206
+    },
+    {
+      "path": "solar_transfer_atlas/solar_transfer_atlas.json",
+      "sha256": "9e1be5327b2cc0ca8b79ed2dde2048d21b212f224ee65b11c067946a236834d9",
+      "size_bytes": 31043
+    },
+    {
+      "path": "transport_admissibility/metrics.json",
+      "sha256": "e1639edd77d492f823b40ef25b4e914e617159cd7d6afce44f407836eeeab1ac",
+      "size_bytes": 1255
+    },
+    {
+      "path": "inference_adversarial_builtin/ablation.csv",
+      "sha256": "c83265f7f62442939552a21f2740efb8b873ed666d5e167c7f1f95c9dd54698f",
+      "size_bytes": 688
+    },
+    {
+      "path": "inference_adversarial_builtin/calibration_search.csv",
+      "sha256": "870c0e45da02d8294f0c271eefcadd138ef9632d04b5aedb27738f4650470853",
+      "size_bytes": 44
+    },
+    {
+      "path": "inference_adversarial_builtin/case_results.csv",
+      "sha256": "45661a71127149851e9ba410af8af7959c491d3f7af1998ff460a14ac60010d5",
+      "size_bytes": 15733
+    },
+    {
+      "path": "inference_adversarial_builtin/confusion.csv",
+      "sha256": "6a0568b314453524797b4a80b4d126fe75969c658441af73180d29fc3cfab609",
+      "size_bytes": 676
+    },
+    {
+      "path": "inference_adversarial_builtin/failure_diagnostics.csv",
+      "sha256": "7d3cc5307cac68c759d63de09ca67c2acf91b17da7dfc27a97062927339f209e",
+      "size_bytes": 45291
+    },
+    {
+      "path": "inference_adversarial_builtin/precision_recall.csv",
+      "sha256": "67781533cebbcb1d6fe5bedb931722521ec8b18a2a01d3229e26dc7fc14fa6dd",
+      "size_bytes": 604
+    },
+    {
+      "path": "inference_adversarial_builtin/reliability_curve.csv",
+      "sha256": "baa4c67b2d5c4b1266e894b26557d8a8d95b2517f8cae001e1f61255ea4c4f99",
+      "size_bytes": 275
+    },
+    {
+      "path": "inference_adversarial_builtin/strata.csv",
+      "sha256": "e04606abe9bfe2c1ba181348259eae11156c8961c250e0a61f481b9658044bce",
+      "size_bytes": 528
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/ablation.csv",
+      "sha256": "d92b1908493e1ed851ea219daa310181a2cd56ecbf18fe7b73cf742f93ed5046",
+      "size_bytes": 631
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/calibration_search.csv",
+      "sha256": "2844502d913218aacc37e93be63bf21ca188552cc61db5ee2e0bec08e10a0f4c",
+      "size_bytes": 7827
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/case_results.csv",
+      "sha256": "9fb11f678302af8b5b0fd636d8883437997646f723bba3e82e148bc82ea19a72",
+      "size_bytes": 75677
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/confusion.csv",
+      "sha256": "73aa84eb37476ad5b448ca61a68a5c070033d09d9e434eebdeab2d3643bef238",
+      "size_bytes": 256
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/failure_diagnostics.csv",
+      "sha256": "c939210e17b381f638140aa8873ab4f9e32391ba0401557627c914594083d619",
+      "size_bytes": 202
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/precision_recall.csv",
+      "sha256": "adcf9f262fa520229a3fe3b5ead2d43de70c42824659af440b65cb813f6a0621",
+      "size_bytes": 277
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/reliability_curve.csv",
+      "sha256": "925e913a8598741d555eb8864e60969872590ca90c3d3f6f3c3e8414f2a1c33b",
+      "size_bytes": 69
+    },
+    {
+      "path": "real_corpus_mpc_500/benchmark/strata.csv",
+      "sha256": "5928c78106c49a8a25ee4e59641d1f43c356c9b168fb53d0e4ace108f08a78ac",
+      "size_bytes": 170
+    },
+    {
+      "path": "artifact_integrity/artifact_manifest.md",
+      "sha256": "345ee87e436b571f33723291d5ab3c38618b9c256e75c60a3fe1f14ec30a2f24",
+      "size_bytes": 5781
+    },
+    {
+      "path": "closure/closure_report.md",
+      "sha256": "a40d1ce3c2b71e2e36aec93a91e0fcb076a95c96a36697766e66f3a3cd602772",
+      "size_bytes": 3113
+    },
+    {
+      "path": "dream_lab/dream_run.md",
+      "sha256": "484c44dceba2b57106530a8f0ebc760e42f26b0c2af68d4c805b807e8b784171",
+      "size_bytes": 895
+    },
+    {
+      "path": "route_promotion/promotion_report.md",
+      "sha256": "3bdd9cbe0a6afa4c83bab3c86fa1843d94cdbb26129c269822864d5af6f69f22",
+      "size_bytes": 848
+    },
+    {
+      "path": "route_promotion_full_strict/promotion_report.md",
+      "sha256": "3ed10410febb7809d8245421604ec0183a4eae2d94f87effe997de7795cf9042",
+      "size_bytes": 848
+    },
+    {
+      "path": "route_promotion_nbody/promotion_report.md",
+      "sha256": "4b6d347d6aa2c7b6fec0863c45b3a792d9f142a0af6e54bc009c1fb9bec8da47",
+      "size_bytes": 848
+    },
+    {
+      "path": "route_promotion_nbody_covariance/promotion_report.md",
+      "sha256": "ac7e010c37f928d2bf745b7aef4e1f1d295f6645a3fe75e4033fc3456cc2c64b",
+      "size_bytes": 848
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_enceladus_small/route_cards.md",
+      "sha256": "fe87bfa245798ae985d73d258cf3c5b5b5e4b137b43b4c396ce0c3262e80b1a8",
+      "size_bytes": 11214
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_mars_small/route_cards.md",
+      "sha256": "467270fb84cc65934d18f77f7532051e4cd520135545ed689c1eff9329b68a77",
+      "size_bytes": 10698
+    },
+    {
+      "path": "debug_mission_plate.png",
+      "sha256": "5d4bd6df2659ddac37019d03372bf5f66934099240673c3124cf2f47f74c5898",
+      "size_bytes": 426997
+    },
+    {
+      "path": "debug_porkchop_mpl.png",
+      "sha256": "65011d8993af46a374d019c6af23045a129115d55c5f5ac77adb2be748be3808",
+      "size_bytes": 424581
+    },
+    {
+      "path": "matplotlib_deepcopy_patch_test.png",
+      "sha256": "00e11c7692c8d0994184cbd1b5cea2fe1b62f6039371665326d4138a1023df09",
+      "size_bytes": 11510
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_enceladus_small/mission_plate.png",
+      "sha256": "3bad721164f651da3bc5ed9695f40fca3458b618939c2967643ad41cc188a715",
+      "size_bytes": 629119
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_enceladus_small/porkchop_heatmap.png",
+      "sha256": "bbf3e7fb5435af9adf4c0886cb7e0b0ce06b962ca8dbaccab31cef5c19db053c",
+      "size_bytes": 625173
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_enceladus_small/route_trade_space.png",
+      "sha256": "e9486800781e0e8d24b4669463e9fc63273ac646a9efb37be390a497db46cc9b",
+      "size_bytes": 133602
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_mars_small/mission_plate.png",
+      "sha256": "a179487df10df6d0bb84234eececa7039340163edf70b68bff78eecbee6c1598",
+      "size_bytes": 562219
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_mars_small/porkchop_heatmap.png",
+      "sha256": "fdf36b455e2ed79567d337937d94f59362049d665359bff71ee6f2b6ab83944b",
+      "size_bytes": 547577
+    },
+    {
+      "path": "solar_navigator_benchmark/earth_mars_small/route_trade_space.png",
+      "sha256": "f32997c18eaa9fbf500044707111e080c8991c6f719820375fedf1b60c03960d",
+      "size_bytes": 120776
+    },
+    {
+      "path": "solar_navigator_enceladus_smoke/porkchop_heatmap.png",
+      "sha256": "73587a379b167ce7d7aef8e2c16d565779483237b2876cae0b4c2489102f4d4e",
+      "size_bytes": 11870
+    },
+    {
+      "path": "solar_navigator_enceladus_smoke/route_trade_space.png",
+      "sha256": "0626e76694810777c35cdeab160b77afc6769765c26ae54b77a5d9cd0cf3a4d0",
+      "size_bytes": 12668
+    },
+    {
+      "path": "solar_transfer_atlas/solar_cost_field.png",
+      "sha256": "aaa5dcdff0b45b94503e70738236ce764ad67f9d066c8741a70480c1bee66789",
+      "size_bytes": 652358
+    },
+    {
+      "path": "solar_transfer_atlas/solar_trail_atlas.png",
+      "sha256": "975be00c0eee0e8359338161062b8ff063ac1cfd12a863dfc25c755073b482d2",
+      "size_bytes": 496207
+    },
+    {
+      "path": "solar_transfer_atlas/solar_transfer_corridor_atlas.png",
+      "sha256": "3ba48487b6dd8428a039ce7b36d6f1048cc96d4015e5c1884655a6b5cdc4c7ac",
+      "size_bytes": 472359
+    },
+    {
+      "path": "solar_transfer_atlas/solar_transfer_optimal_route_map.png",
+      "sha256": "45e07de417c4196cb504c1f30aff7c86ff33f401bc1c5a2812852024df6526b2",
+      "size_bytes": 175772
+    },
+    {
+      "path": "solar_transfer_atlas/solar_transfer_pairwise_heatmap.png",
+      "sha256": "dc6ad7c0eace889523b29a576bfc27c3e9823e5699917c70dabe6be6984eefcc",
+      "size_bytes": 267726
+    }
+  ],
+  "file_count": 69,
+  "root": "data\\benchmarks",
+  "schema": "ariadne.artifact_integrity_manifest.v1",
+  "total_size_bytes": 6410182
+}
