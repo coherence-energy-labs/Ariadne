@@ -1,0 +1,2 @@
+stratum,n,accuracy,macro_f1,mean_confidence,mean_margin,manual_review_rate,safe_accuracy
+known_orbit_recovery,2400,0.9995833333333334,0.9848484848484849,0.9973206292050869,0.9948700804469823,0.0,1.0

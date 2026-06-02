@@ -43,6 +43,13 @@ def to_mjd(iso):
     return float(Time(iso, format="isot", scale="utc").mjd)
 
 
+def _obs_year(iso):
+    try:
+        return float(str(iso)[:4])
+    except Exception:
+        return 0.0
+
+
 def query_box(ra, dec, half, limit, band=None):
     search = [["instrument", "decam"], ["proc_type", "instcal"],
               ["prod_type", "image"],
@@ -66,6 +73,9 @@ def main():
     ap.add_argument("--limit", type=int, default=2000)
     ap.add_argument("--min-per-night", type=int, default=4)
     ap.add_argument("--cell-deg", type=float, default=0.3)
+    ap.add_argument("--min-year", type=float, default=0.0,
+                    help="only count exposures observed on/after this year "
+                         "(near the catalog epoch -> accurate truth cross-match)")
     args = ap.parse_args()
 
     candidates = []
@@ -76,8 +86,11 @@ def main():
         except Exception as e:
             print(f"  lon={lon:3d} (ra={ra:.1f},dec={dec:.1f}) query failed: {str(e)[:60]}")
             continue
-        # public only
+        # public only, and (optionally) recent enough for accurate truth
         rows = [x for x in rows if str(x.get("release_date", "9999")) <= TODAY]
+        if args.min_year:
+            rows = [x for x in rows
+                    if _obs_year(x.get("dateobs_center", "")) >= args.min_year]
         print(f"  lon={lon:3d} ra={ra:6.1f} dec={dec:6.1f} ecllat={ecl_lat(ra,dec):+5.1f}  "
               f"{len(rows)} public instcal exposures", flush=True)
         if not rows:

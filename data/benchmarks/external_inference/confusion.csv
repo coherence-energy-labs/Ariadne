@@ -1,0 +1,8 @@
+truth_label,HILDA,IMB,MARS_CROSSER,MBA,OMB,THULE,subtraction_residual
+HILDA,24,0,0,0,0,0,0
+IMB,0,564,0,0,0,0,0
+MARS_CROSSER,0,0,12,0,0,0,0
+MBA,0,0,0,1734,0,0,0
+OMB,0,0,0,0,60,0,0
+THULE,0,0,0,0,0,5,1
+subtraction_residual,0,0,0,0,0,0,0

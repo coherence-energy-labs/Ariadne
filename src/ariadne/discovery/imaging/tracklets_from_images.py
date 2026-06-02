@@ -15,6 +15,8 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 
+import numpy as np
+
 from .source_extraction import Source
 
 SEC_PER_DAY = 86400.0
@@ -27,6 +29,44 @@ def _angular_separation_arcsec(a: Source, b: Source) -> float:
     return math.degrees(math.hypot(dra, ddec)) * 3600.0
 
 
+def suppress_stationary_sources(sources: list[Source],
+                                radius_arcsec: float = 0.8) -> list[Source]:
+    """Remove same-night fixed-source repeats before moving-object pairing.
+
+    The raw image path sees stars and static artifacts in every exposure. If
+    those fixed sources are allowed into pair formation, bright star/star
+    accidents dominate the O(N^2) candidate space and can bury real moving
+    objects under caps. This veto drops a source when a different exposure on
+    the same night has a neighbour at the same sky position.
+    """
+    if radius_arcsec <= 0.0 or len(sources) < 2:
+        return list(sources)
+    from scipy.spatial import cKDTree
+
+    by_night = defaultdict(list)
+    for idx, src in enumerate(sources):
+        by_night[int(round(src.mjd))].append((idx, src))
+    keep = np.ones(len(sources), dtype=bool)
+    radius_deg = radius_arcsec / 3600.0
+    for rows in by_night.values():
+        if len(rows) < 2:
+            continue
+        dec0 = float(np.median([src.dec for _, src in rows]))
+        cos_dec = math.cos(math.radians(dec0))
+        xy = np.array([[src.ra * cos_dec, src.dec] for _, src in rows], dtype=float)
+        tree = cKDTree(xy)
+        for local_i, (global_i, src) in enumerate(rows):
+            near = tree.query_ball_point(xy[local_i], radius_deg)
+            for local_j in near:
+                if local_i == local_j:
+                    continue
+                _, other = rows[local_j]
+                if other.image_id != src.image_id:
+                    keep[global_i] = False
+                    break
+    return [src for i, src in enumerate(sources) if keep[i]]
+
+
 def nightly_tracklets(sources: list[Source],
                       min_rate_arcsec_hr: float = 0.05,
                       max_rate_arcsec_hr: float = 5.0,
@@ -34,13 +74,16 @@ def nightly_tracklets(sources: list[Source],
                       max_pair_dt_hours: float = 6.0,
                       obscode: str = "807",
                       min_pair_separation_arcsec: float = 0.5,
-                      max_per_night: int | None = 5000) -> list[dict]:
+                      max_per_night: int | None = 5000,
+                      stationary_veto_arcsec: float = 0.0) -> list[dict]:
     """Pair sources within the same night into Ariadne-shaped tracklets.
 
     Default rate window targets the distant-object regime (TNOs / outer Centaurs /
     far-side MBA tail; faster movers are excluded). The dict schema matches
     discovery.itf.build_tracklets so the HelioLinC linker drops in unchanged.
     """
+    if stationary_veto_arcsec > 0.0:
+        sources = suppress_stationary_sources(sources, stationary_veto_arcsec)
     by_night = defaultdict(list)
     for s in sources:
         by_night[int(round(s.mjd))].append(s)

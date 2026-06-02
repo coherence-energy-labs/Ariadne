@@ -1,0 +1,30 @@
+{
+  "accuracy": 0.9995833333333334,
+  "artifacts": {
+    "ablation": "data\\benchmarks\\external_inference\\ablation.csv",
+    "calibration_search": "data\\benchmarks\\external_inference\\calibration_search.csv",
+    "case_results": "data\\benchmarks\\external_inference\\case_results.csv",
+    "confusion": "data\\benchmarks\\external_inference\\confusion.csv",
+    "drift_manifest": "data\\benchmarks\\external_inference\\drift_manifest.json",
+    "failure_diagnostics": "data\\benchmarks\\external_inference\\failure_diagnostics.csv",
+    "holdout_manifest": "data\\benchmarks\\external_inference\\holdout_manifest.json",
+    "metrics": "data\\benchmarks\\external_inference\\metrics.json",
+    "precision_recall": "data\\benchmarks\\external_inference\\precision_recall.csv",
+    "reliability_curve": "data\\benchmarks\\external_inference\\reliability_curve.csv",
+    "reliability_diagram": "data\\benchmarks\\external_inference\\reliability_diagram.txt",
+    "strata": "data\\benchmarks\\external_inference\\strata.csv"
+  },
+  "certificate_hash": "f4dcc79032333b5f959e6696a62cc43084ca78c0f51983a4d5465492d7ddee57",
+  "ece": 0.0028416133772241462,
+  "macro_f1": 0.9848484848484849,
+  "n_cases": 2400,
+  "safe_accuracy": 1.0,
+  "schema": "ariadne.discovery.external_benchmark_manifest.v1",
+  "sources": {
+    "mpcorb_url": "https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz",
+    "rubin_alert_docs_url": "https://prompt-products.lsst.io/products/alerts/index.html",
+    "rubin_schema_url": "https://sdm-schemas.lsst.io/",
+    "ztf_alert_archive_url": "https://ztf.uw.edu/",
+    "ztf_docs_url": "https://irsa.ipac.caltech.edu/docs/program_interface/ztf_api.html"
+  }
+}

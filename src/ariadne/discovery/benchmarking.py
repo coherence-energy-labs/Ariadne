@@ -1048,7 +1048,7 @@ def write_benchmark_report(result: BenchmarkResult, outdir: str | Path) -> dict:
         _canonical_json(result.holdout_manifest) + "\n", encoding="utf-8")
 
     reliability_plot_path = out / "reliability_diagram.png"
-    _write_reliability_plot(result, reliability_plot_path)
+    reliability_plot_path = _write_reliability_plot(result, reliability_plot_path)
 
     return {
         "metrics": str(metrics_path),
@@ -1066,17 +1066,18 @@ def write_benchmark_report(result: BenchmarkResult, outdir: str | Path) -> dict:
     }
 
 
-def _write_reliability_plot(result: BenchmarkResult, path: Path):
+def _write_reliability_plot(result: BenchmarkResult, path: Path) -> Path:
     """Write a PNG reliability diagram when matplotlib is available."""
     try:
         import matplotlib
         matplotlib.use("Agg", force=True)
         import matplotlib.pyplot as plt
     except Exception:
-        path.with_suffix(".txt").write_text(
+        fallback = path.with_suffix(".txt")
+        fallback.write_text(
             "matplotlib unavailable; reliability_curve.csv contains plot data\n",
             encoding="utf-8")
-        return
+        return fallback
     try:
         xs = [b["avg_confidence"] for b in result.reliability.bins]
         ys = [b["accuracy"] for b in result.reliability.bins]
@@ -1095,12 +1096,15 @@ def _write_reliability_plot(result: BenchmarkResult, path: Path):
         ax.grid(True, alpha=0.25)
         fig.savefig(path, dpi=160, bbox_inches="tight")
         plt.close(fig)
+        return path
     except Exception as e:
         try:
             plt.close("all")
         except Exception:
             pass
-        path.with_suffix(".txt").write_text(
+        fallback = path.with_suffix(".txt")
+        fallback.write_text(
             f"matplotlib plot failed ({type(e).__name__}); "
             "reliability_curve.csv contains plot data\n",
             encoding="utf-8")
+        return fallback

@@ -163,6 +163,38 @@ class TestImageTrackletCap:
         for n, count in per_night.items():
             assert count <= 10, f"night {n} has {count} tracklets > cap 10"
 
+    def test_stationary_veto_removes_fixed_source_repeats(self):
+        from ariadne.discovery.imaging.tracklets_from_images import (
+            suppress_stationary_sources,
+        )
+        from ariadne.discovery.imaging.source_extraction import Source
+        srcs = [
+            Source(180.000000, 20.000000, 1000, 20, 3, 60450.00, "a", 100, 100),
+            Source(180.000010, 20.000000, 1000, 20, 3, 60450.02, "b", 100, 100),
+            Source(180.010000, 20.010000, 1000, 20, 3, 60450.00, "a", 100, 100),
+        ]
+        kept = suppress_stationary_sources(srcs, radius_arcsec=0.8)
+        assert kept == [srcs[2]]
+
+    def test_stationary_veto_preserves_moving_tracklet_pair(self):
+        from ariadne.discovery.imaging.tracklets_from_images import nightly_tracklets
+        from ariadne.discovery.imaging.source_extraction import Source
+        srcs = [
+            Source(180.000000, 20.000000, 1000, 20, 3, 60450.00, "a", 100, 100),
+            Source(180.000500, 20.000000, 1000, 20, 3, 60450.02, "b", 100, 100),
+            Source(181.000000, 21.000000, 3000, 18, 3, 60450.00, "a", 100, 100),
+            Source(181.000005, 21.000000, 3000, 18, 3, 60450.02, "b", 100, 100),
+        ]
+        tracks = nightly_tracklets(
+            srcs,
+            min_rate_arcsec_hr=2.0,
+            max_rate_arcsec_hr=120.0,
+            min_pair_dt_hours=0.03,
+            stationary_veto_arcsec=0.8,
+        )
+        assert len(tracks) == 1
+        assert abs(tracks[0]["rate_arcsec_hr"] - 3.5) < 0.2
+
 
 # =============================================================================
 # smart_annotate calibration passthrough

@@ -88,8 +88,6 @@ def test_write_benchmark_report_emits_audit_artifacts(tmp_path: Path):
     assert set(paths) == expected
     for path in paths.values():
         p = Path(path)
-        if not p.exists() and p.suffix == ".png":
-            p = p.with_suffix(".txt")
         assert p.exists()
         assert p.stat().st_size > 0
 

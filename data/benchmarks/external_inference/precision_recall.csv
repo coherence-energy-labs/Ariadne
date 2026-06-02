@@ -1,0 +1,8 @@
+label,support,predicted,true_positive,precision,recall,f1
+HILDA,24,24,24,1.0,1.0,1.0
+IMB,564,564,564,1.0,1.0,1.0
+MARS_CROSSER,12,12,12,1.0,1.0,1.0
+MBA,1734,1734,1734,1.0,1.0,1.0
+OMB,60,60,60,1.0,1.0,1.0
+THULE,6,5,5,1.0,0.8333333333333334,0.9090909090909091
+subtraction_residual,0,1,0,0.0,0.0,0.0

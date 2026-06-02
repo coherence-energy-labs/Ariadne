@@ -1,0 +1,58 @@
+{
+  "candidate_to_false_floor_ratio": 0.0036900369003690036,
+  "created_utc": "2026-06-02T15:34:30.301327+00:00",
+  "data_dir": "data/decam_discovery_field",
+  "extraction_s": 11.131900310516357,
+  "known_recovery": 0.15555555555555556,
+  "linker_mode": "fast",
+  "linking_s": 4.510310173034668,
+  "match_arcsec": 5.0,
+  "max_per_night": 3000,
+  "max_rate_arcsec_hr": 120.0,
+  "max_sources_per_exposure": 0,
+  "min_rate_arcsec_hr": 2.0,
+  "n_ccd": 12,
+  "n_chains": 469,
+  "n_detections": 88282,
+  "n_files_seen": 18,
+  "n_multinight_chains": 469,
+  "n_nights": 4,
+  "n_raw_link_detections": 175319,
+  "n_recoverable_knowns": 135,
+  "n_recovered_knowns": 21,
+  "n_scrambled_unknown_multinight_chains": 271,
+  "n_stationary_vetoed_detections": 87037,
+  "n_tracklets": 2252,
+  "n_uncapped_truth_detections": 175319,
+  "n_unknown_multinight_candidates": 285,
+  "n_usable_exposures": 15,
+  "n_vetted_unknown_candidates": 1,
+  "runtime_s": 254.51795887947083,
+  "schema": "ariadne.real_decam_discovery_benchmark.v1",
+  "scrambled_linking_s": 4.557232141494751,
+  "sigma": 5.0,
+  "skipped_exposures": [
+    {
+      "error": "CfitsioException: decompression error: hit end of compressed byte stream",
+      "path": "data\\decam_discovery_field\\c4d_150418_082825_ooi_VR_v4.fits.fz"
+    },
+    {
+      "error": "CfitsioException: decompression error: hit end of compressed byte stream",
+      "path": "data\\decam_discovery_field\\c4d_150419_080013_ooi_VR_v2.fits.fz"
+    },
+    {
+      "error": "CfitsioException: decompression error: hit end of compressed byte stream",
+      "path": "data\\decam_discovery_field\\c4d_150419_081412_ooi_VR_v2.fits.fz"
+    }
+  ],
+  "stationary_veto_arcsec": 1.2,
+  "status": "pass",
+  "tracklet_build_s": 69.34862303733826,
+  "truth_limit": 1600000,
+  "truth_match_s": 164.9485626220703,
+  "truth_mode": "nbody",
+  "vet_max_heading_scatter_deg": 18.0,
+  "vet_max_linear_resid_arcsec": 30.0,
+  "vet_max_rate_cv": 0.2,
+  "vet_min_nights": 4
+}
