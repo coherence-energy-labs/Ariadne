@@ -54,6 +54,7 @@ data/des_snc3/
 data/real_decam_recovery/
 data/real_decam_tracklet/
 data/real_decam_phase_a/
+data/decam_discovery_field/
 data/mpc_catalog/
 data/synth_fits/
 data/discovery/

@@ -392,7 +392,23 @@ def _morphology_log_likelihood(observed_label: str, observed_conf: float,
     # Streaks indicate fast NEOs or satellites
     if observed_label == "STREAK" and expected_label == "POINT":
         return math.log(0.10)
+    # A weak cosmic-ray flag is common in crowded/noisy real CCDs. Treat it as
+    # mild negative evidence against a moving object, not as a decisive veto;
+    # the audit layer handles high-confidence contradictions separately.
+    if observed_label == "COSMIC_RAY" and expected_label == "POINT" and observed_conf < 0.85:
+        return math.log(0.45)
     return math.log(max(0.05, 1.0 - observed_conf))
+
+
+def _coherent_short_arc_motion(evidence: Evidence) -> bool:
+    """True when sparse evidence still has enough motion to resist artefact priors."""
+    return (
+        evidence.rate_arcsec_hr is not None
+        and evidence.rate_arcsec_hr > 0.2
+        and evidence.n_detections >= 2
+        and evidence.arc_days > 0.0
+        and evidence.morphology_label in (None, "POINT", "BLEND")
+    )
 
 
 def _orbit_state_log_likelihood(orbit_state: list, class_name: str) -> float:
@@ -619,6 +635,7 @@ def _generate_artefact_hypotheses(evidence: Evidence,
     if (evidence.n_detections >= 4 and evidence.arc_days >= 3.0
             and evidence.rms_arcsec is not None and evidence.rms_arcsec < 5.0):
         multinight_motion_penalty -= 8.0
+    coherent_short_arc_penalty = -3.0 if _coherent_short_arc_motion(evidence) else 0.0
 
     for label, prior_frac in artefact_priors.items():
         prior = math.log(max(prior_frac, 1e-9))
@@ -634,6 +651,9 @@ def _generate_artefact_hypotheses(evidence: Evidence,
             likelihood += single_image_penalty
             if single_image_penalty != 0.0:
                 terms["single_image_penalty"] = single_image_penalty
+        if coherent_short_arc_penalty != 0.0:
+            likelihood += coherent_short_arc_penalty
+            terms["coherent_short_arc_motion_penalty"] = coherent_short_arc_penalty
 
         # cosmic_ray: strong likelihood if morphology says so + low rate
         if label == "cosmic_ray":
@@ -891,7 +911,10 @@ def audit_evidence(evidence: Evidence) -> EvidenceAudit:
         contradictions.append("rate_arcsec_hr cannot be negative")
     if evidence.morphology_confidence is not None and not (0.0 <= evidence.morphology_confidence <= 1.0):
         contradictions.append("morphology_confidence outside [0,1]")
-    if evidence.morphology_label == "COSMIC_RAY" and evidence.n_detections >= 3:
+    if (evidence.morphology_label == "COSMIC_RAY"
+            and (evidence.morphology_confidence is None
+                 or evidence.morphology_confidence >= 0.85)
+            and evidence.n_detections >= 3):
         contradictions.append("cosmic-ray morphology conflicts with repeated detections")
     if evidence.rate_arcsec_hr is not None and evidence.rate_arcsec_hr > 1000 and evidence.arc_days > 3:
         contradictions.append("satellite-scale rate conflicts with multi-day coherent arc")
@@ -1326,9 +1349,23 @@ def _recommend_followup(result: InferenceResult,
             and evidence.morphology_confidence < 0.85
             and evidence.rate_arcsec_hr is not None
             and evidence.n_detections >= 2):
+        has_orbit_context = (
+            evidence.orbit_state is not None
+            or {"a_au", "e"}.issubset(evidence.sky_context)
+            or evidence.skybot_match_names is not None
+        )
+        if not has_orbit_context:
+            return {
+                "action": "manual_review",
+                "reason": ("weak cosmic-ray morphology conflicts with tracklet "
+                           "evidence and lacks orbit/xmatch context"),
+                "expected_info_gain_nats": entropy,
+                "source": "adversarial_audit",
+            }
         return {
-            "action": "manual_review",
-            "reason": "weak cosmic-ray morphology conflicts with tracklet evidence",
+            "action": "observe_second_night",
+            "reason": ("weak cosmic-ray morphology conflicts with moving-tracklet "
+                       "evidence; preserve class prediction and verify"),
             "expected_info_gain_nats": entropy,
             "source": "adversarial_audit",
         }
@@ -1353,6 +1390,27 @@ def _recommend_followup(result: InferenceResult,
             "reason": f"top hypothesis is {best.label} (artefact); not worth follow-up",
             "expected_info_gain_nats": 0.0,
         }
+
+    if best.orbital_class == "MBA":
+        trojan_alt = next(
+            (h for h in result.hypotheses[:5] if h.orbital_class in {"JTROJAN", "HILDA"}),
+            None,
+        )
+        if (trojan_alt is not None
+                and evidence.rate_arcsec_hr is not None
+                and 3.0 <= evidence.rate_arcsec_hr <= 7.0
+                and evidence.band_magnitudes):
+            return {
+                "action": "observe_multiband",
+                "reason": ("MBA/Trojan posterior is not decisive for a red, "
+                           "Jovian-rate candidate"),
+                "expected_info_gain_nats": max(entropy, 0.5),
+                "observation_target": {
+                    "ra_deg": evidence.ra_deg,
+                    "dec_deg": evidence.dec_deg,
+                    "expected_rate_arcsec_hr": best.predicted_motion_arcsec_hr,
+                },
+            }
 
     if entropy > 1.5:
         return {

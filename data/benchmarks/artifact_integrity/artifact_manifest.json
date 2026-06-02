@@ -1,11 +1,11 @@
 {
-  "certificate_hash": "282f6643b179adfe262a628e440e32faf1040e896daf60f3b57264a101162d7c",
-  "created_utc": "2026-06-02T12:11:47+00:00",
+  "certificate_hash": "caf5b32bf61a337b43f6c4ac13ed36cbec53c6a4f87dfed3493112afd4849931",
+  "created_utc": "2026-06-02T14:04:40+00:00",
   "entries": [
     {
       "path": "artifact_integrity/artifact_manifest.json",
-      "sha256": "a0828738d2da78e2a8e6534faec69fe79842e420d31196d68ab3b23edb3f9913",
-      "size_bytes": 13171
+      "sha256": "58f3fec663f364a6141af2558070a4d2e3aba87752aa9d7c9601d5e514ea9232",
+      "size_bytes": 14300
     },
     {
       "path": "cislunar_architecture/direct_only.json",
@@ -19,8 +19,8 @@
     },
     {
       "path": "closure/closure_report.json",
-      "sha256": "da5061b95782a1c89600e294e0b9738f64fa6e8ac5a12b569e54ff93792ab76f",
-      "size_bytes": 17054
+      "sha256": "002c25926d5a27a305944b9b8cf9196e60853d3949c4a05a95445ef4a56d1ddc",
+      "size_bytes": 17669
     },
     {
       "path": "dream_lab/dream_run.json",
@@ -28,14 +28,24 @@
       "size_bytes": 3386
     },
     {
+      "path": "engine_improvement/engine_improvement_report.json",
+      "sha256": "132d3715cf8484dedeb58379ac16c0547dfccac47e6f5726bc3dd82d68e9739f",
+      "size_bytes": 15220
+    },
+    {
       "path": "full_image_pipeline.json",
       "sha256": "77b403409c6f0d20c493c89276e9b2c7d69797c31e2bd6a92bc6ecdf1f78f211",
       "size_bytes": 528
     },
     {
+      "path": "improvement_report/improvement_report.json",
+      "sha256": "7c75e891fb511850d948ca84eda491b42c9d4d00547bb26c49327e5bc69a9ecd",
+      "size_bytes": 2212
+    },
+    {
       "path": "inference_adversarial_builtin/drift_manifest.json",
-      "sha256": "5352ad257825b1e2f9799062817d425d70c2dc34218922616b03752ad7868711",
-      "size_bytes": 809
+      "sha256": "deea66e29c8dba3f6536bae4cee6e8e27da4be16970a366ab3360285ad483b41",
+      "size_bytes": 795
     },
     {
       "path": "inference_adversarial_builtin/holdout_manifest.json",
@@ -44,8 +54,8 @@
     },
     {
       "path": "inference_adversarial_builtin/metrics.json",
-      "sha256": "d1dcd83d24f83ecfa3c26358495094a51f52e3173624257f8fe71d3112a4e8a3",
-      "size_bytes": 85184
+      "sha256": "b5eb626b97c86b5feb466f1b570d26bea6e5806c3590c061f5e04c6fcaba4b2e",
+      "size_bytes": 84725
     },
     {
       "path": "real_corpus_alerce_probe/corpus_manifest.json",
@@ -144,8 +154,8 @@
     },
     {
       "path": "inference_adversarial_builtin/ablation.csv",
-      "sha256": "c83265f7f62442939552a21f2740efb8b873ed666d5e167c7f1f95c9dd54698f",
-      "size_bytes": 688
+      "sha256": "5da221280bf502e11f500602c44b93faccf6a2777d707d8fb3ea1bf982a7c083",
+      "size_bytes": 757
     },
     {
       "path": "inference_adversarial_builtin/calibration_search.csv",
@@ -154,33 +164,33 @@
     },
     {
       "path": "inference_adversarial_builtin/case_results.csv",
-      "sha256": "45661a71127149851e9ba410af8af7959c491d3f7af1998ff460a14ac60010d5",
-      "size_bytes": 15733
+      "sha256": "d49a7e04e0754913b78d8d1b020f35ff11c06a1f0367d9f52aefc2057de718e6",
+      "size_bytes": 15838
     },
     {
       "path": "inference_adversarial_builtin/confusion.csv",
-      "sha256": "6a0568b314453524797b4a80b4d126fe75969c658441af73180d29fc3cfab609",
-      "size_bytes": 676
+      "sha256": "ba9797dd8dc0102c8a5e35a49b5f532769463e1f0c883a8f4872814c56d83b6e",
+      "size_bytes": 677
     },
     {
       "path": "inference_adversarial_builtin/failure_diagnostics.csv",
-      "sha256": "7d3cc5307cac68c759d63de09ca67c2acf91b17da7dfc27a97062927339f209e",
-      "size_bytes": 45291
+      "sha256": "0ee501c544f4d017d68054d2d5d6afa6ca6d0b53e1d7eebe7b27962c12f625b4",
+      "size_bytes": 46465
     },
     {
       "path": "inference_adversarial_builtin/precision_recall.csv",
-      "sha256": "67781533cebbcb1d6fe5bedb931722521ec8b18a2a01d3229e26dc7fc14fa6dd",
-      "size_bytes": 604
+      "sha256": "7f92fb32614d47545add8ff1c861b275a771fcc348fa8e8cad7e7aa163a41d86",
+      "size_bytes": 618
     },
     {
       "path": "inference_adversarial_builtin/reliability_curve.csv",
-      "sha256": "baa4c67b2d5c4b1266e894b26557d8a8d95b2517f8cae001e1f61255ea4c4f99",
-      "size_bytes": 275
+      "sha256": "6f2c2ef5a94ea42aeca903be527d8b435ad5dab6eb68c33f1ff699514bc13dc2",
+      "size_bytes": 295
     },
     {
       "path": "inference_adversarial_builtin/strata.csv",
-      "sha256": "e04606abe9bfe2c1ba181348259eae11156c8961c250e0a61f481b9658044bce",
-      "size_bytes": 528
+      "sha256": "c20c004dcbe729efa00bcad9e112f4734faf028ff9ea4c69b44f1a5eba1aacb6",
+      "size_bytes": 477
     },
     {
       "path": "real_corpus_mpc_500/benchmark/ablation.csv",
@@ -224,18 +234,28 @@
     },
     {
       "path": "artifact_integrity/artifact_manifest.md",
-      "sha256": "345ee87e436b571f33723291d5ab3c38618b9c256e75c60a3fe1f14ec30a2f24",
-      "size_bytes": 5781
+      "sha256": "d525503489af1242db7572522bb119a7063b77b0220edab700cb74e3dd071a13",
+      "size_bytes": 6256
     },
     {
       "path": "closure/closure_report.md",
-      "sha256": "a40d1ce3c2b71e2e36aec93a91e0fcb076a95c96a36697766e66f3a3cd602772",
-      "size_bytes": 3113
+      "sha256": "3dd5f976760240e34da45585ea77997c023a1906605b322b314bcc0390bef4c6",
+      "size_bytes": 3415
     },
     {
       "path": "dream_lab/dream_run.md",
       "sha256": "484c44dceba2b57106530a8f0ebc760e42f26b0c2af68d4c805b807e8b784171",
       "size_bytes": 895
+    },
+    {
+      "path": "engine_improvement/engine_improvement_report.md",
+      "sha256": "b4742aa3770d3b0dc389569c826e0aab40475800b192c36f841d61a9ffea41a7",
+      "size_bytes": 1660
+    },
+    {
+      "path": "improvement_report/improvement_report.md",
+      "sha256": "a3b504b357488a4616896d045759abd8ab8d2bdc8a80c60217e4173c9180acbf",
+      "size_bytes": 914
     },
     {
       "path": "route_promotion/promotion_report.md",
@@ -348,8 +368,8 @@
       "size_bytes": 267726
     }
   ],
-  "file_count": 69,
+  "file_count": 73,
   "root": "data\\benchmarks",
   "schema": "ariadne.artifact_integrity_manifest.v1",
-  "total_size_bytes": 6410182
+  "total_size_bytes": 6433568
 }

@@ -1,6 +1,6 @@
 {
   "blocking_residuals": 0,
-  "certificate_hash": "6bd9ed7c7a560063e6a42b8c8bf2df5a312a154e2ffeef6866b3d189fec279ed",
+  "certificate_hash": "4a65a794e70cdf3d42025890a1257ee2e28b1d9b96a71edf434f3361ee52375e",
   "contracts": [
     {
       "maximum_metrics": {},
@@ -94,7 +94,7 @@
       "subsystem": "artifact_integrity"
     }
   ],
-  "created_utc": "2026-06-02T12:11:47+00:00",
+  "created_utc": "2026-06-02T14:04:40+00:00",
   "critical_failures": 0,
   "evidence": [
     {
@@ -145,14 +145,14 @@
     },
     {
       "artifact_id": "discovery_adversarial_builtin",
-      "certificate_hash": "031e6bcf6d32065f90e32228c3d7653fe98c81569a124695d55785d823d34d87",
-      "content_hash": "e42561748e71a9623a7d8c0559b203d4e6bf21261c253fa3b1a9c40f76ec3b95",
+      "certificate_hash": "d4b816e11380dbd85b4b31efb7d09ffe3b743a8978e5bbc262fb6661d8748584",
+      "content_hash": "3fabaee4fa69654d37aec37cd600cc117366efe71efba4e6c7cb4ac5fe5956b5",
       "kind": "adversarial_benchmark",
       "metrics": {
-        "accuracy": 0.64,
-        "macro_f1": 0.5425241425241425,
+        "accuracy": 0.7466666666666667,
+        "macro_f1": 0.6080020989111898,
         "n": 75,
-        "safe_accuracy": 0.9466666666666667
+        "safe_accuracy": 1.0
       },
       "notes": [],
       "path": null,
@@ -247,12 +247,12 @@
     },
     {
       "artifact_id": "artifact_integrity_manifest",
-      "certificate_hash": "282f6643b179adfe262a628e440e32faf1040e896daf60f3b57264a101162d7c",
-      "content_hash": "63f0f114ebcaff8882339747febc0ad91e59d34399a56f24b3a628aeeca323c0",
+      "certificate_hash": "caf5b32bf61a337b43f6c4ac13ed36cbec53c6a4f87dfed3493112afd4849931",
+      "content_hash": "7476f7dcf1a6a6d78b8f4684d5ebc0ffd5945672336ae7c8d6b70ae698b75c5f",
       "kind": "artifact_manifest",
       "metrics": {
-        "file_count": 69,
-        "total_size_bytes": 6410182
+        "file_count": 73,
+        "total_size_bytes": 6433568
       },
       "notes": [],
       "path": null,
@@ -372,7 +372,7 @@
       "gate_id": "discovery_robustness:safe_accuracy:>=",
       "message": "",
       "metrics": {
-        "observed": 0.9466666666666667,
+        "observed": 1.0,
         "threshold": 0.94
       },
       "severity": "critical",
@@ -508,7 +508,7 @@
       "gate_id": "artifact_integrity:file_count:>=",
       "message": "",
       "metrics": {
-        "observed": 69.0,
+        "observed": 73.0,
         "threshold": 10.0
       },
       "severity": "critical",

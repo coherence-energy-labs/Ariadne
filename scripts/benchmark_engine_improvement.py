@@ -37,11 +37,12 @@ def deterministic_train_eval(
     cases: list[LabelledCase],
     *,
     train_percent: int = 70,
+    salt: str = "ariadne-engine-split-v1",
 ) -> tuple[list[LabelledCase], list[LabelledCase]]:
     if not 10 <= train_percent <= 90:
         raise ValueError("train_percent must be between 10 and 90")
-    train = [case for case in cases if _case_bucket(case) < train_percent]
-    eval_cases = [case for case in cases if _case_bucket(case) >= train_percent]
+    train = [case for case in cases if _case_bucket(case, salt=salt) < train_percent]
+    eval_cases = [case for case in cases if _case_bucket(case, salt=salt) >= train_percent]
     if not train or not eval_cases:
         raise ValueError("deterministic split produced an empty train or eval set")
     return train, eval_cases
@@ -74,6 +75,87 @@ def _delta(before: dict, after: dict) -> dict:
     return out
 
 
+def _guard_score(summary: dict) -> float:
+    """Score calibration candidates without letting confidence beat correctness."""
+    return (
+        1000.0 * summary["accuracy"]
+        + 100.0 * summary["safe_accuracy"]
+        + 10.0 * summary["macro_f1"]
+        - summary["nll"]
+        - summary["ece"]
+        - 0.001 * summary["failures"]
+    )
+
+
+def _select_guarded_calibration(train: list[LabelledCase]) -> tuple[CalibrationConfig, dict]:
+    """Fit several calibration candidates and keep only the best guard performer."""
+    if len(train) < 20:
+        return CalibrationConfig(), {"strategy": "baseline_only", "reason": "too_few_train_cases"}
+    fit_cases, guard_cases = deterministic_train_eval(
+        train, train_percent=80, salt="ariadne-engine-guard-split-v1")
+    guard_score_cases = adversarial_mutations(guard_cases, include_original=True)
+    candidates: list[tuple[str, CalibrationConfig]] = [("baseline", CalibrationConfig())]
+
+    temp = run_inference_benchmark(
+        fit_cases,
+        fit_calibration=True,
+        fit_channels=False,
+        fit_labels=False,
+        ablations=False,
+    )
+    candidates.append(("temperature", temp.calibration))
+
+    channel = run_inference_benchmark(
+        fit_cases,
+        fit_calibration=True,
+        fit_channels=True,
+        fit_labels=False,
+        ablations=False,
+    )
+    candidates.append(("temperature_channel_weights", channel.calibration))
+
+    full = run_inference_benchmark(
+        fit_cases,
+        fit_calibration=True,
+        fit_channels=True,
+        fit_labels=True,
+        ablations=False,
+    )
+    candidates.append(("temperature_channel_weights_label_bias", full.calibration))
+
+    scored = []
+    for name, cfg in candidates:
+        guard = run_inference_benchmark(
+            guard_score_cases,
+            calibration=cfg,
+            fit_calibration=False,
+            fit_channels=False,
+            fit_labels=False,
+            ablations=False,
+        )
+        summary = _summary(guard)
+        scored.append({
+            "name": name,
+            "score": _guard_score(summary),
+            "summary": summary,
+            "calibration": asdict(cfg),
+        })
+    scored.sort(key=lambda row: row["score"], reverse=True)
+    best = scored[0]
+    return CalibrationConfig(**{
+        key: best["calibration"][key]
+        for key in ("temperature", "label_bias", "channel_weights",
+                    "class_temperatures", "version")
+    }), {
+        "strategy": "guarded_selection",
+        "fit_cases": len(fit_cases),
+        "guard_cases": len(guard_cases),
+        "guard_score_cases": len(guard_score_cases),
+        "selected": best["name"],
+        "candidates": scored,
+    }
+
+
 def _run_pair(train: list[LabelledCase], eval_cases: list[LabelledCase]) -> dict:
     baseline = run_inference_benchmark(
         eval_cases,
@@ -83,16 +165,10 @@ def _run_pair(train: list[LabelledCase], eval_cases: list[LabelledCase]) -> dict
         fit_labels=False,
         ablations=False,
     )
-    tuned_train = run_inference_benchmark(
-        train,
-        fit_calibration=True,
-        fit_channels=True,
-        fit_labels=True,
-        ablations=False,
-    )
+    tuned_calibration, selection = _select_guarded_calibration(train)
     tuned = run_inference_benchmark(
         eval_cases,
-        calibration=tuned_train.calibration,
+        calibration=tuned_calibration,
         fit_calibration=False,
         fit_channels=False,
         fit_labels=False,
@@ -104,7 +180,8 @@ def _run_pair(train: list[LabelledCase], eval_cases: list[LabelledCase]) -> dict
         "baseline": before,
         "tuned": after,
         "delta": _delta(before, after),
-        "trained_calibration": asdict(tuned_train.calibration),
+        "trained_calibration": asdict(tuned_calibration),
+        "selection": selection,
     }
 
 

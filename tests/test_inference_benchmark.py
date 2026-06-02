@@ -182,3 +182,56 @@ def test_adversarial_mutation_suite_and_safe_accuracy():
     assert 0.0 <= result.safe_accuracy <= 1.0
     assert any(row.source.endswith(":mutated") for row in result.rows)
     assert result.safe_accuracy >= 0.9
+
+
+def test_weak_cosmic_ray_flag_does_not_erase_coherent_moving_arc():
+    from ariadne.discovery.benchmarking import LabelledCase, run_inference_benchmark
+    from ariadne.discovery.inference import Evidence
+
+    case = LabelledCase(
+        "weak_cosmic_flag_real_arc",
+        Evidence(
+            rate_arcsec_hr=18.5,
+            apparent_mag=19.2,
+            morphology_label="COSMIC_RAY",
+            morphology_confidence=0.70,
+            n_detections=12,
+            arc_days=10.0,
+            rms_arcsec=0.8,
+            skybot_match_names=[],
+            sky_context={"a_au": 2.6, "e": 0.1},
+        ),
+        truth_label="MBA",
+        source="regression",
+    )
+
+    result = run_inference_benchmark([case], fit_calibration=False, ablations=False)
+
+    assert result.accuracy == 1.0
+    assert result.rows[0].predicted_label == "MBA"
+
+
+def test_short_arc_point_motion_beats_generic_subtraction_residual():
+    from ariadne.discovery.benchmarking import LabelledCase, run_inference_benchmark
+    from ariadne.discovery.inference import Evidence
+
+    case = LabelledCase(
+        "short_arc_inner_belt_motion",
+        Evidence(
+            rate_arcsec_hr=19.0,
+            apparent_mag=19.5,
+            morphology_label="POINT",
+            morphology_confidence=0.9,
+            n_detections=2,
+            arc_days=0.05,
+            skybot_match_names=[],
+            sky_context={"a_au": 2.0, "e": 0.08},
+        ),
+        truth_label="IMB",
+        source="regression",
+    )
+
+    result = run_inference_benchmark([case], fit_calibration=False, ablations=False)
+
+    assert result.accuracy == 1.0
+    assert result.rows[0].predicted_label == "IMB"

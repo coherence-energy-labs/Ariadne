@@ -2,8 +2,8 @@
   "corpus_path": "data\\benchmarks\\real_corpus_mpc_500\\labelled_cases.jsonl",
   "heldout_adversarial_mutations": {
     "baseline": {
-      "accuracy": 0.8102189781021898,
-      "brier": 0.026566579106171977,
+      "accuracy": 1.0,
+      "brier": 0.0033752958140569507,
       "calibration": {
         "channel_weights": {},
         "class_temperatures": {},
@@ -11,89 +11,232 @@
         "temperature": 1.0,
         "version": "manual-v1"
       },
-      "certificate_hash": "91aeb36e9a57eeb1201dbd322656bd61f0412e113b55364b88a2b335d1b7b727",
-      "ece": 0.038318767481060584,
-      "failures": 156,
-      "macro_f1": 0.8476854507744583,
+      "certificate_hash": "dfd751d6c6edc54085a4882e1756e6d3cda3c10f18a82e1178f21e18dc7bec92",
+      "ece": 0.012028521582161847,
+      "failures": 0,
+      "macro_f1": 1.0,
       "macro_precision": 1.0,
-      "macro_recall": 0.7387152777777778,
+      "macro_recall": 1.0,
       "n": 822,
-      "nll": 0.0912680032461324,
+      "nll": 0.014646978452331916,
       "safe_accuracy": 1.0
     },
     "delta": {
       "accuracy": 0.0,
-      "brier": -0.006162579021116315,
-      "ece": -0.022898600483684067,
+      "brier": -0.0016662803142992017,
+      "ece": -0.007513129301674894,
       "failures": 0,
       "macro_f1": 0.0,
       "macro_precision": 0.0,
       "macro_recall": 0.0,
-      "nll": 0.032085963946831,
+      "nll": -0.008953963364284667,
       "safe_accuracy": 0.0
     },
+    "selection": {
+      "candidates": [
+        {
+          "calibration": {
+            "channel_weights": {},
+            "class_temperatures": {},
+            "label_bias": {},
+            "temperature": 0.5,
+            "version": "temperature-grid-0.5"
+          },
+          "name": "temperature",
+          "score": 1109.9967342631157,
+          "summary": {
+            "accuracy": 1.0,
+            "brier": 0.00044381740451245044,
+            "calibration": {
+              "channel_weights": {},
+              "class_temperatures": {},
+              "label_bias": {},
+              "temperature": 0.5,
+              "version": "temperature-grid-0.5"
+            },
+            "certificate_hash": "c2f7602c590b1f7734c7ddb79fb7af907b4ed397d51d3d2c4b506c0f876d7253",
+            "ece": 0.0014819206070678034,
+            "failures": 0,
+            "macro_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "n": 378,
+            "nll": 0.001783816277202332,
+            "safe_accuracy": 1.0
+          }
+        },
+        {
+          "calibration": {
+            "channel_weights": {},
+            "class_temperatures": {},
+            "label_bias": {},
+            "temperature": 1.0,
+            "version": "manual-v1"
+          },
+          "name": "baseline",
+          "score": 1109.9835422403744,
+          "summary": {
+            "accuracy": 1.0,
+            "brier": 0.001283663161776169,
+            "calibration": {
+              "channel_weights": {},
+              "class_temperatures": {},
+              "label_bias": {},
+              "temperature": 1.0,
+              "version": "manual-v1"
+            },
+            "certificate_hash": "11e3809a9f44c6c29c12cd08e1156b0c8e35c5ebbd54665626d9f57b5e9e1541",
+            "ece": 0.007773332854800608,
+            "failures": 0,
+            "macro_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "n": 378,
+            "nll": 0.00868442677082033,
+            "safe_accuracy": 1.0
+          }
+        },
+        {
+          "calibration": {
+            "channel_weights": {
+              "artifact_context": 0.75,
+              "magnitude": 2.0,
+              "morphology": 0.5,
+              "orbit_fit": 2.0,
+              "rate": 2.0
+            },
+            "class_temperatures": {},
+            "label_bias": {
+              "HILDA": 0.75,
+              "HUNGARIA": 1.5,
+              "IMB": 1.5,
+              "MARS_CROSSER": 0.75,
+              "MBA": -0.75,
+              "OMB": -0.75,
+              "THULE": 3.0
+            },
+            "temperature": 0.5,
+            "version": "label-bias-search-v1"
+          },
+          "name": "temperature_channel_weights_label_bias",
+          "score": 1107.3347995358317,
+          "summary": {
+            "accuracy": 0.9973544973544973,
+            "brier": 0.0019318386736175744,
+            "calibration": {
+              "channel_weights": {
+                "artifact_context": 0.75,
+                "magnitude": 2.0,
+                "morphology": 0.5,
+                "orbit_fit": 2.0,
+                "rate": 2.0
+              },
+              "class_temperatures": {},
+              "label_bias": {
+                "HILDA": 0.75,
+                "HUNGARIA": 1.5,
+                "IMB": 1.5,
+                "MARS_CROSSER": 0.75,
+                "MBA": -0.75,
+                "OMB": -0.75,
+                "THULE": 3.0
+              },
+              "temperature": 0.5,
+              "version": "label-bias-search-v1"
+            },
+            "certificate_hash": "594cf1720061a5020bfe85038414a17a6748c809c3fb12bb319b224d22d51c8d",
+            "ece": 0.0022343993521492015,
+            "failures": 1,
+            "macro_f1": 0.9988826815642458,
+            "macro_precision": 1.0,
+            "macro_recall": 0.9977777777777778,
+            "n": 378,
+            "nll": 0.005290234955644321,
+            "safe_accuracy": 1.0
+          }
+        },
+        {
+          "calibration": {
+            "channel_weights": {
+              "artifact_context": 0.75,
+              "magnitude": 2.0,
+              "morphology": 0.5,
+              "orbit_fit": 2.0,
+              "rate": 2.0
+            },
+            "class_temperatures": {},
+            "label_bias": {},
+            "temperature": 0.5,
+            "version": "channel-weight-search-v1"
+          },
+          "name": "temperature_channel_weights",
+          "score": 1107.326801817411,
+          "summary": {
+            "accuracy": 0.9973544973544973,
+            "brier": 0.0026155417848287956,
+            "calibration": {
+              "channel_weights": {
+                "artifact_context": 0.75,
+                "magnitude": 2.0,
+                "morphology": 0.5,
+                "orbit_fit": 2.0,
+                "rate": 2.0
+              },
+              "class_temperatures": {},
+              "label_bias": {},
+              "temperature": 0.5,
+              "version": "channel-weight-search-v1"
+            },
+            "certificate_hash": "4f155f183bbcdccde9b03fe000d25e7303ac27fdd4ec228f7d605ee32ba9a2ed",
+            "ece": 0.0026234067400897855,
+            "failures": 1,
+            "macro_f1": 0.9988826815642458,
+            "macro_precision": 1.0,
+            "macro_recall": 0.9977777777777778,
+            "n": 378,
+            "nll": 0.012898945988568408,
+            "safe_accuracy": 1.0
+          }
+        }
+      ],
+      "fit_cases": 300,
+      "guard_cases": 63,
+      "guard_score_cases": 378,
+      "selected": "temperature",
+      "strategy": "guarded_selection"
+    },
     "trained_calibration": {
-      "channel_weights": {
-        "artifact_context": 1.0,
-        "magnitude": 2.0,
-        "morphology": 0.75,
-        "orbit_fit": 2.0,
-        "rate": 2.0
-      },
+      "channel_weights": {},
       "class_temperatures": {},
-      "label_bias": {
-        "AMOR": -2.25,
-        "HILDA": 0.75,
-        "HUNGARIA": 1.5,
-        "IMB": 1.5,
-        "MARS_CROSSER": 0.75,
-        "MBA": -0.75,
-        "OMB": -0.75,
-        "THULE": 3.0
-      },
+      "label_bias": {},
       "temperature": 0.5,
-      "version": "label-bias-search-v1"
+      "version": "temperature-grid-0.5"
     },
     "tuned": {
-      "accuracy": 0.8102189781021898,
-      "brier": 0.020404000085055662,
+      "accuracy": 1.0,
+      "brier": 0.001709015499757749,
       "calibration": {
-        "channel_weights": {
-          "artifact_context": 1.0,
-          "magnitude": 2.0,
-          "morphology": 0.75,
-          "orbit_fit": 2.0,
-          "rate": 2.0
-        },
+        "channel_weights": {},
         "class_temperatures": {},
-        "label_bias": {
-          "AMOR": -2.25,
-          "HILDA": 0.75,
-          "HUNGARIA": 1.5,
-          "IMB": 1.5,
-          "MARS_CROSSER": 0.75,
-          "MBA": -0.75,
-          "OMB": -0.75,
-          "THULE": 3.0
-        },
+        "label_bias": {},
         "temperature": 0.5,
-        "version": "label-bias-search-v1"
+        "version": "temperature-grid-0.5"
       },
-      "certificate_hash": "017f9c0e15b6eb927bbdbe0d7de6de74c2459885234b87728faccd03dd20cab9",
-      "ece": 0.015420166997376517,
-      "failures": 156,
-      "macro_f1": 0.8476854507744583,
+      "certificate_hash": "0a0bc2c0fadbe23cbb6c9eeb94041b58b0060b3c2db94c828f672d33ab5ee31b",
+      "ece": 0.004515392280486953,
+      "failures": 0,
+      "macro_f1": 1.0,
       "macro_precision": 1.0,
-      "macro_recall": 0.7387152777777778,
+      "macro_recall": 1.0,
       "n": 822,
-      "nll": 0.1233539671929634,
+      "nll": 0.005693015088047248,
       "safe_accuracy": 1.0
     }
   },
   "heldout_real_corpus": {
     "baseline": {
       "accuracy": 1.0,
-      "brier": 7.631559751447494e-05,
+      "brier": 7.631557582160787e-05,
       "calibration": {
         "channel_weights": {},
         "class_temperatures": {},
@@ -101,82 +244,225 @@
         "temperature": 1.0,
         "version": "manual-v1"
       },
-      "certificate_hash": "3ba3bc8c13ddb27c993339960f329b44a7621a577a34ba9d1ebd14870dcd1040",
-      "ece": 0.0028298846914051046,
+      "certificate_hash": "f7a356fe52f52b970e1fc0feee91de2d0409f46929d6c2ec3ec091e984ebac4e",
+      "ece": 0.002829884262585902,
       "failures": 0,
       "macro_f1": 1.0,
       "macro_precision": 1.0,
       "macro_recall": 1.0,
       "n": 137,
-      "nll": 0.002868910630104105,
+      "nll": 0.0028689101900661053,
       "safe_accuracy": 1.0
     },
     "delta": {
       "accuracy": 0.0,
-      "brier": -7.631559751447494e-05,
-      "ece": -0.002829884675508154,
+      "brier": -7.628455390380718e-05,
+      "ece": -0.0027840211453411534,
       "failures": 0,
       "macro_f1": 0.0,
       "macro_precision": 0.0,
       "macro_recall": 0.0,
-      "nll": -0.0028689106142072056,
+      "nll": -0.002823031554753263,
       "safe_accuracy": 0.0
     },
+    "selection": {
+      "candidates": [
+        {
+          "calibration": {
+            "channel_weights": {},
+            "class_temperatures": {},
+            "label_bias": {},
+            "temperature": 0.5,
+            "version": "temperature-grid-0.5"
+          },
+          "name": "temperature",
+          "score": 1109.9967342631157,
+          "summary": {
+            "accuracy": 1.0,
+            "brier": 0.00044381740451245044,
+            "calibration": {
+              "channel_weights": {},
+              "class_temperatures": {},
+              "label_bias": {},
+              "temperature": 0.5,
+              "version": "temperature-grid-0.5"
+            },
+            "certificate_hash": "c2f7602c590b1f7734c7ddb79fb7af907b4ed397d51d3d2c4b506c0f876d7253",
+            "ece": 0.0014819206070678034,
+            "failures": 0,
+            "macro_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "n": 378,
+            "nll": 0.001783816277202332,
+            "safe_accuracy": 1.0
+          }
+        },
+        {
+          "calibration": {
+            "channel_weights": {},
+            "class_temperatures": {},
+            "label_bias": {},
+            "temperature": 1.0,
+            "version": "manual-v1"
+          },
+          "name": "baseline",
+          "score": 1109.9835422403744,
+          "summary": {
+            "accuracy": 1.0,
+            "brier": 0.001283663161776169,
+            "calibration": {
+              "channel_weights": {},
+              "class_temperatures": {},
+              "label_bias": {},
+              "temperature": 1.0,
+              "version": "manual-v1"
+            },
+            "certificate_hash": "11e3809a9f44c6c29c12cd08e1156b0c8e35c5ebbd54665626d9f57b5e9e1541",
+            "ece": 0.007773332854800608,
+            "failures": 0,
+            "macro_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "n": 378,
+            "nll": 0.00868442677082033,
+            "safe_accuracy": 1.0
+          }
+        },
+        {
+          "calibration": {
+            "channel_weights": {
+              "artifact_context": 0.75,
+              "magnitude": 2.0,
+              "morphology": 0.5,
+              "orbit_fit": 2.0,
+              "rate": 2.0
+            },
+            "class_temperatures": {},
+            "label_bias": {
+              "HILDA": 0.75,
+              "HUNGARIA": 1.5,
+              "IMB": 1.5,
+              "MARS_CROSSER": 0.75,
+              "MBA": -0.75,
+              "OMB": -0.75,
+              "THULE": 3.0
+            },
+            "temperature": 0.5,
+            "version": "label-bias-search-v1"
+          },
+          "name": "temperature_channel_weights_label_bias",
+          "score": 1107.3347995358317,
+          "summary": {
+            "accuracy": 0.9973544973544973,
+            "brier": 0.0019318386736175744,
+            "calibration": {
+              "channel_weights": {
+                "artifact_context": 0.75,
+                "magnitude": 2.0,
+                "morphology": 0.5,
+                "orbit_fit": 2.0,
+                "rate": 2.0
+              },
+              "class_temperatures": {},
+              "label_bias": {
+                "HILDA": 0.75,
+                "HUNGARIA": 1.5,
+                "IMB": 1.5,
+                "MARS_CROSSER": 0.75,
+                "MBA": -0.75,
+                "OMB": -0.75,
+                "THULE": 3.0
+              },
+              "temperature": 0.5,
+              "version": "label-bias-search-v1"
+            },
+            "certificate_hash": "594cf1720061a5020bfe85038414a17a6748c809c3fb12bb319b224d22d51c8d",
+            "ece": 0.0022343993521492015,
+            "failures": 1,
+            "macro_f1": 0.9988826815642458,
+            "macro_precision": 1.0,
+            "macro_recall": 0.9977777777777778,
+            "n": 378,
+            "nll": 0.005290234955644321,
+            "safe_accuracy": 1.0
+          }
+        },
+        {
+          "calibration": {
+            "channel_weights": {
+              "artifact_context": 0.75,
+              "magnitude": 2.0,
+              "morphology": 0.5,
+              "orbit_fit": 2.0,
+              "rate": 2.0
+            },
+            "class_temperatures": {},
+            "label_bias": {},
+            "temperature": 0.5,
+            "version": "channel-weight-search-v1"
+          },
+          "name": "temperature_channel_weights",
+          "score": 1107.326801817411,
+          "summary": {
+            "accuracy": 0.9973544973544973,
+            "brier": 0.0026155417848287956,
+            "calibration": {
+              "channel_weights": {
+                "artifact_context": 0.75,
+                "magnitude": 2.0,
+                "morphology": 0.5,
+                "orbit_fit": 2.0,
+                "rate": 2.0
+              },
+              "class_temperatures": {},
+              "label_bias": {},
+              "temperature": 0.5,
+              "version": "channel-weight-search-v1"
+            },
+            "certificate_hash": "4f155f183bbcdccde9b03fe000d25e7303ac27fdd4ec228f7d605ee32ba9a2ed",
+            "ece": 0.0026234067400897855,
+            "failures": 1,
+            "macro_f1": 0.9988826815642458,
+            "macro_precision": 1.0,
+            "macro_recall": 0.9977777777777778,
+            "n": 378,
+            "nll": 0.012898945988568408,
+            "safe_accuracy": 1.0
+          }
+        }
+      ],
+      "fit_cases": 300,
+      "guard_cases": 63,
+      "guard_score_cases": 378,
+      "selected": "temperature",
+      "strategy": "guarded_selection"
+    },
     "trained_calibration": {
-      "channel_weights": {
-        "artifact_context": 1.0,
-        "magnitude": 2.0,
-        "morphology": 0.75,
-        "orbit_fit": 2.0,
-        "rate": 2.0
-      },
+      "channel_weights": {},
       "class_temperatures": {},
-      "label_bias": {
-        "AMOR": -2.25,
-        "HILDA": 0.75,
-        "HUNGARIA": 1.5,
-        "IMB": 1.5,
-        "MARS_CROSSER": 0.75,
-        "MBA": -0.75,
-        "OMB": -0.75,
-        "THULE": 3.0
-      },
+      "label_bias": {},
       "temperature": 0.5,
-      "version": "label-bias-search-v1"
+      "version": "temperature-grid-0.5"
     },
     "tuned": {
       "accuracy": 1.0,
-      "brier": 5.665766285103146e-21,
+      "brier": 3.1021917800691286e-08,
       "calibration": {
-        "channel_weights": {
-          "artifact_context": 1.0,
-          "magnitude": 2.0,
-          "morphology": 0.75,
-          "orbit_fit": 2.0,
-          "rate": 2.0
-        },
+        "channel_weights": {},
         "class_temperatures": {},
-        "label_bias": {
-          "AMOR": -2.25,
-          "HILDA": 0.75,
-          "HUNGARIA": 1.5,
-          "IMB": 1.5,
-          "MARS_CROSSER": 0.75,
-          "MBA": -0.75,
-          "OMB": -0.75,
-          "THULE": 3.0
-        },
+        "label_bias": {},
         "temperature": 0.5,
-        "version": "label-bias-search-v1"
+        "version": "temperature-grid-0.5"
       },
-      "certificate_hash": "a250faac28a92d6a0c6ad561bb2535cc3cc6f44fac203ed207941a6628af5c7c",
-      "ece": 1.589695042270023e-11,
+      "certificate_hash": "6f447710f6b93d2769b19a0bd6d6b2044abc3419e0d11a7c1c4a0b70fc24c729",
+      "ece": 4.5863117244748786e-05,
       "failures": 0,
       "macro_f1": 1.0,
       "macro_precision": 1.0,
       "macro_recall": 1.0,
       "n": 137,
-      "nll": 1.5896899371481615e-11,
+      "nll": 4.5878635312842506e-05,
       "safe_accuracy": 1.0
     }
   },
