@@ -94,3 +94,4 @@ data/jpl_orbit_class.json
 # Root-level scratch result JSONs from validation runs
 /_*.json
 # (data/survey_targets.txt is config and SHOULD be committed)
+data/cockpit_jobs/

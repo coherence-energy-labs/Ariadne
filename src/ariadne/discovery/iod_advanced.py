@@ -412,12 +412,12 @@ def _strategy_bernstein_khushalani(tracklets, t_ref: float) -> StrategyResult:
         r_km = r_au * AU_KM
         # Build the (x, v) state at t_ref from (alpha, beta, r)
         # Position = observer + r * line-of-sight
-        L = np.array([math.cos(beta0) * math.cos(alpha0),
-                      math.cos(beta0) * math.sin(alpha0),
-                      math.sin(beta0)])
+        los = np.array([math.cos(beta0) * math.cos(alpha0),
+                        math.cos(beta0) * math.sin(alpha0),
+                        math.sin(beta0)])
         R_obs = body_state("EARTH", t_ref, "J2000", "SUN")[:3]
-        # Solve for rho such that |R_obs + rho*L| = r_km
-        b_coef = 2.0 * float(np.dot(L, R_obs))
+        # Solve for rho such that |R_obs + rho*los| = r_km
+        b_coef = 2.0 * float(np.dot(los, R_obs))
         c_coef = float(np.dot(R_obs, R_obs)) - r_km ** 2
         disc = b_coef ** 2 - 4 * c_coef
         if disc < 0:
@@ -425,7 +425,7 @@ def _strategy_bernstein_khushalani(tracklets, t_ref: float) -> StrategyResult:
         rho = (-b_coef + math.sqrt(disc)) / 2.0
         if rho <= 0:
             continue
-        x_state = R_obs + rho * L
+        x_state = R_obs + rho * los
         # Velocity from circular-orbit speed at this r, tangent direction
         # set by (alpha_dot, beta_dot)
         v_circ = math.sqrt(GM_SUN / r_km)

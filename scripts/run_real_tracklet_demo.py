@@ -112,7 +112,6 @@ def main():
     epochs = []
     for f in files:
         cache = str(f).replace(".fits.fz", "_dets.npz")
-        import os
         if os.path.exists(cache):
             c = np.load(cache)
             epochs.append((c["ra"], c["dec"], c["mag"], float(c["mjd"])))

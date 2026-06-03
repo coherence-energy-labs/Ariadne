@@ -172,7 +172,6 @@ def chain_coherence_score(chain: Sequence[dict]) -> float:
     validate_chain_quality_coherence.py). It also scores motion coherence directly
     from positions, so it needs no pre-computed per-entry rates. Falls back to
     chain_purity_score only when the chain lacks sky positions (ra/dec)."""
-    import math
     if not chain or any("ra" not in e or "dec" not in e or "t" not in e for e in chain):
         return chain_purity_score(chain)
     from .coherence_vet import track_energy

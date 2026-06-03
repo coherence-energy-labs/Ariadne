@@ -70,7 +70,8 @@ def main():
     flux_for_mag = lambda m: 10 ** ((zp - m) / 2.5)
 
     print(f"CCD {ccd.name}, exptime={TEXP}s, pixscale={PIXSCALE}\"/px, ZP={zp:.1f}")
-    print(f"{'rate(\"/hr)':>10s} {'trail(px)':>9s} {'a/b':>6s} "
+    rlab = 'rate("/hr)'
+    print(f"{rlab:>10s} {'trail(px)':>9s} {'a/b':>6s} "
           f"{'a^2-b^2':>8s} {'impl_rate':>10s} {'dPA':>5s}  (mag=18, n=40)")
     print("-" * 64)
     # baseline a^2-b^2 from rate=0 injections (round PSF on real noise)

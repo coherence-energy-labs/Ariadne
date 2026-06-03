@@ -41,7 +41,8 @@ def main():
 
     # (1) vetting F1 vs astrometric jitter
     print("\n(1) VETTING -- EoO F1 vs astrometric jitter on the tracks:")
-    print(f"    {'jitter(\")':>10}{'EoO F1':>9}{'hard F1':>9}")
+    jlab = 'jitter(")'
+    print(f"    {jlab:>10}{'EoO F1':>9}{'hard F1':>9}")
     rng = np.random.default_rng(7)
     for jit in (0.1, 0.3, 0.5, 1.0, 2.0, 3.0):
         pos = real_positive_tracks(n_orbits=2500, jitter_arcsec=jit, seed=3)

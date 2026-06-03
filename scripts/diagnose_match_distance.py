@@ -117,7 +117,8 @@ def main():
           f"({len(ccds)} CCDs) ===")
     print(f"  (a detection within 2.5\" = matched; 2.5-30\" = detected but "
           f"position-off; >30\"/none = not detected)\n")
-    hdr = f"  {'mag group':<16}{'N':>5}" + "".join(f"{f'{r[0]:g}-{r[1]:g}\"':>10}" for r in rings) + f"{'none>120':>10}"
+    ringlabs = [f"{r[0]:g}-{r[1]:g}" + chr(34) for r in rings]   # chr(34) = '"'
+    hdr = f"  {'mag group':<16}{'N':>5}" + "".join(f"{rl:>10}" for rl in ringlabs) + f"{'none>120':>10}"
     print(hdr)
     for name, lo, hi in mag_groups:
         row = f"  {name:<16}{totals[name]:>5}"
