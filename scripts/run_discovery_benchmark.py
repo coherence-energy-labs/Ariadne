@@ -23,6 +23,7 @@ CCDs -- per-CCD auto-measurement is more accurate but ~2x slower.
 """
 from __future__ import annotations
 
+import os
 import argparse
 import json
 import math
@@ -44,7 +45,7 @@ except Exception:
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 OBS = "807"
-DB = "C:/Users/Josh/AppData/Local/Temp/recovery_clean.db"
+DB = os.environ.get("ARIADNE_DB", "data/recovery_clean.db")
 
 
 def extract_exposure(path, sigma, n_ccd, cache_dir):
@@ -53,7 +54,10 @@ def extract_exposure(path, sigma, n_ccd, cache_dir):
     cache = Path(cache_dir) / (Path(path).stem + f".s{sigma:.0f}.npz")
     if cache.exists():
         c = np.load(cache)
-        return c["ra"], c["dec"], c["mag"], c["flux"], float(c["mjd"])
+        # older caches omit 'flux'; derive it from magnitude (relative scale only,
+        # used for brightest-N capping) so legacy caches stay usable.
+        flux = c["flux"] if "flux" in c.files else np.power(10.0, -0.4 * np.asarray(c["mag"], float))
+        return c["ra"], c["dec"], c["mag"], flux, float(c["mjd"])
     from ariadne.discovery.imaging.decam_instcal import load_decam_instcal
     from ariadne.discovery.imaging.source_extraction import detect_sources_in_image
     from ariadne.discovery.imaging.trailed_rate import measure_image_fwhm
@@ -99,14 +103,28 @@ def main():
                     help="cap same-night tracklets per night before cross-night linking")
     ap.add_argument("--max-sources-per-exposure", type=int, default=1800,
                     help="keep brightest detections per exposure before pair search; 0 disables")
+    ap.add_argument("--max-detections-per-exposure", type=int, default=0,
+                    help="skip whole exposures with more detections than this (noise-inflated / "
+                         "poor-quality frames); 0 disables")
     ap.add_argument("--stationary-veto-arcsec", type=float, default=0.8,
                     help="remove repeated same-night fixed sources before tracklet pairing; 0 disables")
     ap.add_argument("--truth-limit", type=int, default=300000,
                     help="catalog rows to scan for known-object truth labels")
     ap.add_argument("--truth-mode", choices=("fast", "nbody"), default="fast",
                     help="fast uses vectorized 2-body truth after field prefilter; nbody is slower")
-    ap.add_argument("--linker-mode", choices=("fast", "full"), default="fast",
-                    help="fast uses greedy/probabilistic/multipass; full adds HelioLinC/nbody grow")
+    ap.add_argument("--linker-mode", choices=("fast", "full", "rate", "rate-coherence"), default="fast",
+                    help="fast uses greedy/probabilistic/multipass; full adds HelioLinC/nbody "
+                         "grow; rate uses the scalable rate-constrained linker (>=3-pt "
+                         "within-night tracks + rate-extrapolated tight-box cross-night)")
+    ap.add_argument("--rate-min-points", type=int, default=3,
+                    help="min detections per within-night rate track (rate linker)")
+    ap.add_argument("--rate-pos-tol", type=float, default=2.5,
+                    help="within-night track growth tolerance, arcsec (rate linker)")
+    ap.add_argument("--vet-mode", choices=("rules", "coherence"), default="rules",
+                    help="rules = hard AND-thresholds; coherence = Equation-of-ONE "
+                         "energy selector (gap22 pattern, dominates the rules in A/B)")
+    ap.add_argument("--vet-eoo-tau", type=float, default=2.0,
+                    help="EoO vetting energy threshold (lower = stricter)")
     ap.add_argument("--vet-min-nights", type=int, default=3)
     ap.add_argument("--vet-max-rate-cv", type=float, default=0.25)
     ap.add_argument("--vet-max-heading-scatter-deg", type=float, default=25.0)
@@ -121,6 +139,8 @@ def main():
         suppress_stationary_sources,
     )
     from ariadne.discovery.imaging.advanced_linking import discover_in_images_chains
+    from ariadne.discovery.imaging.rate_constrained_linker import (
+        build_within_night_tracks, link_rate_constrained, link_coherence)
     from ariadne.discovery.imaging.detection_db import open_db
     from ariadne.discovery.imaging.injection_recovery import pick_orbits_in_field
     from ariadne.discovery.imaging.mpc_ephemeris_nbody import bulk_ephemeris_at_mjd_nbody
@@ -153,6 +173,13 @@ def main():
             })
             print(f"  SKIP {f.name}: {type(exc).__name__}: {exc}", flush=True)
             continue
+        if args.max_detections_per_exposure and len(ra) > args.max_detections_per_exposure:
+            skipped_exposures.append({
+                "path": str(f),
+                "error": f"anomalous {len(ra)} detections > {args.max_detections_per_exposure} "
+                         f"(noise-inflated / poor-quality frame)"})
+            print(f"  SKIP {f.name}: anomalous {len(ra)} detections (poor frame)", flush=True)
+            continue
         night = int(round(mjd))
         truth_ra, truth_dec, truth_mag, truth_flux = ra, dec, mag, flux
         for i in range(len(truth_ra)):
@@ -161,9 +188,9 @@ def main():
                        image_id=f.stem, x=0.0, y=0.0)
             all_truth_sources.append(s); by_night_truth_src[night].append(s)
             by_exposure_truth_src[f.stem].append(s)
-        if args.max_sources_per_exposure and len(ra) > args.max_sources_per_exposure:
-            keep = np.argsort(flux)[-args.max_sources_per_exposure:]
-            ra, dec, mag, flux = ra[keep], dec[keep], mag[keep], flux[keep]
+        # NOTE: do NOT brightness-cap here -- in crowded fields the brightest
+        # detections are stars; capping before the stationary veto cuts the faint
+        # asteroids. Build uncapped, veto stars, THEN cap the movers (below).
         for i in range(len(ra)):
             s = Source(ra=float(ra[i]), dec=float(dec[i]), flux=float(flux[i]),
                        mag=float(mag[i]), fwhm_px=4.0, mjd=mjd,
@@ -171,6 +198,18 @@ def main():
             raw_link_sources.append(s)
         print(f"  {f.name}: {len(ra)} det, night {night} ({time.time()-t0:.0f}s)", flush=True)
     all_sources = suppress_stationary_sources(raw_link_sources, args.stationary_veto_arcsec)
+    # cap the NON-STATIONARY set per exposure (tractable linking) -- after the veto
+    # so faint movers survive the crowded-field star bulk.
+    if args.max_sources_per_exposure:
+        _by_exp = defaultdict(list)
+        for s in all_sources:
+            _by_exp[s.image_id].append(s)
+        capped = []
+        for ss in _by_exp.values():
+            if len(ss) > args.max_sources_per_exposure:
+                ss = sorted(ss, key=lambda s: -s.flux)[:args.max_sources_per_exposure]
+            capped.extend(ss)
+        all_sources = capped
     by_night_src = defaultdict(list)
     for s in all_sources:
         by_night_src[int(round(s.mjd))].append(s)
@@ -195,13 +234,35 @@ def main():
 
     # within-night tracklets
     stage_t = time.time()
-    tracks = nightly_tracklets(all_sources, min_rate_arcsec_hr=args.min_rate,
-                                max_rate_arcsec_hr=args.max_rate,
-                                min_pair_dt_hours=0.03, max_pair_dt_hours=3.0,
-                                min_pair_separation_arcsec=0.5,
-                                max_per_night=args.max_per_night)
+    rate_track_objs = None          # populated only in --linker-mode rate
+    track2dict = {}                 # id(Track) -> tracklet dict
+    if args.linker_mode in ("rate", "rate-coherence"):
+        rate_track_objs = []
+        for n in nights:
+            rate_track_objs += build_within_night_tracks(
+                by_night_src[n], min_rate_arcsec_hr=args.min_rate,
+                max_rate_arcsec_hr=args.max_rate, pos_tol_arcsec=args.rate_pos_tol,
+                min_points=args.rate_min_points)
+        tracks = []
+        for tr in rate_track_objs:
+            d = {"night": tr.night, "t": (tr.jd_mid - 2451545.0) * 86400.0,
+                 "jd": tr.jd_mid, "ra": math.radians(tr.ra_mid),
+                 "dec": math.radians(tr.dec_mid),
+                 "dra": math.radians(tr.vra / 3600.0) / 3600.0,
+                 "ddec": math.radians(tr.vdec / 3600.0) / 3600.0,
+                 "rate_arcsec_hr": tr.rate_arcsec_hr, "source_pair": tr.sources,
+                 "n_points": tr.n_points}
+            track2dict[id(tr)] = d
+            tracks.append(d)
+    else:
+        tracks = nightly_tracklets(all_sources, min_rate_arcsec_hr=args.min_rate,
+                                    max_rate_arcsec_hr=args.max_rate,
+                                    min_pair_dt_hours=0.03, max_pair_dt_hours=3.0,
+                                    min_pair_separation_arcsec=0.5,
+                                    max_per_night=args.max_per_night)
     tracklet_build_s = time.time() - stage_t
-    print(f"  {len(tracks)} within-night tracklets", flush=True)
+    print(f"  {len(tracks)} within-night tracklets"
+          f"{' (>=3-pt rate tracks)' if args.linker_mode in ('rate','rate-coherence') else ''}", flush=True)
     print(f"  tracklet build: {tracklet_build_s:.1f}s", flush=True)
 
     # KNOWN cross-match: label each tracklet by the known it matches (if any),
@@ -254,16 +315,24 @@ def main():
         return max(counts.items(), key=lambda kv: kv[1])[0]
     for t in tracks:
         t["known_id"] = label_tracklet(t)
+    if args.linker_mode in ("rate", "rate-coherence"):
+        for tr in rate_track_objs:        # carry label onto the Track for scrambling
+            tr._known_id = track2dict[id(tr)]["known_id"]
 
-    # cross-night linking (full strategy suite incl. HelioLinC + n-body grow)
+    # cross-night linking
     stage_t = time.time()
-    chains = discover_in_images_chains(
-        tracks,
-        use_helio_linc=args.linker_mode == "full",
-        use_nbody_grow=args.linker_mode == "full",
-        use_orbit_grow=args.linker_mode == "full",
-        use_multi_hypothesis=args.linker_mode == "full",
-    )
+    if args.linker_mode in ("rate", "rate-coherence"):
+        _link = link_coherence if args.linker_mode == "rate-coherence" else link_rate_constrained
+        track_chains = _link(rate_track_objs, min_nights=2)
+        chains = [[track2dict[id(tr)] for tr in ch] for ch in track_chains]
+    else:
+        chains = discover_in_images_chains(
+            tracks,
+            use_helio_linc=args.linker_mode == "full",
+            use_nbody_grow=args.linker_mode == "full",
+            use_orbit_grow=args.linker_mode == "full",
+            use_multi_hypothesis=args.linker_mode == "full",
+        )
     multinight = [c for c in chains if len({t["night"] for t in c}) >= 2]
     linking_s = time.time() - stage_t
     print(f"  {len(chains)} chains, {len(multinight)} span >=2 nights", flush=True)
@@ -311,7 +380,7 @@ def main():
             return 0.0
         return float(np.degrees(np.std(heads)))
 
-    def vet(c):
+    def vet_rules(c):
         if len({t["night"] for t in c}) < args.vet_min_nights:
             return False
         rates = np.array([t["rate_arcsec_hr"] for t in c], dtype=float)
@@ -325,27 +394,55 @@ def main():
         if _linear_residual_arcsec(c) > args.vet_max_linear_resid_arcsec:
             return False
         return True
-    vetted = [c for c in unknown_chains if vet(c)]
-    print(f"  vetted unknown candidates (rate-consistent): {len(vetted)}")
 
-    # FALSE FLOOR: scramble one night's source positions, re-link
+    def vet_coherence(c):
+        # Equation-of-ONE energy selector over the chain's per-night centroids
+        # (gap22 pattern). One unified energy replaces the AND-thresholds.
+        if len({t["night"] for t in c}) < args.vet_min_nights:
+            return False
+        from ariadne.discovery.imaging.coherence_vet import track_energy
+        ra = np.array([math.degrees(t["ra"]) for t in c], dtype=float)
+        dec = np.array([math.degrees(t["dec"]) for t in c], dtype=float)
+        mjd = np.array([t["t"] / 86400.0 for t in c], dtype=float)
+        return track_energy(ra, dec, mjd) <= args.vet_eoo_tau
+
+    vet = vet_coherence if args.vet_mode == "coherence" else vet_rules
+    vetted = [c for c in unknown_chains if vet(c)]
+    print(f"  vetted unknown candidates ({args.vet_mode}): {len(vetted)}")
+
+    # FALSE FLOOR: scramble one night's positions, re-link. A chance excess
+    # of real candidates over this floor is the discovery signal.
     import copy
-    scr_tracks = []
     off_night = nights[len(nights) // 2]
-    for t in tracks:
-        t2 = dict(t)
-        if t2["night"] == off_night:
-            t2["ra"] = t2["ra"] + math.radians(0.08)
-            t2["dec"] = t2["dec"] + math.radians(0.05)
-        scr_tracks.append(t2)
     stage_t = time.time()
-    scr_chains = discover_in_images_chains(
-        scr_tracks,
-        use_helio_linc=args.linker_mode == "full",
-        use_nbody_grow=args.linker_mode == "full",
-        use_orbit_grow=args.linker_mode == "full",
-        use_multi_hypothesis=args.linker_mode == "full",
-    )
+    if args.linker_mode in ("rate", "rate-coherence"):
+        scr_objs = []
+        for tr in rate_track_objs:
+            tr2 = copy.copy(tr)            # shallow copy carries _known_id
+            if tr2.night == off_night:
+                tr2.ra_mid = tr2.ra_mid + 0.08
+                tr2.dec_mid = tr2.dec_mid + 0.05
+            scr_objs.append(tr2)
+        _link = link_coherence if args.linker_mode == "rate-coherence" else link_rate_constrained
+        scr_track_chains = _link(scr_objs, min_nights=2)
+        scr_chains = [[{"night": tr.night,
+                        "known_id": getattr(tr, "_known_id", None)} for tr in ch]
+                      for ch in scr_track_chains]
+    else:
+        scr_tracks = []
+        for t in tracks:
+            t2 = dict(t)
+            if t2["night"] == off_night:
+                t2["ra"] = t2["ra"] + math.radians(0.08)
+                t2["dec"] = t2["dec"] + math.radians(0.05)
+            scr_tracks.append(t2)
+        scr_chains = discover_in_images_chains(
+            scr_tracks,
+            use_helio_linc=args.linker_mode == "full",
+            use_nbody_grow=args.linker_mode == "full",
+            use_orbit_grow=args.linker_mode == "full",
+            use_multi_hypothesis=args.linker_mode == "full",
+        )
     scrambled_linking_s = time.time() - stage_t
     scr_mn = [c for c in scr_chains if len({t["night"] for t in c}) >= 2
               and all(t.get("known_id") is None for t in c)]
@@ -371,6 +468,12 @@ def main():
                       f"RMS={getattr(ens,'rms_arcsec',-1):.2f}\"")
             except Exception as e:
                 print(f"    chain IOD error: {str(e)[:70]}")
+    def coherence_vet_energy(c):
+        from ariadne.discovery.imaging.coherence_vet import track_energy
+        ra = [math.degrees(t["ra"]) for t in c]; dec = [math.degrees(t["dec"]) for t in c]
+        mjd = [t["t"] / 86400.0 for t in c]
+        return track_energy(ra, dec, mjd)
+
     summary = {
         "schema": "ariadne.real_decam_discovery_benchmark.v1",
         "status": "pass",
@@ -411,6 +514,18 @@ def main():
         "candidate_to_false_floor_ratio": (
             len(vetted) / len(scr_mn) if len(scr_mn) else None
         ),
+        "above_floor": len(vetted) > len(scr_mn),   # potential real-discovery signal
+        "candidates": [
+            {
+                "ra_deg": float(math.degrees(c[0]["ra"])),
+                "dec_deg": float(math.degrees(c[0]["dec"])),
+                "rate_arcsec_hr": float(np.mean([t["rate_arcsec_hr"] for t in c])),
+                "nights": sorted({int(t["night"]) for t in c}),
+                "n_tracklets": len(c),
+                "coherence": float(math.exp(-0.5 * coherence_vet_energy(c))),
+            }
+            for c in sorted(vetted, key=lambda c: -len(c))
+        ],
         "runtime_s": time.time() - t0,
         "extraction_s": extraction_s,
         "tracklet_build_s": tracklet_build_s,

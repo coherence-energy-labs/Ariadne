@@ -63,3 +63,34 @@ data/decam_night_report/
 .benchmarks/
 .coverage
 _*.log
+
+# --- Public-release safety: large data, caches, and automated-survey artifacts ---
+# Remaining DECam/NSC field data + caches not listed above (downloaded/regenerable)
+data/decam_deep_field/
+data/decam_benchmark/
+data/decam_e2e/
+data/real_decam_e2e/
+data/nsc_field/
+data/auto_fields/
+data/auto_runs/
+data/_lc_cache/
+data/_viz/
+data/calibration/
+# Broad safety nets so raw imagery / billion-row catalogs / the dev DB never commit
+*.fits
+*.fits.fz
+*.fz
+*.npz
+*.db
+MPCORB*
+# Automated-discovery state, ledger, reports, cached labels, calibrations (personal / regenerable)
+data/discovery_ledger.jsonl
+data/auto_discovery_state.json
+data/catalog_survey_state.json
+data/DISCOVERY_WATCH.md
+data/auto_survey.log
+data/*_calibrated.json
+data/jpl_orbit_class.json
+# Root-level scratch result JSONs from validation runs
+/_*.json
+# (data/survey_targets.txt is config and SHOULD be committed)

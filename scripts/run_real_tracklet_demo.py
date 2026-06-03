@@ -19,6 +19,7 @@ Pipeline:
 """
 from __future__ import annotations
 
+import os
 import argparse
 import math
 import sys
@@ -101,7 +102,7 @@ def build_triplet_tracklets(epochs, *, max_rate_deg_day=0.8,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", default="data/real_decam_tracklet")
-    ap.add_argument("--db", default="C:/Users/Josh/AppData/Local/Temp/recovery_clean.db")
+    ap.add_argument("--db", default=os.environ.get("ARIADNE_DB", "data/recovery_clean.db"))
     ap.add_argument("--detect-sigma", type=float, default=5.0)
     ap.add_argument("--collinear-tol", type=float, default=2.0)
     args = ap.parse_args()

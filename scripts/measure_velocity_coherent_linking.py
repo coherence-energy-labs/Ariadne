@@ -20,6 +20,7 @@ cross-match).
 """
 from __future__ import annotations
 
+import os
 import math
 import sys
 import time
@@ -32,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 DATA = Path("data/real_decam_recovery")
 SEP4 = DATA / "c4d_240904_012341_ooi_r_v1.fits.fz"
 SEP5 = DATA / "c4d_240905_020550_ooi_r_v1.fits.fz"
-DB = "C:/Users/Josh/AppData/Local/Temp/recovery_clean.db"
+DB = os.environ.get("ARIADNE_DB", "data/recovery_clean.db")
 PIXSCALE = 0.263
 TEXP = 90.0
 STAMP = 16

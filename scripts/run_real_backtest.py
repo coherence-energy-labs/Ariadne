@@ -85,7 +85,7 @@ def backtest_night(db, fits_path, cache_path, *, match_arcsec, detect_sigma):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", default="data/real_decam_recovery")
-    ap.add_argument("--db", default="C:/Users/Josh/AppData/Local/Temp/recovery_clean.db")
+    ap.add_argument("--db", default=os.environ.get("ARIADNE_DB", "data/recovery_clean.db"))
     ap.add_argument("--match-arcsec", type=float, default=3.0)
     ap.add_argument("--detect-sigma", type=float, default=5.0)
     args = ap.parse_args()

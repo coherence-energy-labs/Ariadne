@@ -161,6 +161,30 @@ def chain_purity_score(chain: Sequence[dict]) -> float:
     return (r_score * p_score * e_score * a_score) ** 0.25
 
 
+def chain_coherence_score(chain: Sequence[dict]) -> float:
+    """Equation-of-ONE chain quality via the ONE shared coherence engine
+    (coherence = exp(-E/2) of coherence_vet.track_energy, the SAME incoherence
+    primitive used for vetting and classification). This is the UNIFIED default:
+    once track_energy was rebuilt on curvature-tolerant features (rate spread +
+    heading, not a raw linear residual) plus one-sided coverage deficits, it
+    SEPARATES real-from-chance better than the old ad-hoc geometric mean
+    (AUC 0.993 vs 0.973 length-different; 0.998 vs 0.50 same-length motion-only;
+    validate_chain_quality_coherence.py). It also scores motion coherence directly
+    from positions, so it needs no pre-computed per-entry rates. Falls back to
+    chain_purity_score only when the chain lacks sky positions (ra/dec)."""
+    import math
+    if not chain or any("ra" not in e or "dec" not in e or "t" not in e for e in chain):
+        return chain_purity_score(chain)
+    from .coherence_vet import track_energy
+    ra = [math.degrees(float(e["ra"])) for e in chain]
+    dec = [math.degrees(float(e["dec"])) for e in chain]
+    mjd = [float(e["t"]) / 86400.0 for e in chain]
+    mags = _chain_mags(chain)
+    mag = mags if len(mags) == len(chain) else None
+    E = track_energy(ra, dec, mjd, mag)
+    return math.exp(-0.5 * E) if E < math.inf else 0.0
+
+
 def rate_coherence_filter(chain: Sequence[dict], *,
                             max_rate_spread: float = 0.5) -> bool:
     """True if the chain's within-chain rate spread is below threshold.
@@ -209,25 +233,35 @@ def filter_chains(chains: Sequence[Sequence[dict]],
                    min_unique_epochs: int = 3,
                    min_arc_hours: float = 12.0,
                    require_photometry: bool = False,
+                   coherence_tau: float | None = None,
                    ) -> tuple[list, list, list[ChainQualityVerdict]]:
-    """Apply all four quality filters in sequence.
+    """Apply the quality gate to each chain.
 
-    Returns (kept_chains, dropped_chains, verdicts) where verdicts is one
-    ChainQualityVerdict per input chain (in input order).
+    By default uses the four hard threshold filters. If `coherence_tau` is given,
+    the gate is instead the ONE unified coherence score: a chain passes iff
+    chain_coherence_score(ch) >= coherence_tau -- the Equation-of-ONE selector
+    that dominates the hard ANDs (validated +6.6pp F1 on real orbits). The
+    reported `purity_score` is always the unified coherence score.
+
+    Returns (kept_chains, dropped_chains, verdicts), one verdict per input chain.
     """
     kept, dropped, verdicts = [], [], []
     for idx, ch in enumerate(chains):
         n_epochs, arc_hours = epoch_coverage(ch)
         rate_med, rate_spread = rate_coherence_score(ch)
         mag_med, mag_std = photometric_coherence_score(ch)
-        purity = chain_purity_score(ch)
+        purity = chain_coherence_score(ch)        # the unified engine score
 
-        passes_rate = rate_spread <= max_rate_spread
-        passes_photo = (photometric_coherence_filter(
-                          ch, max_mag_std=max_mag_std,
-                          require_photometry=require_photometry))
-        passes_epoch = n_epochs >= min_unique_epochs
-        passes_arc = arc_hours >= min_arc_hours
+        if coherence_tau is not None:
+            passes = purity >= coherence_tau
+            passes_rate = passes_photo = passes_epoch = passes_arc = passes
+        else:
+            passes_rate = rate_spread <= max_rate_spread
+            passes_photo = (photometric_coherence_filter(
+                              ch, max_mag_std=max_mag_std,
+                              require_photometry=require_photometry))
+            passes_epoch = n_epochs >= min_unique_epochs
+            passes_arc = arc_hours >= min_arc_hours
 
         reasons = []
         if not passes_rate:

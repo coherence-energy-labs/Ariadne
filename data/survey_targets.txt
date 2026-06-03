@@ -1,0 +1,16 @@
+# Ariadne automated-survey target fields: RA_deg Dec_deg label
+# Ecliptic (asteroid-dense), off the galactic plane (avoid crowding ~RA 260-290).
+# The survey rotates through these; whichever is near opposition at run time and
+# has recent multi-night NOIRLab coverage will yield movers. Add/curate freely.
+30.0   12.0   ecl_ra030
+45.0   17.0   ecl_ra045
+60.0   21.0   ecl_ra060
+120.0  21.0   ecl_ra120
+135.0  17.0   ecl_ra135
+150.0  12.0   ecl_ra150
+180.0  0.0    ecl_ra180
+195.0  -6.0   ecl_ra195
+210.0  -12.0  ecl_ra210
+240.0  -21.0  ecl_ra240
+330.0  -12.0  ecl_ra330
+0.0    0.0    ecl_ra000

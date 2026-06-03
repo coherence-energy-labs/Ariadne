@@ -17,6 +17,7 @@ comparing the elongation-implied rate/PA to the catalog (N-body) truth.
 """
 from __future__ import annotations
 
+import os
 import math
 import sys
 from pathlib import Path
@@ -26,7 +27,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 FITS = "data/real_decam_recovery/c4d_240824_013234_ooi_r_v1.fits.fz"
-DB = "C:/Users/Josh/AppData/Local/Temp/recovery_clean.db"
+DB = os.environ.get("ARIADNE_DB", "data/recovery_clean.db")
 OBS = "807"
 PIXSCALE = 0.263
 STAMP = 15  # half-size

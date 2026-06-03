@@ -17,6 +17,9 @@ astroquery>=0.4.7    # JPL Horizons + SBDB queries for validation
 # Optimization (trajectory NLP); IPOPT optional, SciPy used by default
 # cyipopt>=1.4       # uncomment if IPOPT is available for large collocation problems
 
+# Dashboard (optional; scripts/dashboard.py local discovery console)
+flask>=3.0
+
 # Dev / test
 pytest>=8.0
 pyyaml>=6.0

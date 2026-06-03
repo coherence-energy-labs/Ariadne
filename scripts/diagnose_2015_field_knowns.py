@@ -10,6 +10,7 @@ radii (separating 'none predicted' from 'predicted but not matching').
 """
 from __future__ import annotations
 
+import os
 import argparse
 import math
 import sys
@@ -19,7 +20,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-DB = "C:/Users/Josh/AppData/Local/Temp/recovery_clean.db"
+DB = os.environ.get("ARIADNE_DB", "data/recovery_clean.db")
 
 
 def main():

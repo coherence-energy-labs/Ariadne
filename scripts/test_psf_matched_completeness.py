@@ -16,6 +16,7 @@ This tells us, on real pixels, whether the proper kernel buys completeness.
 """
 from __future__ import annotations
 
+import os
 import argparse
 import math
 import sys
@@ -31,7 +32,7 @@ SCI = DATA / "c4d_240824_013234_ooi_r_v1.fits.fz"
 REFS = [DATA / "c4d_240809_043854_ooi_r_v1.fits.fz",
         DATA / "c4d_240904_012341_ooi_r_v1.fits.fz",
         DATA / "c4d_240905_020550_ooi_r_v1.fits.fz"]
-DB = "C:/Users/Josh/AppData/Local/Temp/recovery_clean.db"
+DB = os.environ.get("ARIADNE_DB", "data/recovery_clean.db")
 
 
 def main():

@@ -28,10 +28,14 @@ def main():
     ap.add_argument("--dec", type=float, default=-11.7)
     ap.add_argument("--half", type=float, default=0.7)
     ap.add_argument("--proposal", default="2013B-0536")
-    ap.add_argument("--nights", default="57129,57130,57132,57133",
-                    help="comma CTIO night ids (floor(mjd-0.667)); default 2015-Apr block")
+    ap.add_argument("--nights", default="",
+                    help="comma CTIO night ids (floor(mjd-0.667)); empty = auto-pick from range")
     ap.add_argument("--per-night", type=int, default=5)
     ap.add_argument("--max-files", type=int, default=0, help="0 = no cap")
+    ap.add_argument("--band", default="", help="filter ifilter (e.g. 'r'); empty = any")
+    ap.add_argument("--mjd-lo", type=float, default=0.0)
+    ap.add_argument("--mjd-hi", type=float, default=1e9)
+    ap.add_argument("--max-nights", type=int, default=7)
     ap.add_argument("--out", default="data/decam_discovery_field")
     args = ap.parse_args()
 
@@ -51,6 +55,10 @@ def main():
             if isinstance(x, dict) and "ra_center" in x]
     rows = [x for x in rows if str(x.get("release_date", "9999")) <= "2026-06-02"
             and str(x.get("proposal")) == args.proposal]
+    if args.band:
+        rows = [x for x in rows if str(x.get("ifilter", "")).split()[:1] == [args.band]]
+    rows = [x for x in rows
+            if args.mjd_lo <= float(Time(x["dateobs_center"], format="isot", scale="utc").mjd) <= args.mjd_hi]
 
     # DEDUPE multiple pipeline reductions of the SAME exposure: the archive
     # returns e.g. c4d_150418_082343_..._v4 AND ..._vx (identical date_time).
@@ -78,6 +86,9 @@ def main():
     for x in rows:
         mjd = float(Time(x["dateobs_center"], format="isot", scale="utc").mjd)
         by_night[math.floor(mjd - 0.667)].append((mjd, x))
+    if not want_nights:   # auto-pick the most-populated nights in range
+        want_nights = {n for n, _ in sorted(by_night.items(),
+                       key=lambda kv: -len(kv[1]))[:args.max_nights]}
     picks = []
     for n in sorted(want_nights):
         evs = sorted(by_night.get(n, []), key=lambda e: e[0])[:args.per_night]

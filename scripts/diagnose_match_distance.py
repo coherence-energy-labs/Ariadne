@@ -19,6 +19,7 @@ detection separation and bins it. The split tells us which lever matters.
 """
 from __future__ import annotations
 
+import os
 import argparse
 import math
 import sys
@@ -31,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 DATA = Path("data/real_decam_recovery")
 SCI = DATA / "c4d_240824_013234_ooi_r_v1.fits.fz"
-DB = "C:/Users/Josh/AppData/Local/Temp/recovery_clean.db"
+DB = os.environ.get("ARIADNE_DB", "data/recovery_clean.db")
 
 
 def main():

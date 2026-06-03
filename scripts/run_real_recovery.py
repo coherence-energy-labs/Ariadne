@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -28,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("exposure", help="path to a DECam instcal FITS")
-    ap.add_argument("--db", default="C:/Users/Josh/AppData/Local/Temp/full_discovery.db",
+    ap.add_argument("--db", default=os.environ.get("ARIADNE_FULL_DB", "data/full_discovery.db"),
                       help="DB with the MPCORB known_objects catalog")
     ap.add_argument("--max-ccds", type=int, default=60)
     ap.add_argument("--detect-sigma", type=float, default=5.0)

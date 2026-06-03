@@ -19,6 +19,7 @@ scrambled-control false floor, and the limiting magnitude reached.
 """
 from __future__ import annotations
 
+import os
 import argparse
 import math
 import sys
@@ -66,7 +67,7 @@ def extract_night(fits_paths, sigma, cache):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", default="data/des_snc3")
-    ap.add_argument("--db", default="C:/Users/Josh/AppData/Local/Temp/recovery_clean.db")
+    ap.add_argument("--db", default=os.environ.get("ARIADNE_DB", "data/recovery_clean.db"))
     ap.add_argument("--detect-sigma", type=float, default=5.0)
     ap.add_argument("--collinear-tol", type=float, default=2.0)
     args = ap.parse_args()
