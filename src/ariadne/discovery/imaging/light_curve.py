@@ -113,6 +113,38 @@ def analyze_light_curve(
     pmax = float(max_period if max_period else 0.45 * span)
     if pmax <= pmin:
         pmax = pmin * 5
+
+    # SUPER-NYQUIST ONLY WHERE THE SAMPLING EARNS IT.
+    #
+    # The 0.05 d floor above is deliberate and correct for IRREGULARLY sampled survey
+    # data: uneven cadence breaks the aliasing degeneracy, so Lomb-Scargle validly
+    # recovers periods far shorter than the median spacing. On EVENLY sampled data it
+    # does not, and searching there does not find a signal -- it finds an alias.
+    #
+    # Measured on the smooth-brightening case: 50 points evenly spaced over 30 days is
+    # a Nyquist frequency of ~0.82/d, the search ran to 20/d (~24x beyond it), and the
+    # strongest "period" came back at 0.056 d -- an alias of nothing, with a peak power
+    # of 4.036 where a standard-normalised power is defined on [0, 1].
+    #
+    # THAT is the version split. Handed a number that is not a power, Baluev overflows
+    # to nan on Python 3.14 (caught below) and returns a small FINITE probability on
+    # 3.11/3.12/3.13, where it sails through `fap < 0.1` and a one-off transient is
+    # classified as a contact eclipsing binary. Guarding the FAP treats the symptom;
+    # not searching for aliases removes the cause.
+    #
+    # Regularity is measured, not assumed: the coefficient of variation of the gaps.
+    # Evenly spaced data has cv ~ 0 and gets capped at Nyquist; real survey cadence is
+    # ragged, clears the threshold comfortably, and keeps the super-Nyquist reach it
+    # legitimately has.
+    gaps = np.diff(np.sort(t))
+    gaps = gaps[gaps > 0]
+    if len(gaps) >= 2:
+        cv = float(np.std(gaps) / np.mean(gaps)) if np.mean(gaps) > 0 else 0.0
+        if cv < 0.10:  # near-uniform sampling: aliases are not recoverable here
+            nyquist_period = 2.0 * float(np.median(gaps))
+            pmin = max(pmin, nyquist_period)
+            if pmax <= pmin:
+                pmax = pmin * 5
     ls = LombScargle(t, m, dy=dy) if dy is not None else LombScargle(t, m)
     freq, power = ls.autopower(
         minimum_frequency=1.0 / pmax, maximum_frequency=1.0 / pmin, samples_per_peak=8
@@ -201,6 +233,22 @@ def analyze_light_curve(
     # so there is no significance to report. Fails CLOSED, like the FAP guard: no
     # evidence of periodicity rather than confident evidence built on a broken number.
     if not (0.0 <= pk <= 1.0):
+        fap = 1.0
+
+    # A PERIOD MUST REPEAT, and this guard only becomes reachable once the alias above
+    # is gone.
+    #
+    # It was written earlier and removed for "never firing" -- because the alias put the
+    # candidate at 0.056 d, i.e. 538 apparent cycles, which clears any cycle count
+    # trivially. With the search capped at Nyquist the real candidate for a single
+    # 30-day excursion is ~13 d: about two cycles, neither of them a repeat. That is a
+    # transient, and no periodogram can tell us otherwise -- periodicity means the shape
+    # RECURS.
+    #
+    # Three cycles is the conventional floor for claiming a period, and it costs nothing
+    # on real detections: RR Lyrae, EW binaries and asteroid rotation run hours to days
+    # against baselines of weeks, clearing it by one to three orders of magnitude.
+    if best_p > 0 and (span / best_p) < 3.0:
         fap = 1.0
 
     # fold + classify shape
