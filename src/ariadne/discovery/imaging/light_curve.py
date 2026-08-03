@@ -173,6 +173,36 @@ def analyze_light_curve(
     except Exception:
         pass
 
+    # THE PEAK MUST BE A PHYSICALLY VALID POWER. This is the guard that actually fixes
+    # the bug, and it fires on the invariant rather than on a library's arithmetic.
+    #
+    # Sanitising the FAP above was necessary and not sufficient. Measured: for a smooth
+    # single-peak brightening this periodogram returns
+    #
+    #     normalization = 'standard'   -> power is DEFINED on [0, 1]
+    #     peak power    = 4.036        -> impossible
+    #
+    # A standard-normalised Lomb-Scargle power cannot exceed 1. The cause is visible in
+    # the sampling: 50 points over 30 days is a Nyquist frequency near 0.82/d, and the
+    # search runs to 1/0.05 = 20/d -- about 24x beyond it. The super-Nyquist floor is
+    # deliberate and correct for IRREGULARLY sampled survey data (see the note above),
+    # but on regularly-spaced input it resolves aliases so finely that the returned
+    # power leaves its own domain.
+    #
+    # Baluev is then handed a number that is not a power. On this machine it overflows
+    # to nan and the sanitiser catches it; on the CI images for Python 3.11/3.12/3.13
+    # the same call returns a small FINITE value, which is a perfectly usable
+    # probability and sails through to classify a transient as a contact eclipsing
+    # binary. Same broken input, two different lies, and only one of them was visible
+    # locally -- which is why chasing the FAP across library versions was chasing a
+    # symptom.
+    #
+    # An out-of-domain power means the periodogram did not do arithmetic we can trust,
+    # so there is no significance to report. Fails CLOSED, like the FAP guard: no
+    # evidence of periodicity rather than confident evidence built on a broken number.
+    if not (0.0 <= pk <= 1.0):
+        fap = 1.0
+
     # fold + classify shape
     base = float(np.median(m))
     depth = float(np.max(m) - base)
