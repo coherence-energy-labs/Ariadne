@@ -57,11 +57,13 @@ import pytest
 #: Modules that touch the GPU. Importing any of them initialises CUDA, so the resource
 #: is owned at module scope -- the module is the honest unit, and a new GPU module is
 #: one line here rather than a marker on each of its tests.
-GPU_MODULES = frozenset({
-    "test_gpu_shift_stack.py",
-    "test_integrators.py",
-    "test_secular_avg.py",
-})
+GPU_MODULES = frozenset(
+    {
+        "test_gpu_shift_stack.py",
+        "test_integrators.py",
+        "test_secular_avg.py",
+    }
+)
 
 _LOCK = Path(os.environ.get("TEMP", "/tmp")) / "ariadne-gpu-tests.lock"
 
@@ -99,13 +101,15 @@ def _serialise_gpu_tests(request):
             try:
                 age = time.time() - _LOCK.stat().st_mtime
             except OSError:
-                continue                       # vanished between the two calls; retry
+                continue  # vanished between the two calls; retry
             if age > 300.0:
                 _LOCK.unlink(missing_ok=True)  # a worker died holding it
                 continue
             if time.monotonic() > deadline:
-                pytest.fail("timed out waiting for the GPU lock -- refusing to run "
-                            "concurrently rather than reporting a contended result")
+                pytest.fail(
+                    "timed out waiting for the GPU lock -- refusing to run "
+                    "concurrently rather than reporting a contended result"
+                )
             time.sleep(0.05)
     try:
         yield

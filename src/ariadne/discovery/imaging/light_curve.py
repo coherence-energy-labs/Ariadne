@@ -124,6 +124,7 @@ def analyze_light_curve(
     k = int(np.argmax(power))
     best_p = float(1.0 / freq[k])
     pk = float(power[k])
+
     # THE FALLBACK NEVER FIRED, because the failure it guards is not an exception.
     #
     # Baluev's analytic FAP overflows on high-power peaks: astropy emits
