@@ -41,7 +41,18 @@ jobs:
         run: ruff format --check src/ariadne tests scripts benchmarks
 
       - name: Run fast tests
-        run: pytest -m "not slow" -q
+        # `-n auto` belongs HERE, not in pyproject's addopts, because the right worker
+        # count is a property of the machine and not of the project. A GitHub runner has
+        # 2-4 cores, where auto is exactly right. On a 24-core workstation auto spawns 24
+        # workers that each also open a BLAS pool -- measured there as SLOWER than serial
+        # (453 s vs 474 s) and it broke a PSF test outright. One number cannot be correct
+        # for both, so the config carries only the distribution MODE.
+        #
+        # `--dist loadfile` (set in pyproject) is load-balanced per MODULE. This suite is
+        # import-dominated -- astropy alone is 0.9 s across 122 test modules -- so keeping
+        # a module on one worker imports it once there. Every finer-grained mode measured
+        # WORSE than running serially.
+        run: pytest -m "not slow" -q -n auto
 
       - name: Import smoke check
         run: |

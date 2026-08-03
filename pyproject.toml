@@ -104,4 +104,19 @@ testpaths = ["tests"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "network: marks tests that need network access (MPC, JPL, SkyBoT)",
+    "gpu: touches the GPU; pinned to one xdist worker (see tests/conftest.py)",
 ]
+# Parallel by default. MEASURED on the fast suite, 1054 tests:
+#   serial            474 s
+#   -n auto (24 wk)   453 s  + 3 failures   <- oversubscribed, and SLOWER
+#   -n 8              see below
+# 'auto' is wrong on a 24-core box: each worker also spawns a BLAS pool, so the machine
+# attempts ~576 compute threads and spends its time context-switching. A bounded worker
+# count plus one BLAS thread per worker (tests/conftest.py) is the configuration that
+# actually goes faster.
+# `--dist loadgroup` is load-balanced EXCEPT that same-group tests land on one worker,
+# which is what keeps the GPU tests from racing each other. The flag and the marker
+# must travel together: under any other distribution mode the group is INERT and the
+# flakiness comes straight back (first parallel run: 5 failed, second: 1054 passed --
+# a suite that passes on the second try is not passing).
+addopts = "--dist loadfile"

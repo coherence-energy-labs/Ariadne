@@ -124,10 +124,53 @@ def analyze_light_curve(
     k = int(np.argmax(power))
     best_p = float(1.0 / freq[k])
     pk = float(power[k])
+    # THE FALLBACK NEVER FIRED, because the failure it guards is not an exception.
+    #
+    # Baluev's analytic FAP overflows on high-power peaks: astropy emits
+    # "overflow encountered in expm1/exp" and "invalid value in scalar power" as
+    # RuntimeWarnings and RETURNS a value. Measured on the smooth-brightening case:
+    # peak power 4.036, FAP = nan, no exception raised. So `except Exception` was
+    # never reached and `fap` carried a non-probability into the decision.
+    #
+    # That mattered because the gate downstream is `false_alarm_prob < 0.1`, which
+    # admits a PERIODIC hypothesis. `nan < 0.1` is False, so on one library version a
+    # smooth single-peak brightening is correctly left aperiodic -- and on another,
+    # where the same overflow lands on 0.0 instead of nan, the identical data is
+    # classified "contact eclipsing binary (EW)". Ariadne's CI passed on Python 3.10
+    # and failed on 3.11/3.12/3.13 for exactly this reason: the verdict depended on
+    # which way an overflow rounded.
+    #
+    # "It raised" and "it returned a wrong number" are different failures, and only
+    # the first was handled. So the result is now CHECKED, not merely caught: a false
+    # alarm probability that is not finite and inside [0, 1] is not a probability.
+    #
+    # Fails CLOSED. When no usable value can be obtained, fap = 1.0 -- "certainly a
+    # false alarm" -- so an unreliable periodogram can never be used as evidence FOR
+    # periodicity. The opposite default would let a numerical failure manufacture a
+    # detection, which is the failure mode worth being paranoid about here.
+    def _usable(x: float) -> bool:
+        return bool(np.isfinite(x)) and 0.0 <= x <= 1.0
+
+    # THE OLD FALLBACK IS GONE, and removing it is the actual fix.
+    #
+    # It was `exp(-power * (n-1) / 2)`, a single-trial estimate that ignores how many
+    # independent frequencies were searched. On the smooth-brightening case it returns
+    # 7e-44 -- finite, inside [0, 1], and therefore "usable" -- which sails through the
+    # `< 0.1` gate and manufactures a confident detection out of a numerical failure.
+    # Measured: keeping it reproduced the exact CI misclassification locally.
+    #
+    # Swapping a nan for a confidently wrong number is not a fix. When Baluev cannot
+    # produce a usable value there is no reliable significance for this peak, and the
+    # honest encoding of that is fap = 1.0: no evidence of periodicity, so no periodic
+    # hypothesis. A detection must be earned by a computation that worked.
+    fap = 1.0
     try:
-        fap = float(ls.false_alarm_probability(pk, method="baluev"))
+        with np.errstate(all="ignore"):
+            cand = float(ls.false_alarm_probability(pk, method="baluev"))
+        if _usable(cand):
+            fap = cand
     except Exception:
-        fap = float(np.exp(-pk * (n - 1) / 2.0))  # rough fallback
+        pass
 
     # fold + classify shape
     base = float(np.median(m))
