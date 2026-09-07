@@ -245,3 +245,18 @@ __all__ = [
     "build_solar_transfer_atlas",
     "build_default_closure_report",
 ]
+
+
+def compile_success_contract(*args, **kwargs):
+    """Compile directed CTMC rates for opt-in success-before-failure decisions."""
+    from .optimize.success_contract import SuccessContract
+    return SuccessContract(*args, **kwargs)
+
+
+def goal_success(*args, **kwargs):
+    """Probability of hitting declared absorbing goals under a supplied rate model."""
+    from .optimize.success_contract import goal_success as _goal_success
+    return _goal_success(*args, **kwargs)
+
+
+__all__ += ["compile_success_contract", "goal_success"]
