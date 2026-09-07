@@ -17,12 +17,22 @@ jobs:
       OMP_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
       - run: python -m pip install "numpy>=2" "scipy>=1.13" "pytest>=8"
       - name: Focused numerical API tests (not the full repository suite)
-        run: python -m pytest -q -o addopts= tests/test_success_contract.py
+        run: python -m pytest -q -o addopts= tests/test_success_contract.py --junitxml=frontier-junit.xml
+      - name: Preserve test receipt even when a test fails
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontier-tests-${{ matrix.os }}-${{ matrix.python }}
+          path: frontier-junit.xml
+          if-no-files-found: error
+          retention-days: 7
   formatting_review:
     runs-on: ubuntu-latest
     steps:
@@ -40,13 +50,15 @@ jobs:
           python -m ruff format src/ariadne/optimize/success_contract.py src/ariadne/__init__.py tests/test_success_contract.py
           git diff -- src/ariadne/optimize/success_contract.py src/ariadne/__init__.py tests/test_success_contract.py > frontier-format-review/formatting.patch
           git rev-parse HEAD > frontier-format-review/checkout.txt
-          if [ -s frontier-format-review/formatting.patch ]; then
-            python -m pip download --no-deps --only-binary=:all: ruff==0.16.6 -d frontier-format-review
-          fi
-      - uses: actions/upload-artifact@v7
+      - name: Preserve inspectable patch and source for offline review (no auto-commit)
+        uses: actions/upload-artifact@v7
         with:
           name: frontier-format-review
-          path: frontier-format-review/
+          path: |
+            frontier-format-review/
+            src/ariadne/
+            tests/test_success_contract.py
+            pyproject.toml
           if-no-files-found: error
           retention-days: 7
       - name: Refuse formatting drift
