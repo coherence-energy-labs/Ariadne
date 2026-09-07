@@ -8,6 +8,7 @@ Only constant reductions in failure rates at retained states are supported.
 The prepared object is a frozen model snapshot, not a live telemetry feed.
 A current fingerprint is required at evaluation to expose accidental stale use.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -101,12 +102,15 @@ def residual_certificate(A, b, x, start):
     if eta <= 0:
         raise ValueError("UNSUPPORTED_CERTIFICATE: no strict row dominance")
     bound = residual / eta
-    return {"family": "EXACT_RATIONAL_RESIDUAL_ON_BINARY64_MATRIX",
-            "lower": math.nextafter(float(xx[start] - bound), -math.inf),
-            "upper": math.nextafter(float(xx[start] + bound), math.inf),
-            "error_bound": math.nextafter(float(bound), math.inf),
-            "exact_error_bound": str(bound), "exact_residual": str(residual),
-            "scope": "eventual probability only; not time moments or physical rates"}
+    return {
+        "family": "EXACT_RATIONAL_RESIDUAL_ON_BINARY64_MATRIX",
+        "lower": math.nextafter(float(xx[start] - bound), -math.inf),
+        "upper": math.nextafter(float(xx[start] + bound), math.inf),
+        "error_bound": math.nextafter(float(bound), math.inf),
+        "exact_error_bound": str(bound),
+        "exact_residual": str(residual),
+        "scope": "eventual probability only; not time moments or physical rates",
+    }
 
 
 class SuccessContract:
@@ -161,18 +165,25 @@ class SuccessContract:
             raise ValueError("reductions must retain strictly positive failure rates")
         return d
 
-    def evaluate(self, reductions, *, current_fingerprint, moments=True,
-                 deadline=None, certify=False):
+    def evaluate(
+        self, reductions, *, current_fingerprint, moments=True, deadline=None, certify=False
+    ):
         d = self._validate(reductions, current_fingerprint)
         A = self._S - np.diag(d)
         h = np.linalg.solve(A, self._r)
         if not np.isfinite(h).all() or np.any(h < -1e-12) or np.any(h > 1 + 1e-12):
             raise ArithmeticError("NUMERICAL_PROBABILITY_INVALID")
         p = float(h[self.start_pos])
-        result = {"status": "NUMERICAL_MODEL_RESULT", "model_fingerprint": self.fingerprint,
-                  "success_probability": p, "retained": list(self.retained),
-                  "retained_values": h.tolist(), "reductions": d.tolist(),
-                  "source_states": len(self._b), "solve_states": len(self.retained)}
+        result = {
+            "status": "NUMERICAL_MODEL_RESULT",
+            "model_fingerprint": self.fingerprint,
+            "success_probability": p,
+            "retained": list(self.retained),
+            "retained_values": h.tolist(),
+            "reductions": d.tolist(),
+            "source_states": len(self._b),
+            "solve_states": len(self.retained),
+        }
         if moments:
             if p <= 0:
                 result.update(mean_success_time=None, variance_success_time=None)
@@ -181,9 +192,9 @@ class SuccessContract:
                 hpp = np.linalg.solve(A, self._r2 - self._S2 @ h - 2 * self._S1 @ hp)
                 mean = -float(hp[self.start_pos]) / p
                 var = float(hpp[self.start_pos]) / p - mean * mean
-                if not math.isfinite(mean + var) or mean < 0 or var < -1e-9 * max(1., mean**2):
+                if not math.isfinite(mean + var) or mean < 0 or var < -1e-9 * max(1.0, mean**2):
                     raise ArithmeticError("NUMERICAL_MOMENTS_INVALID")
-                result.update(mean_success_time=mean, variance_success_time=max(0., var))
+                result.update(mean_success_time=mean, variance_success_time=max(0.0, var))
         if certify or deadline is not None:
             full = self._M.copy()
             full[self._B, self._B] -= d
@@ -204,16 +215,20 @@ class SuccessContract:
             G = np.zeros((n + 1, n + 1))
             G[:n, :n], G[:n, n] = -full, self._b
             e = np.zeros(n + 1)
-            e[n] = 1.
+            e[n] = 1.0
             cdf = float(expm_multiply(csr_matrix(G * t), e)[self.start])
             if not math.isfinite(cdf) or cdf < -1e-12 or cdf > p + 1e-10:
                 raise ArithmeticError("NUMERICAL_DEADLINE_INVALID")
-            result.update(deadline=t, success_before_deadline=max(0., cdf),
-                          deadline_method="FULL_AUGMENTED_EXPONENTIAL_NOT_STATIC_REDUCTION")
+            result.update(
+                deadline=t,
+                success_before_deadline=max(0.0, cdf),
+                deadline_method="FULL_AUGMENTED_EXPONENTIAL_NOT_STATIC_REDUCTION",
+            )
         return result
 
-    def select_bundle(self, sites, costs, budget, *, fraction, current_fingerprint,
-                      max_candidates=10000):
+    def select_bundle(
+        self, sites, costs, budget, *, fraction, current_fingerprint, max_candidates=10000
+    ):
         """Enumerate all feasible constant protection bundles in a bounded family.
 
         Objective: eventual success, NOT deadline success. Numerical selection,
@@ -222,8 +237,13 @@ class SuccessContract:
         """
         self._validate(np.zeros(len(self.retained)), current_fingerprint)
         sites = [_index(v, len(self._b), "site") for v in sites]
-        if len(sites) > 20 or len(set(sites)) != len(sites) or any(v not in self.retained for v in sites):
+        if (
+            len(sites) > 20
+            or len(set(sites)) != len(sites)
+            or any(v not in self.retained for v in sites)
+        ):
             raise ValueError("at most 20 unique retained intervention sites")
+
         def integer(v):
             if isinstance(v, (bool, np.bool_)):
                 raise ValueError("integer cost required")
@@ -231,8 +251,18 @@ class SuccessContract:
                 return operator.index(v)
             except TypeError as exc:
                 raise ValueError("integer cost required") from exc
-        costs, budget, max_candidates = list(map(integer, costs)), integer(budget), integer(max_candidates)
-        if len(costs) != len(sites) or budget < 0 or max_candidates < 1 or any(c <= 0 for c in costs):
+
+        costs, budget, max_candidates = (
+            list(map(integer, costs)),
+            integer(budget),
+            integer(max_candidates),
+        )
+        if (
+            len(costs) != len(sites)
+            or budget < 0
+            or max_candidates < 1
+            or any(c <= 0 for c in costs)
+        ):
             raise ValueError("positive integer costs and candidate cap; nonnegative budget")
         fraction = float(fraction)
         if not math.isfinite(fraction) or not 0 <= fraction < 1:
@@ -252,9 +282,14 @@ class SuccessContract:
                 trial = self.evaluate(d, current_fingerprint=current_fingerprint, moments=False)
                 if best is None or trial["success_probability"] > best["success_probability"]:
                     best, best_sites = trial, [sites[i] for i in subset]
-        final = self.evaluate(best["reductions"], current_fingerprint=current_fingerprint, certify=True)
-        final.update(selected_sites=best_sites, evaluated_candidates=count,
-                     selection_scope="EXHAUSTIVE_FINITE_FAMILY_NUMERICAL_EVENTUAL_SUCCESS")
+        final = self.evaluate(
+            best["reductions"], current_fingerprint=current_fingerprint, certify=True
+        )
+        final.update(
+            selected_sites=best_sites,
+            evaluated_candidates=count,
+            selection_scope="EXHAUSTIVE_FINITE_FAMILY_NUMERICAL_EVENTUAL_SUCCESS",
+        )
         return final
 
 
@@ -284,18 +319,23 @@ def goal_success(rates, goals, *, loss_rate, start=0, deadline=None):
     if deadline is not None and (not math.isfinite(float(deadline)) or deadline < 0):
         raise ValueError("nonnegative finite deadline required")
     if start in goals:
-        result = {"status": "AT_GOAL", "success_probability": 1., "mean_success_time": 0.,
-                  "variance_success_time": 0.}
+        result = {
+            "status": "AT_GOAL",
+            "success_probability": 1.0,
+            "mean_success_time": 0.0,
+            "variance_success_time": 0.0,
+        }
         if deadline is not None:
-            result["success_before_deadline"] = 1.
+            result["success_before_deadline"] = 1.0
         return result
     transient = [i for i in range(n) if i not in goals]
     i = transient.index(start)
     W = rates[np.ix_(transient, transient)]
     success = rates[np.ix_(transient, goals)].sum(axis=1)
     compiler = SuccessContract(W, loss[transient], success, [i], start=i)
-    result = compiler.evaluate([0.], current_fingerprint=compiler.fingerprint,
-                               deadline=deadline, certify=True)
+    result = compiler.evaluate(
+        [0.0], current_fingerprint=compiler.fingerprint, deadline=deadline, certify=True
+    )
     result["transient_node_ids"] = transient
     result["goals"] = goals
     return result
