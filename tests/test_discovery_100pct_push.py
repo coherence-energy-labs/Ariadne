@@ -14,6 +14,7 @@ import json
 import math
 import os
 import sqlite3
+import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -379,7 +380,8 @@ class TestGaiaRefineExtras:
         from ariadne.discovery.imaging.gaia_refine import _query_gaia_dr3
 
         # Force ImportError on astroquery.gaia
-        with patch.dict("sys.modules", {"astroquery.gaia": None}):
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setitem(sys.modules, "astroquery.gaia", None)
             stars = _query_gaia_dr3(180, 20, 0.1)
             assert stars == []
 
