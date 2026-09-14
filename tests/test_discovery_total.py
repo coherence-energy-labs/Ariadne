@@ -30,6 +30,7 @@ import json
 import math
 import os
 import sqlite3
+import sys
 import tempfile
 import types
 from pathlib import Path
@@ -295,7 +296,8 @@ class TestATLASMocked:
         ok_resp.json.return_value = {"url": "https://example.com/task1"}
         fake = MagicMock()
         fake.post.side_effect = [rate_limited, ok_resp]
-        with patch.dict("sys.modules", {"requests": fake}):
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setitem(sys.modules, "requests", fake)
             # No need to fully simulate the success path; just ensure 429
             # branch is exercised + the call doesn't crash
             list(broker.query_cone(180, 20, 0.1, 60450, 60451, max_alerts=1))
@@ -306,7 +308,8 @@ class TestATLASMocked:
         broker = AtlasBroker(api_token="fake")
         fake = MagicMock()
         fake.post.side_effect = Exception("network down")
-        with patch.dict("sys.modules", {"requests": fake}):
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setitem(sys.modules, "requests", fake)
             list(broker.query_cone(180, 20, 0.05, 60450, 60451, max_alerts=1))
 
     def test_atlas_imports_requests_or_raises(self):
@@ -314,7 +317,8 @@ class TestATLASMocked:
         from ariadne.discovery.brokers.base import BrokerError
 
         broker = AtlasBroker(api_token="fake")
-        with patch.dict("sys.modules", {"requests": None}), pytest.raises(BrokerError):
+        with pytest.MonkeyPatch.context() as mp, pytest.raises(BrokerError):
+            mp.setitem(sys.modules, "requests", None)
             list(broker.query_cone(180, 20, 0.1, 60450, 60451))
 
     def test_atlas_post_success_polls_for_result(self):
@@ -340,7 +344,8 @@ class TestATLASMocked:
         fake = MagicMock()
         fake.post.return_value = post_resp
         fake.get.side_effect = [finished_resp, result_resp]
-        with patch.dict("sys.modules", {"requests": fake}):
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setitem(sys.modules, "requests", fake)
             alerts = list(broker.query_cone(180, 20, 0.05, 60450, 60451, max_alerts=10))
         # If parse succeeded, at least one alert came back
         assert isinstance(alerts, list)
@@ -1053,10 +1058,9 @@ class TestLinkageFromMPC:
         fake_mpc.MPC.get_observations.return_value = fake_obs
         fake_module = types.ModuleType("astroquery.mpc")
         fake_module.MPC = fake_mpc.MPC
-        with patch.dict(
-            "sys.modules",
-            {"astroquery.mpc": fake_module, "astroquery": types.ModuleType("astroquery")},
-        ):
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setitem(sys.modules, "astroquery.mpc", fake_module)
+            mp.setitem(sys.modules, "astroquery", types.ModuleType("astroquery"))
             try:
                 tracks, e0 = linkage.tracklets_from_mpc("Sedna", window_days=120)
                 assert isinstance(tracks, list)

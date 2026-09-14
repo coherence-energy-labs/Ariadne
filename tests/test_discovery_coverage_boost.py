@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import math
 import os
-from unittest.mock import MagicMock, patch
+import sys
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -64,7 +65,8 @@ class TestPanSTARRSBroker:
 
         b = PanStarrsBroker()
         # Force ImportError path
-        with patch.dict("sys.modules", {"astroquery.mast": None}):
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setitem(sys.modules, "astroquery.mast", None)
             out = list(b.query_cone(180, 20, 0.1, 50000, 60000))
             assert out == []
 
@@ -75,7 +77,8 @@ class TestAlerceBroker:
         from ariadne.discovery.brokers.base import BrokerError
 
         # Pretend alerce isn't installed
-        with patch.dict("sys.modules", {"alerce.core": None}), pytest.raises(BrokerError):
+        with pytest.MonkeyPatch.context() as mp, pytest.raises(BrokerError):
+            mp.setitem(sys.modules, "alerce.core", None)
             alerce.AlerceZTFBroker()
 
 
